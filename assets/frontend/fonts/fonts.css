@@ -1,0 +1,70 @@
+@font-face {
+  font-family: 'Rajdhani-Regular';
+  src: url(./Rajdhani-Regular.otf) format('otf'),
+       url(./Rajdhani-Regular.svg#Rajdhani-Regular) format('svg'),
+       url(./Rajdhani-Regular.ttf) format('truetype'),
+       url(./Rajdhani-Regular.woff) format('woff'),
+       url(./Rajdhani-Regular.woff2) format('woff2');
+}
+@font-face {
+  font-family: 'Rajdhani-SemiBold';
+  src: url(./Rajdhani-SemiBold.otf) format('otf'),
+       url(./Rajdhani-SemiBold.svg#Rajdhani-SemiBold) format('svg'),
+       url(./Rajdhani-SemiBold.ttf) format('truetype'),
+       url(./Rajdhani-SemiBold.woff) format('woff'),
+       url(./Rajdhani-SemiBold.woff2) format('woff2');
+}
+@font-face {
+  font-family: 'Rajdhani-Medium';
+  src: url(./Rajdhani-Medium.otf) format('otf'),
+       url(./Rajdhani-Medium.svg#Rajdhani-Medium) format('svg'),
+       url(./Rajdhani-Medium.ttf) format('truetype'),
+       url(./Rajdhani-Medium.woff) format('woff'),
+       url(./Rajdhani-Medium.woff2) format('woff2');
+}
+@font-face {
+  font-family: 'Rajdhani-Bold';
+  src: url(./Rajdhani-Bold.eot);
+  src: url(./Rajdhani-Bold.eot?#iefix) format('embedded-opentype'),
+       url(./Rajdhani-Bold.otf) format('otf'),
+       url(./Rajdhani-Bold.svg#Rajdhani-Bold) format('svg'),
+       url(./Rajdhani-Bold.woff2) format('woff2'),
+       url(./Rajdhani-Bold.woff) format('woff');
+}
+@font-face {
+  font-family: 'Rajdhani-Light';
+  src: url(./Rajdhani-Light.otf) format('otf'),
+       url(./Rajdhani-Light.svg#Rajdhani-Light) format('svg'),
+       url(./Rajdhani-Light.woff2) format('woff2'),
+       url(./Rajdhani-Light.woff) format('woff');
+}
+@font-face {
+  font-family: 'Inter-Bold';
+  src: url('Inter18pt-Bold.eot');
+  src: url('Inter18pt-Bold.eot?#iefix') format('embedded-opentype'),
+      url('Inter18pt-Bold.woff2') format('woff2'),
+      url('Inter18pt-Bold.woff') format('woff'),
+      url('Inter18pt-Bold.ttf') format('truetype'),
+      url('Inter18pt-Bold.svg#Inter18pt-Bold') format('svg');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+
+@font-face {
+  font-family: 'Inter-Medium';
+  src: url(./Inter_18pt-Medium.otf) format('otf'),
+       url(./Inter_18pt-Medium.svg#Inter_18pt-Medium) format('svg'),
+       url(./Inter_18pt-Medium.ttf) format('truetype'),
+       url(./Inter_18pt-Medium.woff) format('woff'),
+       url(./Inter_18pt-Medium.woff2) format('woff2');
+}
+@font-face {
+  font-family: 'Inter-Regular';
+  src: url(./Inter_18pt-Regular.ttf) format('truetype'),
+       url(./Inter_18pt-Regular.woff) format('woff'),
+       url(./Inter_18pt-Regular.woff2) format('woff2'),
+       url(./Inter_18pt-Regular.svg#Inter_18pt-Regular) format('svg'),
+       url(./Inter_18pt-Regular.otf) format('otf');
+}
