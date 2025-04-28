@@ -14,48 +14,6 @@
                     </ol>
                 </div>
             </div>
-            <div class="modal fade " tabindex="-1" role="dialog" aria-hidden="true" id='customer-address-modal'>
-                <div class="modal-dialog modal-xl">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">View Address Details</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body p-0">
-                            <div class="row">
-                                <div class="col-md-12 main-content">
-                                    <div class="card content-area p-4">
-                                        <div class="card-innr">
-                                            <div class="gaps-1-5x"></div>
-                                            <table class='table-striped' id='customer-address-table' data-toggle="table" data-url="<?= base_url('admin/customer/get_address') ?>" data-click-to-select="true" data-side-pagination="server" data-pagination="true" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-show-columns="true" data-show-refresh="true" data-trim-on-search="false" data-sort-name="id" data-sort-order="desc" data-mobile-responsive="true" data-toolbar="" data-show-export="true" data-maintain-selected="true" data-query-params="queryParams">
-                                                <thead>
-                                                    <tr>
-                                                        <th data-field="id" data-sortable="true" data-align='center'>Id</th>
-                                                        <th data-field="name" data-sortable="false" data-align='center'>User Name</th>
-                                                        <th data-field="type" data-sortable="false" data-align='center'>Type</th>
-                                                        <th data-field="mobile" data-sortable="false" data-align='center'>mobile</th>
-                                                        <th data-field="alternate_mobile" data-sortable="false" data-align='center'>Alternate mobile</th>
-                                                        <th data-field="address" data-sortable="false" data-visible="false" data-align='center'>Address</th>
-                                                        <th data-field="landmark" data-sortable="false" data-align='center'>Landmark</th>
-                                                        <th data-field="area" data-sortable="false" data-align='center'>Area</th>
-                                                        <th data-field="city" data-sortable="false" data-align='center'>City</th>
-                                                        <th data-field="state" data-sortable="false" data-align='center'>State</th>
-                                                        <th data-field="pincode" data-sortable="false" data-align='center'>Pincode</th>
-                                                        <th data-field="country" data-sortable="false" data-align='center'>Country</th>
-                                                    </tr>
-                                                </thead>
-                                            </table>
-                                        </div><!-- .card-innr -->
-                                    </div><!-- .card -->
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
         </div><!-- /.container-fluid -->
     </section>
     <section class="content">
@@ -64,22 +22,91 @@
                 <div class="col-md-12 main-content">
                     <div class="card content-area p-4">
                         <div class="card-innr">
-                            <div class="gaps-1-5x row d-flex adjust-items-center">
+
+
+                            <div class="">
+                                <ul class="nav nav-pills">
+                                    <li class="nav-item">
+                                        <a class="nav-link active" data-toggle="pill" href="#content1">List Users</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" data-toggle="pill" href="#content2">List Admins</a>
+                                    </li>
+
+                                </ul>
+
+                                <div class="tab-content">
+                                    <div class="tab-pane active" id="content1">
+                                        <div class="gaps-1-5x row d-flex adjust-items-center">
+                                            <h1>List Users</h1>
+                                        </div>
+                                        <table id="custom_category_table" class='table-striped'>
+                                            <thead>
+                                                <tr>
+                                                    <th data-field="id" data-sortable="true">ID</th>
+                                                    <th data-field="name" data-sortable="false">Name</th>
+                                                    <th data-field="email" data-sortable="true">Email</th>
+                                                    <th data-field="mobile" data-sortable="true">Mobile No</th>
+                                                    <th data-field="balance" data-sortable="true">Balance</th>
+                                                    <th data-field="date" data-sortable="true">Date</th>
+                                                    <th data-field="status" data-sortable="true">Status</th>
+                                                </tr>
+                                            </thead>
+
+                                            <tbody>
+                                                <?php foreach ($users as $user) : ?>
+                                                    <tr>
+                                                        <td><?= $user['id'] ?></td>
+                                                        <td><?= $user['username'] ?></td>
+                                                        <td><?= $user['email'] ?></td>
+                                                        <td><?= $user['mobile'] ?></td>
+                                                        <td><?= $user['balance'] ?></td>
+                                                        <td><?= $user['created_at'] ?></td>
+                                                        <td><?= $user['status'] == 1 ? 'Active' : 'Inactive' ?></td>
+
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            </tbody>
+                                            <tbody>
+
+                                                <tr>
+                                                    <td colspan="8" class="text-center">No data found</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="tab-pane" id="content2">
+                                        <div class="gaps-1-5x row d-flex adjust-items-center">
+                                            <h1>List Admins</h1>
+                                        </div>
+                                        <table id="" class='table table-striped'>
+                                            <thead>
+                                                <tr>
+                                                    <th data-field="id" data-sortable="true">ID</th>
+                                                    <th data-field="name" data-sortable="false">UserName</th>
+                                                    <th data-field="email" data-sortable="true">Email</th>
+                                                    <th data-field="mobile" data-sortable="true">Mobile No</th>
+                                                    <th data-field="date" data-sortable="true">Date</th>
+                                                </tr>
+                                            </thead>
+
+                                            <tbody>
+                                                <?php foreach ($admins as $admin) : ?>
+                                                    <tr>
+                                                        <td><?= $admin['id'] ?></td>
+                                                        <td><?= $admin['username'] ?></td>
+                                                        <td><?= $admin['email'] ?></td>
+                                                        <td><?= $admin['mobile'] ?></td>
+                                                        <td><?= $admin['created_at'] ?></td>
+
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
-                            <table class='table-striped' data-toggle="table" data-url="<?= base_url('admin/customer/view_customer') ?>" data-side-pagination="server" data-click-to-select="true" data-pagination="true" data-id-field="id" data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-show-columns="true" data-show-refresh="true" data-trim-on-search="false" data-sort-name="id" data-sort-order="desc" data-mobile-responsive="true" data-toolbar="#toolbar" data-show-export="true" data-maintain-selected="true" data-export-types='["txt","excel"]' data-query-params="queryParams">
-                                <thead>
-                                    <tr>
-                                        <th data-field="id" data-sortable="true">ID</th>
-                                        <th data-field="name" data-sortable="false">Name</th>
-                                        <th data-field="email" data-sortable="true">Email</th>
-                                        <th data-field="mobile" data-sortable="true">Mobile No</th>
-                                        <th data-field="balance" data-sortable="true">Balance</th>
-                                        <th data-field="date" data-sortable="true">Date</th>
-                                        <th data-field="status" data-sortable="true">Status</th>
-                                        <th data-field="actions" data-sortable="false">Actions</th>
-                                    </tr>
-                                </thead>
-                            </table>
+
                         </div><!-- .card-innr -->
                     </div><!-- .card -->
                 </div>
