@@ -275,12 +275,12 @@ if ($authentication_settings !== null && is_string($authentication_settings)) {
 
                             <?php // if (has_permissions('read', 'attribute_value')) { ?>
 
-                                <li class="nav-item">
+                                <!-- <li class="nav-item">
                                     <a href="<?= base_url('admin/attributevalue/manage_attribute_value') ?>" class="nav-link">
                                         <i class="fas fa-filter nav-icon"></i>
                                         <p>Attribute Values</p>
                                     </a>
-                                </li>
+                                </li> -->
                             <?php //} ?>
 
                             <?php // if (has_permissions('read', 'tax')) { ?>
@@ -583,6 +583,12 @@ if ($authentication_settings !== null && is_string($authentication_settings)) {
                                 </a>
                             </li>
                             <li class="nav-item">
+                                <a href="<?= base_url('admin/customer/adminusers') ?>" class="nav-link">
+                                    <i class="fas fa-users nav-icon"></i>
+                                    <p> View Staff </p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
                                 <a href="<?= base_url('admin/customer/addresses') ?>" class="nav-link">
                                     <i class="far fa-address-book nav-icon"></i>
                                     <p> Addresses </p>
@@ -830,15 +836,15 @@ if ($authentication_settings !== null && is_string($authentication_settings)) {
                     <?php } ?>
                 <?php // } ?>
                 <li class="nav-item has-treeview">
-                    <a href="#" class="nav-link">
+                    <!-- <a href="#" class="nav-link">
                         <i class="fa fa-exclamation-triangle nav-icon"></i>
                         <p>
                             Policies
                             <i class="right fas fa-angle-left"></i>
                         </p>
-                    </a>
+                    </a> -->
                     <ul class="nav nav-treeview">
-                        <li class="nav-item">
+                        <!-- <li class="nav-item">
                             <a href="<?= base_url('admin/aboutus') ?>" class="nav-link">
                                 <i class="fas fa-info-circle nav-icon "></i>
                                 <p>About Us</p>
@@ -867,7 +873,7 @@ if ($authentication_settings !== null && is_string($authentication_settings)) {
                                 <i class="fa fa-exclamation-triangle nav-icon  "></i>
                                 <p>Admin Policies</p>
                             </a>
-                        </li>
+                        </li> -->
                         <!-- <li class="nav-item text-sm">
                             <a href="<?= base_url('admin/delivery-boy-privacy-policy') ?>" class="nav-link">
                                 <i class="fa fa-exclamation-triangle nav-icon  "></i>

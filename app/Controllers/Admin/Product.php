@@ -29,7 +29,7 @@ use Psr\Log\LoggerInterface;
 class Product extends Controller
 {
 
-    public $taxesTable, $categoryTable, $brandsTable, $productsTable, $countriesTable, $productMasterFeaturesTable, $productFeaturesTable, $productImagesTable, $relatedProductsTable, $relatedProductOptionsTable, $slugTable, $productMasterTagsTable, $productTagsTable;
+    public $taxesTable, $categoryTable, $brandsTable, $productsTable, $countriesTable, $productMasterFeaturesTable, $productFeaturesTable, $productImagesTable, $relatedProductsTable, $relatedProductOptionsTable, $slugTable, $productMasterTagsTable, $productTagsTable, $productsVariantsTable, $productColorVariantsTable, $attributeSetCategoryTable, $attributesTable, $productAttributesTable;
 
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger)
     {
@@ -145,10 +145,6 @@ class Product extends Controller
                     $session->setFlashdata('message', 'Product Slug Already exist you should use a different slug');
                 }else{
 
-                     // Move the file to the public/uploads directory
-                    $mainImage = $main_image->getRandomName();
-                    $main_image->move('uploads/products', $mainImage);
-
                     $data = [
                         'name' =>  $this->request->getPost('pro_input_name'),
                         // 'slug' =>  url_title($this->request->getPost('pro_input_slug'), '-', true),
@@ -164,7 +160,7 @@ class Product extends Controller
                         'model' =>  $this->request->getPost('model'),
                         'vpn' =>  $this->request->getPost('vpn'),
                         'gtin' =>  $this->request->getPost('gtin'),
-                        'image' =>  "uploads/products/".$mainImage,
+                        // 'image' =>  "uploads/products/".$mainImage,
                         // 'other_images' =>  json_encode($uploadedFiles),
                         // 'tax' =>  $this->request->getPost('tax'),
                         'indicator' =>  0,
@@ -172,16 +168,16 @@ class Product extends Controller
                         // 'total_allowed_quantity' =>  $this->request->getPost('total_allowed_quantity'),
                         // 'minimum_order_quantity' =>  $this->request->getPost('minimum_order_quantity'),
                         // 'quantity_step_size' =>  $this->request->getPost('quantity_step_size'),
-                        'warranty_period' =>  $this->request->getPost('warranty_period'),
-                        'guarantee_period' =>  $this->request->getPost('guarantee_period'),
+                        // 'warranty_period' =>  $this->request->getPost('warranty_period'),
+                        // 'guarantee_period' =>  $this->request->getPost('guarantee_period'),
                         // 'pickup_location' =>  $this->request->getPost('pickup_location'),
-                        'is_prices_inclusive_tax' =>  $this->request->getPost('is_prices_inclusive_tax') ? 1 : 0,
-                        'cod_allowed' =>  $this->request->getPost('cod_allowed') ? 1 : 0,
-                        'is_returnable' =>  $this->request->getPost('is_returnable') ? 1 : 0,
-                        'is_cancelable' =>  $this->request->getPost('is_cancelable') ? 1 : 0,
-                        'is_attachment_required' =>  $this->request->getPost('is_attachment_required') ? 1 : 0,
-                        'video_type' =>  $this->request->getPost('video_type'),
-                        'video' =>  $this->request->getPost('video'),
+                        // 'is_prices_inclusive_tax' =>  $this->request->getPost('is_prices_inclusive_tax') ? 1 : 0,
+                        // 'cod_allowed' =>  $this->request->getPost('cod_allowed') ? 1 : 0,
+                        // 'is_returnable' =>  $this->request->getPost('is_returnable') ? 1 : 0,
+                        // 'is_cancelable' =>  $this->request->getPost('is_cancelable') ? 1 : 0,
+                        // 'is_attachment_required' =>  $this->request->getPost('is_attachment_required') ? 1 : 0,
+                        // 'video_type' =>  $this->request->getPost('video_type'),
+                        // 'video' =>  $this->request->getPost('video'),
                         // 'type' =>  $this->request->getPost('type'),
                         'seo_page_title' =>  $this->request->getPost('seo_page_title'),
                         'seo_meta_keywords' =>  input_tags_to_comma_string($this->request->getPost('seo_meta_keywords')),
@@ -200,6 +196,17 @@ class Product extends Controller
 
                     if ($product_added_id) {
 
+                        // Move the file to the public/uploads directory
+                        $mainImage = $main_image->getRandomName();
+                        $main_image->move('uploads/products/'.$product_added_id, $mainImage);
+                    
+                        $productImage = [
+                             'image' =>  'uploads/products/'.$product_added_id.'/'.$mainImage,
+                        ];
+    
+                        $product_update = $this->productsTable->update($product_added_id, $productImage);
+
+
                         // other images for products
                         $files = $this->request->getFiles();
 
@@ -207,9 +214,8 @@ class Product extends Controller
                             foreach ($files['other_images'] as $file) {
                                 if ($file->isValid() && !$file->hasMoved()) {
                                     $newName = $file->getRandomName();
-                                    $file->move('uploads/other_products', $newName);
-                                    // $uploadedFiles[] = "uploads/other_products/".$newName;
-                                    $uploads_image_path = "uploads/other_products/".$newName;
+                                    $file->move('uploads/products/'.$product_added_id, $newName);
+                                    $uploads_image_path = "uploads/products/".$product_added_id.'/'.$newName;
 
                                     $images_data = [
                                         'product_id' =>  $product_added_id,
@@ -226,10 +232,10 @@ class Product extends Controller
                             'product_id' =>  $product_added_id,
                             'price' =>  $this->request->getPost('simple_price'),
                             'rrp' =>  $this->request->getPost('simple_rrp'),
-                            'weight' =>  $this->request->getPost('weight'),
-                            'height' =>  $this->request->getPost('height'),
-                            'breadth' =>  $this->request->getPost('breadth'),
-                            'length' =>  $this->request->getPost('length'),
+                            // 'weight' =>  $this->request->getPost('weight'),
+                            // 'height' =>  $this->request->getPost('height'),
+                            // 'breadth' =>  $this->request->getPost('breadth'),
+                            // 'length' =>  $this->request->getPost('length'),
                             // 'sku' =>  $this->request->getPost('product_sku'),
                             'stock' =>  $this->request->getPost('product_total_stock'),
                             'status' =>  $this->request->getPost('simple_product_stock_status'),
@@ -238,12 +244,14 @@ class Product extends Controller
                         $product_added = $this->productsVariantsTable->insert($product_data);
 
                         $tags = $this->request->getPost('tags');
-                        foreach ($tags as $tag) {
-                            $assign_product_tags = [
-                                'product_id' =>  $product_added_id,
-                                'tag_id' =>  $tag,
-                            ];
-                            $assign_inserted_id = $this->productTagsTable->insert($assign_product_tags);
+                        if(!empty($tags)){
+                            foreach ($tags as $tag) {
+                                $assign_product_tags = [
+                                    'product_id' =>  $product_added_id,
+                                    'tag_id' =>  $tag,
+                                ];
+                                $assign_inserted_id = $this->productTagsTable->insert($assign_product_tags);
+                            }
                         }
 
                         $slug_data = [
@@ -504,8 +512,8 @@ class Product extends Controller
                 if($main_image != ""){
                     // Move the file to the public/uploads directory
                     $mainImage = $main_image->getRandomName();
-                    $main_image->move('uploads/products', $mainImage);
-                    $main_image_path = "uploads/products/".$mainImage;
+                    $main_image->move('uploads/products/'.$edit_product_id, $mainImage);
+                    $main_image_path = "uploads/products/".$edit_product_id."/".$mainImage;
                 }else{
                     $main_image_path = $this->request->getPost('edit_product_image');
                 }
@@ -523,15 +531,15 @@ class Product extends Controller
                     'vpn' =>  $this->request->getPost('vpn'),
                     'gtin' =>  $this->request->getPost('gtin'),
                     'image' =>  $main_image_path,
-                    'warranty_period' =>  $this->request->getPost('warranty_period'),
-                    'guarantee_period' =>  $this->request->getPost('guarantee_period'),
-                    'is_prices_inclusive_tax' =>  $this->request->getPost('is_prices_inclusive_tax') ? 1 : 0,
-                    'cod_allowed' =>  $this->request->getPost('cod_allowed') ? 1 : 0,
-                    'is_returnable' =>  $this->request->getPost('is_returnable') ? 1 : 0,
-                    'is_cancelable' =>  $this->request->getPost('is_cancelable') ? 1 : 0,
-                    'is_attachment_required' =>  $this->request->getPost('is_attachment_required') ? 1 : 0,
-                    'video_type' =>  $this->request->getPost('video_type'),
-                    'video' =>  $this->request->getPost('video'),
+                    // 'warranty_period' =>  $this->request->getPost('warranty_period'),
+                    // 'guarantee_period' =>  $this->request->getPost('guarantee_period'),
+                    // 'is_prices_inclusive_tax' =>  $this->request->getPost('is_prices_inclusive_tax') ? 1 : 0,
+                    // 'cod_allowed' =>  $this->request->getPost('cod_allowed') ? 1 : 0,
+                    // 'is_returnable' =>  $this->request->getPost('is_returnable') ? 1 : 0,
+                    // 'is_cancelable' =>  $this->request->getPost('is_cancelable') ? 1 : 0,
+                    // 'is_attachment_required' =>  $this->request->getPost('is_attachment_required') ? 1 : 0,
+                    // 'video_type' =>  $this->request->getPost('video_type'),
+                    // 'video' =>  $this->request->getPost('video'),
                     'seo_page_title' =>  $this->request->getPost('seo_page_title'),
                     'seo_meta_keywords' =>  input_tags_to_comma_string($this->request->getPost('seo_meta_keywords')),
                     'seo_meta_description' =>  $this->request->getPost('seo_meta_description'),
@@ -558,9 +566,8 @@ class Product extends Controller
                         foreach ($files['other_images'] as $file) {
                             if ($file->isValid() && !$file->hasMoved()) {
                                 $newName = $file->getRandomName();
-                                $file->move('uploads/other_products', $newName);
-                                // $uploadedFiles[] = "uploads/other_products/".$newName;
-                                $uploads_image_path = "uploads/other_products/".$newName;
+                                $file->move('uploads/products/'.$edit_product_id, $newName);
+                                $uploads_image_path = "uploads/products/".$edit_product_id."/".$newName;
 
                                 $images_data = [
                                     'product_id' =>  $edit_product_id,
@@ -576,10 +583,10 @@ class Product extends Controller
                     $product_data = [
                         'price' =>  $this->request->getPost('simple_price'),
                         'rrp' =>  $this->request->getPost('simple_rrp'),
-                        'weight' =>  $this->request->getPost('weight'),
-                        'height' =>  $this->request->getPost('height'),
-                        'breadth' =>  $this->request->getPost('breadth'),
-                        'length' =>  $this->request->getPost('length'),
+                        // 'weight' =>  $this->request->getPost('weight'),
+                        // 'height' =>  $this->request->getPost('height'),
+                        // 'breadth' =>  $this->request->getPost('breadth'),
+                        // 'length' =>  $this->request->getPost('length'),
                         // 'sku' =>  $this->request->getPost('product_sku'),
                         'stock' =>  $this->request->getPost('product_total_stock'),
                         'status' =>  $this->request->getPost('simple_product_stock_status'),
@@ -920,10 +927,13 @@ class Product extends Controller
         }
 
         if (!empty($searchFilter)) {
-            $query = $query->like('products.name', $searchFilter);
-            $query = $query->orLike('products.model', $searchFilter);
-            $query = $query->orLike('products.description', $searchFilter);
+            $query->groupStart(); // Opens bracket (
+            $query->like('products.name', $searchFilter);
+            $query->orLike('products.model', $searchFilter);
+            $query->orLike('products.description', $searchFilter);
+            $query->groupEnd();   // Closes bracket )
         }
+        
         if (!empty($categoryFilter)) {
             $query = $query->where('products.category_id', $categoryFilter);
         }

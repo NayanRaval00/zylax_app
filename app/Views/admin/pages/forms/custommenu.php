@@ -46,7 +46,7 @@
                                 <div class="form-group row">
                                     <div class="col-sm-6">
                                         <label for="title">Menu Title <span class='text-danger text-sm'>*</span></label>
-                                        <input type="text" class="form-control" id="title" placeholder="Menu Title" name="title" value="">
+                                        <input type="text" class="form-control" id="title" placeholder="Menu Title" name="title" value="<?= old('title') ?>">
                                     </div>
                                     <div class="col-sm-6">
                                         <label for="menu_id">Parent Menu</label>
@@ -55,7 +55,7 @@
                                             <?php
                                                 foreach ($menus as $menu) {
                                             ?>
-                                                <option value="<?= $menu['id'] ?>"><?= $menu['title'] ?></option>
+                                                <option value="<?= $menu['id'] ?>" <?php if($menu['id'] == old('menu_id')){ echo "selected"; } ?>><?= $menu['title'] ?></option>
                                             <?php
                                                 }
                                             ?>
@@ -65,15 +65,15 @@
 
                                 <div class="form-group row">
                                     <div class="col-sm-12">
-                                        <label for="link">Link <span class='text-danger text-sm'>*</span></label>
-                                        <input type="text" class="form-control" id="link" placeholder="Menu Link" name="link" value="">
+                                        <label for="link">Slug <span class='text-danger text-sm'>*</span></label>
+                                        <input type="text" class="form-control" id="link" placeholder="Menu Slug" name="link" value="<?= old('link') ?>">
                                     </div>
                                 </div>
 
                                 <div class="form-group row">
                                     <div class="col-sm-12">
                                         <label for="link_url">Link Url</label>
-                                        <input type="text" class="form-control" id="link_url" placeholder="Menu Link Url" name="link_url" value="">
+                                        <input type="text" class="form-control" id="link_url" placeholder="Menu Link Url" name="link_url" value="<?= old('link_url') ?>">
                                     </div>
                                 </div>
 
@@ -81,16 +81,16 @@
                                     <div class="col-sm-6">
                                         <label for="sort">Sort</label>
                                         <select name="sort" id="sort" class="form-control type_event_trigger" required="">
-                                            <option value="10">10</option>
-                                            <option value="9">9</option>
-                                            <option value="8">8</option>
-                                            <option value="7">7</option>
-                                            <option value="6">6</option>
-                                            <option value="5">5</option>
-                                            <option value="4">4</option>
-                                            <option value="3">3</option>
-                                            <option value="2">2</option>
-                                            <option value="1">1</option>
+                                            <option value="10" <?php if("10" == old('sort')){ echo "selected"; } ?>>10</option>
+                                            <option value="9" <?php if("9" == old('sort')){ echo "selected"; } ?>>9</option>
+                                            <option value="8" <?php if("8" == old('sort')){ echo "selected"; } ?>>8</option>
+                                            <option value="7" <?php if("7" == old('sort')){ echo "selected"; } ?>>7</option>
+                                            <option value="6" <?php if("6" == old('sort')){ echo "selected"; } ?>>6</option>
+                                            <option value="5" <?php if("5" == old('sort')){ echo "selected"; } ?>>5</option>
+                                            <option value="4" <?php if("4" == old('sort')){ echo "selected"; } ?>>4</option>
+                                            <option value="3" <?php if("3" == old('sort')){ echo "selected"; } ?>>3</option>
+                                            <option value="2" <?php if("2" == old('sort')){ echo "selected"; } ?>>2</option>
+                                            <option value="1" <?php if("1" == old('sort')){ echo "selected"; } ?>>1</option>
                                         </select>
                                     </div>
                                 </div>

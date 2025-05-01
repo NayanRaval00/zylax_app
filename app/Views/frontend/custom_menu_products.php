@@ -4,7 +4,7 @@
     <div class="container">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="#"><i class="bi bi-house-door" style="color: #EB4227;"></i></a>
+                <li class="breadcrumb-item"><a href="<?= base_url() ?>"><i class="bi bi-house-door" style="color: #EB4227;"></i></a>
             </li>
             <?php 
                 // $link_append = "";
@@ -101,7 +101,7 @@
                                 <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne">
                                     <div class="accordion-body" style="font-size: 14px;max-height: 800px;overflow-y: scroll;">
                                         <?php foreach($categories as $category) {?>
-                                            <label class="radioopt"><input type="checkbox" class="category-checkbox" name="cate" value="<?= $category['category_slug'] ?>"  > <?= $category['category_name'] ?> (<?= $category['product_count'] ?>)</label>
+                                            <label class="radioopt"><input type="checkbox" class="category-checkbox" name="cate" value="<?= $category['category_slug'] ?>" <?php echo in_array($category['category_slug'], $selectedCategories) ? 'checked' : ''; ?> > <?= $category['category_name'] ?> (<?= $category['product_count'] ?>)</label>
                                         <?php } ?>
                                     </div>
                                 </div>
@@ -121,22 +121,32 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- <hr>
-                            <div class="accordion-item">
-                                <h2 class="accordion-header" id="headingBrand">
-                                    <button class="accordion-button " type="button" data-bs-toggle="collapse"
-                                        data-bs-target="#collapseBrands" aria-expanded="true" aria-controls="collapseOne">
-                                        All Attributes
-                                    </button>
-                                </h2>
-                                <div id="collapseBrands" class="accordion-collapse collapse show" aria-labelledby="headingBrand">
-                                    <div class="accordion-body" style="font-size: 14px;">
-                                        <?php foreach($attribute_sets as $attribute_set) {?>
-                                            <label class="radioopt"><input type="checkbox" class="attribute-set-checkbox" name="attribute_set" value="<?= $attribute_set['slug'] ?>" <?php echo in_array($attribute_set['slug'], $selectedAttributeSets) ? 'checked' : ''; ?> > <?= $attribute_set['name'] ?> (<?= $attribute_set['product_count'] ?>)</label>
-                                        <?php } ?>
+                            <?php foreach($attribute_set_values as $attribute_set) {
+                                // print_r($attribute_set);
+                                if(count($attribute_set['dropdowns']) > 0){
+                                ?>
+                                <hr>
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="headingBrand">
+                                        <button class="accordion-button test" type="button" data-bs-toggle="collapse"
+                                            data-bs-target="#collapseCustom<?= $attribute_set['set_id'] ?>" aria-expanded="true" aria-controls="collapseOne">
+                                            <?= $attribute_set['set_name'] ?>
+                                        </button>
+                                    </h2>
+                                    <div id="collapseCustom<?= $attribute_set['set_id'] ?>" class="accordion-collapse collapse show" aria-labelledby="headingBrand">
+                                        <div class="accordion-body" style="font-size: 14px;">
+                                            <?php foreach($attribute_set['dropdowns'] as $attribute) {
+                                                // $query_string = str_replace(' ', '-', strtolower($attribute_set['set_name']));
+                                                $query_string = $attribute_set['set_slug'];
+                                                $selectedAttributes = isset($_GET[$query_string]) ? explode(' ', $_GET[$query_string]) : [];
+                                                ?>
+                                                <label class="radioopt"><input type="checkbox" class="attribute-checkbox" name="<?= $query_string ?>" value="<?= $attribute['attribute_slug'] ?>" <?php echo in_array($attribute['attribute_slug'], $selectedAttributes) ? 'checked' : ''; ?>> <?= $attribute['attribute_name'] ?> (<?= $attribute['product_count'] ?>) </label>
+                                            <?php } ?>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            <?php } } ?>
+                            <!-- 
                             <hr>
                             <div class="accordion-item">
                                 <h2 class="accordion-header" id="headingTwo">
@@ -228,13 +238,13 @@
                                 <div class="col-lg-custom col-md-4 col-sm-6">
                                     <div class="product-card text-center p-3">
                                         <a href="<?= base_url($product['product_slug']); ?>" class="product-title"><?= $product['product_name'] ?></a>
-                                        <div class="rating py-2 mb-2">
+                                       <!-- <div class="rating py-2 mb-2">
                                             <center><i class="bi bi-star-fill"></i> <i class="bi bi-star-fill"></i> <i
                                                     class="bi bi-star-half"></i> <i class="bi bi-star"></i> <i class="bi bi-star"></i>
                                                 (2)</center>
-                                        </div>
+                                        </div>-->
                                         <a href="<?= base_url($product['product_slug']); ?>" class="product-image">
-                                            <img src="<?= base_url($product['product_image']); ?>" alt="Product">
+                                            <img src="<?= base_url($product['product_image']); ?>" alt="<?= $product['product_name'] ?>">
                                         </a>
                                         <div class="product-brand-sku"> 
                                             <span class="brand">Brand : <span><?= $product['brand_name'] ?></span> </span>
@@ -254,11 +264,12 @@
                                                 <div class="discount-label"><?= $discount ?> OFF</div>
                                             <?php } ?>
                                         </div>
-                                        <div class="purchase-row">
+                                        <!--<div class="purchase-row">
                                             <span>1,286 <span>Purchases</span></span>
                                             <a href="javascript:void(0);" class="wishlist-btn "><i class="bi bi-heart"></i></a>
-                                        </div>
-                                        <div class="buy-now"><a href="javascript:void(0);" class="buynow-btn">Buy Now</a></div>
+                                        </div>-->
+                                        <div class="buy-now"><a href="javascript:void(0);" pid="<?= $product['product_id'] ?>" ppn="<?= $product['product_name'] ?>"  ppp="<?= $product['pv_price'] ?>"  ppimage="<?= isset($product['product_image']) ? $product['product_image'] : '' ?>"  pbaseurl = "<?= base_url() ?>"  cat_id="<?= $product['category_id'] ?>"
+                                        onclick="add_to_cart(this)" class="buynow-btn">Buy Now</a></div>
                                         <?php if(isset($product['pv_status']) && $product['pv_status'] == 0){ ?>
                                             <div class="out-of-stock">Out of Stock</div>
                                         <?php } ?>
@@ -369,20 +380,50 @@
         });
     });
 
-     document.querySelectorAll(".attribute-set-checkbox").forEach(checkbox => {
+    //  document.querySelectorAll(".attribute-set-checkbox").forEach(checkbox => {
+    //     checkbox.addEventListener("change", function () {
+    //         let params = new URLSearchParams(window.location.search);
+    //         let selectedValues = [];
+
+    //         // Collect checked brands
+    //         document.querySelectorAll(".attribute-set-checkbox:checked").forEach(checkedBox => {
+    //             selectedValues.push(checkedBox.value);
+    //         });
+
+    //         if (selectedValues.length > 0) {
+    //             params.set("attribute_set", selectedValues.join("+"));
+    //         } else {
+    //             params.delete("attribute_set");
+    //         }
+
+    //         // Reload the page with the new URL
+    //         var newUrl = window.location.pathname + "?" + params.toString();
+    //         newUrl = decodeURIComponent(newUrl);
+    //         // console.log(newUrl); 
+    //         window.location.href = newUrl;
+    //     });
+    // });
+
+    document.querySelectorAll(".attribute-checkbox").forEach(checkbox => {
         checkbox.addEventListener("change", function () {
+            var attr_name = $(this).attr("name");
+            let attr_value = $(this).val();
+
+            console.log("attr_name", attr_name);
+            console.log("attr_value", attr_value);
             let params = new URLSearchParams(window.location.search);
             let selectedValues = [];
 
             // Collect checked brands
-            document.querySelectorAll(".attribute-set-checkbox:checked").forEach(checkedBox => {
+            // document.querySelectorAll(".attribute-checkbox:checked").forEach(checkedBox => {
+            document.querySelectorAll('[name="'+attr_name+'"]:checked').forEach(checkedBox => {
                 selectedValues.push(checkedBox.value);
             });
 
             if (selectedValues.length > 0) {
-                params.set("attribute_set", selectedValues.join("+"));
+                params.set(attr_name, selectedValues.join("+"));
             } else {
-                params.delete("attribute_set");
+                params.delete(attr_name);
             }
 
             // Reload the page with the new URL

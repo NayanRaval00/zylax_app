@@ -145,6 +145,13 @@
                                     <label class="radioopt"><input type="radio" name="page_type" value="Repair" <?= (isset($fetched_data['page_type']) && $fetched_data['page_type'] == 'Repair') ? 'checked' : ''; ?>> Repair</label>
                                 </div>   
 
+                                <div class="form-group row">
+                                    <div class="col-sm-2">
+                                        <label for="sort" class="col-form-label">Sort <span class='text-danger text-sm'>*</span> </label>
+                                        <input type="number" class="form-control" id="sort" placeholder="Enter Sort" name="sort" value="<?= isset($fetched_data['sort']) ? output_escaping($fetched_data['sort']) : 10 ?>">
+                                    </div>
+                                </div>
+
                                 <div class="form-group">
                                     <button type="reset" class="btn btn-warning">Reset</button>
                                     <button type="submit" class="btn btn-success">Update Page</button>

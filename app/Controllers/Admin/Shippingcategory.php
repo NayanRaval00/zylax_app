@@ -80,19 +80,28 @@ class Shippingcategory extends Controller
             $data = [
                 'shipping_id' =>  $this->request->getPost('shipping_name'),
                 'price' =>  $this->request->getPost('price'),
+                'ordermaxprice' =>  $this->request->getPost('ordermaxprice'),
+                'orderminprice' =>  $this->request->getPost('orderminprice'),
             ];
+
+            // print_r($_POST);
+
+            // die;
 
             $inserted_id = $this->shippingCategoryTable->insert($data);
 
             if ($inserted_id) {
 
-                $category = $this->request->getPost('category') ?? '';
-                if($category){
+                $categories = $this->request->getPost('category') ?? '';
+                if(!empty($categories)){
                     foreach ($categories as $category) {
                         $assign_shipping_category_price = [
                             'shipping_id' =>  $this->request->getPost('shipping_name'),
                             'category_id' =>  $category,
                             'price' =>  $this->request->getPost('price'),
+                            'ordermaxprice' =>  $this->request->getPost('ordermaxprice'),
+                            'orderminprice' =>  $this->request->getPost('orderminprice'),
+                            'priority' =>  $this->request->getPost('priority'),  
                         ];
                         $assign_inserted_id = $this->shippingCategoryPriceTable->insert($assign_shipping_category_price);
                     }
@@ -101,6 +110,9 @@ class Shippingcategory extends Controller
                         'shipping_id' => $this->request->getPost('shipping_name') ?? '',
                         'category_id' => $this->request->getPost('category_id') ?? '',
                         'price' => $this->request->getPost('price') ?? 0,
+                        'ordermaxprice' =>  $this->request->getPost('ordermaxprice'),
+                        'orderminprice' =>  $this->request->getPost('orderminprice'),
+                        'priority' =>  $this->request->getPost('priority'),
                     ];
                     $assign_inserted_id = $this->shippingCategoryPriceTable->insert($assign_shipping_category_price);
                 }
@@ -151,9 +163,16 @@ class Shippingcategory extends Controller
             $category_list = "";
             foreach ($selected_categories as $category) {
                 $category_list .= $category['category_id'] . ",";
+                $priority = $category['priority'];
+                $shippingcatpricesid = $category['id'];
+
             }
 
             $data['selected_categories'] = $category_list;
+            $data['priority'] = $priority;
+            $data['shippingcatpricesid'] = $shippingcatpricesid;
+
+
 
 
             $data['shipping_result'] = $this->shippingTable
@@ -199,58 +218,80 @@ class Shippingcategory extends Controller
             }
 
             $edit_id = $this->request->getPost('edit_shipping_category_id');
+            $shippingcatpricesid = $this->request->getPost('shippingcatpricesid');
             $edit_shipping_id = $this->request->getPost('edit_shipping_id');
-            $edit_shipping_category = rtrim($this->request->getPost('edit_shipping_category'), ",");;
-            $existing_categories_array = explode(',', $edit_shipping_category);
             $new_categories = $this->request->getPost('category');
-            $difference_categories = array_diff($existing_categories_array, $new_categories);
-
+            if(!empty($new_categories)){
+                $edit_shipping_category = rtrim($this->request->getPost('edit_shipping_category'), ",");;
+                $existing_categories_array = explode(',', $edit_shipping_category);
+                $difference_categories = array_diff($existing_categories_array, $new_categories);
+            }
             $data = [
                 'shipping_id' =>  $this->request->getPost('shipping_name'),
                 'price' =>  $this->request->getPost('price'),
+                'ordermaxprice' =>  $this->request->getPost('ordermaxprice'),
+                'orderminprice' =>  $this->request->getPost('orderminprice'),
             ];
 
             $updated = $this->shippingCategoryTable->update($edit_id, $data);
 
             if ($updated) {
 
-                // delete removed category first
-                foreach ($difference_categories as $category) {
-                    $this->shippingCategoryPriceTable
-                            ->where('shipping_id', $edit_shipping_id)
-                            ->where('category_id', $category)
-                            ->delete();
-                }
-
-                // add/update new category
-                 foreach ($new_categories as $category) {
-
-                    $exist_category_update = $this->shippingCategoryPriceTable
-                                                    ->where('shipping_id', $this->request->getPost('shipping_name'))
-                                                    ->where('category_id', $category)
-                                                    ->first();
-                                            
-                    if(isset($exist_category_update['id']) && !empty($exist_category_update['id'])){
-
-                        $shipping_category_price_id = $exist_category_update['id'];
-
-                        $existing_assign_shipping_category_price = [
-                            'shipping_id' =>  $this->request->getPost('shipping_name'),
-                            'category_id' =>  $category,
-                            'price' =>  $this->request->getPost('price'),
-                        ];
-                        $updated = $this->shippingCategoryPriceTable->update($shipping_category_price_id, $existing_assign_shipping_category_price);
-
-                    }else{
-                        $assign_shipping_category_price = [
-                            'shipping_id' =>  $this->request->getPost('shipping_name'),
-                            'category_id' =>  $category,
-                            'price' =>  $this->request->getPost('price'),
-                        ];
-                        $assign_inserted_id = $this->shippingCategoryPriceTable->insert($assign_shipping_category_price);
+                if(!empty($new_categories)){
+                    // delete removed category first
+                    foreach ($difference_categories as $category) {
+                        $this->shippingCategoryPriceTable
+                                ->where('shipping_id', $edit_shipping_id)
+                                ->where('category_id', $category)
+                                ->delete();
                     }
 
+                    // add/update new category
+                    foreach ($new_categories as $category) {
+
+                        $exist_category_update = $this->shippingCategoryPriceTable
+                                                        ->where('shipping_id', $this->request->getPost('shipping_name'))
+                                                        ->where('category_id', $category)
+                                                        ->first();
+                                                
+                        if(isset($exist_category_update['id']) && !empty($exist_category_update['id'])){
+
+                            $shipping_category_price_id = $exist_category_update['id'];
+
+                            $existing_assign_shipping_category_price = [
+                                'shipping_id' =>  $this->request->getPost('shipping_name'),
+                                'category_id' =>  $category,
+                                'price' =>  $this->request->getPost('price'),
+                                'ordermaxprice' =>  $this->request->getPost('ordermaxprice'),
+                                'orderminprice' =>  $this->request->getPost('orderminprice'),
+                                'priority' =>  $this->request->getPost('priority'),  
+                            ];
+                            $updated = $this->shippingCategoryPriceTable->update($shipping_category_price_id, $existing_assign_shipping_category_price);
+
+                        }else{
+                            $assign_shipping_category_price = [
+                                'shipping_id' =>  $this->request->getPost('shipping_name'),
+                                'category_id' =>  $category,
+                                'price' =>  $this->request->getPost('price'),
+                                'ordermaxprice' =>  $this->request->getPost('ordermaxprice'),
+                                'orderminprice' =>  $this->request->getPost('orderminprice'),
+                                'priority' =>  $this->request->getPost('priority'),  
+                            ];
+                            $assign_inserted_id = $this->shippingCategoryPriceTable->insert($assign_shipping_category_price);
+                        }
+
+                    }
+                }else{
+                    $existing_assign_shipping_category_price = [
+                        'shipping_id' =>  $this->request->getPost('shipping_name'),
+                        'price' =>  $this->request->getPost('price'),
+                        'ordermaxprice' =>  $this->request->getPost('ordermaxprice'),
+                        'orderminprice' =>  $this->request->getPost('orderminprice'),
+                        'priority' =>  $this->request->getPost('priority'),  
+                    ];
+                    $updated = $this->shippingCategoryPriceTable->update($shippingcatpricesid, $existing_assign_shipping_category_price);
                 }
+
 
                 $session->setFlashdata('status', 'success');
                 $session->setFlashdata('message', 'Shipping Category updated Successful!');

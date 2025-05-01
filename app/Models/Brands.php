@@ -115,6 +115,56 @@ class Brands extends Model
 
     }
 
+    function getProductCountWithBrandWithAttributesMultiple($category_ids = [], $attributes = [])
+    {
+        $sql_get2 = "SELECT b.id as brand_id, b.name AS brand_name, b.slug AS brand_slug, count(p.id) as product_count 
+                    FROM products p 
+                    LEFT JOIN brands b ON b.id = p.brand";
+
+        $innerCond = '';
+        foreach ($attributes as $attribute) {
+            $selectedAttrNames = isset($attribute['filter_value']) ? explode(' ', trim($attribute['filter_value'])) : [];
+            $attribute_set_id = $attribute['attribute_set_id'];
+
+            if (empty($selectedAttrNames)) continue;
+
+            $attr_slugs = implode("','", array_map('addslashes', $selectedAttrNames));
+
+            $sql_get = "SELECT id FROM attributes WHERE slug IN ('$attr_slugs') AND attribute_set_id = '$attribute_set_id'";
+            $results = $this->db->query($sql_get)->getResultArray();
+            $attr_ids = array_column($results, 'id');
+
+            if (!empty($attr_ids)) {
+                $attr_ids_str = implode("','", $attr_ids);
+                if ($innerCond != "") {
+                    $innerCond .= ' OR ';
+                }
+                if ($innerCond == '') {
+                    $innerCond .= '(';
+                }
+                $innerCond .= "(`attribute_value_id` IN ('$attr_ids_str') AND attribute_id = '$attribute_set_id')";
+            }
+        }
+
+        if (!empty($innerCond)) {
+            $innerCond .= ')';
+            $sql_get2 .= " WHERE p.id IN (SELECT pa.product_id FROM product_attributes pa WHERE $innerCond)";
+        } else {
+            $sql_get2 .= " WHERE 1=1"; // ensure WHERE clause exists
+        }
+
+        // Apply multiple category filter
+        if (!empty($category_ids)) {
+            $category_ids_str = implode(",", array_map('intval', $category_ids));
+            $sql_get2 .= " AND p.category_id IN ($category_ids_str)";
+        }
+
+        $sql_get2 .= " AND p.status = '1' GROUP BY b.name ORDER BY b.name ASC";
+
+        return $this->db->query($sql_get2)->getResultArray();
+    }
+
+
     function getProductCountWithBrandsMultipleCategory($category = []){
         $builder = $this->db->table('brands as b');
         $builder->select('b.id AS brand_id, b.name AS brand_name, b.slug AS brand_slug, COUNT(p.id) AS product_count');

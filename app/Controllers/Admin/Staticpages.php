@@ -197,6 +197,12 @@ class Staticpages extends Controller
                         'required'    => 'The menu name is required!',
                     ]
                 ],
+                'sort' => [
+                    'rules' => 'required',
+                    'errors' => [
+                        'required'    => 'The sort is required!',
+                    ]
+                ],
             ];
 
             if (!$this->validate($rules)) {
@@ -238,7 +244,8 @@ class Staticpages extends Controller
                     'active' =>  $this->request->getPost('active') == "1" ? 1 : 0,
                     'place_to' =>  $this->request->getPost('place_to'),
                     'page_script' =>  $this->request->getPost('page_script'),
-                    'page_type' =>  $this->request->getPost('page_type')
+                    'page_type' =>  $this->request->getPost('page_type'),
+                    'sort' =>  $this->request->getPost('sort')
                 ];
 
                 // dd($data);
@@ -328,6 +335,11 @@ class Staticpages extends Controller
         $page_deleted = $this->pagesTable->delete($page_id);
 
         if ($page_deleted) {
+
+            $this->slugTable->where('type', 'static_page')
+                            ->where('ref_id', $page_id)
+                            ->delete();
+
            $response['error'] = false;
            $response['message'] = 'Page Deleted Succesfully';
             echo(json_encode($response));

@@ -14,5 +14,5 @@ class order_items extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['id', 'order_id', 'product_id', 'product_name', 'product_gst', 'price', 'quantity', 'image', 'created_at'];
+    protected $allowedFields    = ['id', 'order_id', 'product_id', 'product_name', 'product_gst', 'price', 'quantity', 'image', 'addon_products', 'created_at'];
 }

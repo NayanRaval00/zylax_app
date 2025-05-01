@@ -174,14 +174,14 @@
                                                 </select>
                                             </div> -->
                                             
-                                            <div class="col-md-4 warranty_period <?= (isset($product_details[0]['type']) && $product_details[0]['type'] == 'digital_product') ? 'd-none' : '' ?>">
+                                            <!-- <div class="col-md-4 warranty_period <?= (isset($product_details[0]['type']) && $product_details[0]['type'] == 'digital_product') ? 'd-none' : '' ?>">
                                                 <label for="warranty_period" class="col-form-label">Warranty Period</label>
                                                 <input type="text" class="col-md-12 form-control" id="warranty_period" name="warranty_period" value="<?= old('warranty_period') ?>" placeholder='Warranty Period if any'>
                                             </div>
                                             <div class="col-md-4 guarantee_period <?= (isset($product_details[0]['type']) && $product_details[0]['type'] == 'digital_product') ? 'd-none' : '' ?>">
                                                 <label for="guarantee_period" class="col-form-label">Guarantee Period</label>
                                                 <input type="text" class="col-md-12 form-control" id="guarantee_period" name="guarantee_period" value="<?= old('guarantee_period') ?>" placeholder='Guarantee Period if any'>
-                                            </div>
+                                            </div> -->
                                         </div>
 
                                         <!-- <div class="row col mt-3 pickup_locations <?= (isset($product_details[0]['type']) && $product_details[0]['type'] == 'digital_product') ? 'd-none' : '' ?>">
@@ -194,7 +194,7 @@
                                             </div>
                                         </div> -->
 
-                                        <div class="row col mt-3">
+                                        <!-- <div class="row col mt-3">
                                             <div class="col-md-3 col-xs-6">
                                                 <label for="is_prices_inclusive_tax" class="col-form-label">Tax included in prices?</label>
                                                 <input type="checkbox" name="is_prices_inclusive_tax" id="is_prices_inclusive_tax" data-bootstrap-switch data-off-color="danger" data-on-color="success" data-on-text="Yes" data-off-text="No"
@@ -236,7 +236,7 @@
                                                     <input type="checkbox" class="form-check-input " role="switch" id="is_attachment_required" name="is_attachment_required" <?= (isset($product_details[0]['is_attachment_required']) && $product_details[0]['is_attachment_required'] == '1') ? 'Checked' : '' ?> data-bootstrap-switch data-off-color="danger" data-on-color="success" />
                                                 </a>
                                             </div>
-                                        </div>
+                                        </div> -->
 
                                         <div class="row col mt-3">
 
@@ -253,20 +253,20 @@
                                                         <input type="file" id="other_images" name="other_images[]" class="form-control" multiple/>
                                                     </div>
                                                 </div>
-                                                <div class="form-group d-flex">
+                                                <!-- <div class="form-group d-flex">
                                                     <div class="form-group col-md-6">
                                                         <label for="video_type" class="col-form-label">Video Type</label>
                                                         <select class='form-control comman_select2' name='video_type' id='video_type'>
-                                                            <option value='' <?= (isset($product_details[0]['video_type']) && ($product_details[0]['video_type'] == '' || $product_details[0]['video_type'] == NULL)) ? 'selected' : ''; ?>>None</option>
+                                                            <option value='' <?= (isset($product_details[0]['video_type']) && ($product_details[0]['video_type'] == '' || $product_details[0]['video_type'] == NULL)) ? 'selected' : ''; ?>>None</option> -->
                                                             <!-- <option value='self_hosted' <?= (isset($product_details[0]['video_type']) &&  $product_details[0]['video_type'] == 'self_hosted') ? 'selected' : ''; ?>>Self Hosted</option> -->
-                                                            <option value='youtube' <?= (isset($product_details[0]['video_type']) &&  $product_details[0]['video_type'] == 'youtube') ? 'selected' : ''; ?>>Youtube</option>
+                                                            <!-- <option value='youtube' <?= (isset($product_details[0]['video_type']) &&  $product_details[0]['video_type'] == 'youtube') ? 'selected' : ''; ?>>Youtube</option>
                                                             <option value='vimeo' <?= (isset($product_details[0]['video_type']) &&  $product_details[0]['video_type'] == 'vimeo') ? 'selected' : ''; ?>>Vimeo</option>
                                                         </select>
-                                                    </div>
-                                                    <div class="col-md-6 <?= (isset($product_details[0]['video_type']) && ($product_details[0]['video_type'] == 'youtube' ||  $product_details[0]['video_type'] == 'vimeo')) ? '' : 'd-none'; ?>" id="video_link_container">
+                                                    </div> -->
+                                                    <!-- <div class="col-md-6 <?= (isset($product_details[0]['video_type']) && ($product_details[0]['video_type'] == 'youtube' ||  $product_details[0]['video_type'] == 'vimeo')) ? '' : 'd-none'; ?>" id="video_link_container">
                                                         <label for="video" class="col-form-label">Video Link <span class='text-danger text-sm'>*</span></label>
                                                         <input type="text" class='form-control' name='video' id='video' value="<?= (isset($product_details[0]['video_type']) && ($product_details[0]['video_type'] == 'youtube' || $product_details[0]['video_type'] == 'vimeo')) ? $product_details[0]['video'] : ''; ?>" placeholder="Paste Youtube / Vimeo Video link or URL here">
-                                                    </div>
+                                                    </div> -->
                                                     <!-- <div class="col-md-6 mt-2 <?= (isset($product_details[0]['video_type']) && ($product_details[0]['video_type'] == 'self_hosted')) ? '' : 'd-none'; ?>" id="video_media_container">
                                                         <label for="image" class="ml-2">Video <span class='text-danger text-sm'>*</span></label>
                                                         <div class='col-md-3'><a class="uploadFile img btn btn-primary text-white btn-sm" data-input='pro_input_video' data-isremovable='1' data-media_type='video' data-is-multiple-uploads-allowed='0' data-toggle="modal" data-target="#media-upload-modal" value="Upload Photo"><i class='fa fa-upload'></i> Upload</a></div>
@@ -286,7 +286,7 @@
                                                         <?php } ?>
 
                                                     </div> -->
-                                                </div>
+                                                <!-- </div> -->
                                             </div>
                                         </div>
                                         
@@ -322,7 +322,7 @@
                                                                             </div>
                                                                         </div>
                                                                     </div>
-                                                                    <div class="form-group row mt-3" id="product-dimensions">
+                                                                    <!-- <div class="form-group row mt-3" id="product-dimensions">
                                                                         <div class="col-md-6">
                                                                             <label for="weight" class="control-label col-md-12"><small>(These are the product parcel's dimentions.)</small></label>
                                                                         </div>
@@ -344,7 +344,7 @@
                                                                             <label for="length" class="control-label col-md-12">Length <small>(cms)</small></label>
                                                                             <input type="number" class="form-control" name="length" placeholder="Length" id="length" value="<?= old('length') ?>" step="0.01" min='0.01'>
                                                                         </div>
-                                                                    </div>
+                                                                    </div> -->
 
                                                                     <!-- <div class="form-group  simple_stock_management mx-2">
                                                                         <div class="d-flex">

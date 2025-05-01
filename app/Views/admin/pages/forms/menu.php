@@ -46,24 +46,24 @@
                                 <div class="form-group row">
                                     <div class="col-sm-6">
                                         <label for="title">Menu Title <span class='text-danger text-sm'>*</span></label>
-                                        <input type="text" class="form-control" id="title" placeholder="Menu Title" name="title" value="">
+                                        <input type="text" class="form-control" id="title" placeholder="Menu Title" name="title" value="<?= old('title') ?>">
                                     </div>
                                     <div class="col-sm-6">
                                         <label for="icon">Icon HTML Code</label>
-                                        <input type="text" class="form-control" id="icon" placeholder="Menu Icon" name="icon" value="">
+                                        <input type="text" class="form-control" id="icon" placeholder="Menu Icon" name="icon" value="<?= old('icon') ?>">
                                     </div>
                                 </div>
 
                                 <div class="form-group row">
                                     <div class="col-sm-12">
-                                        <label for="link">Link <span class='text-danger text-sm'>*</span></label>
-                                        <input type="text" class="form-control" id="link" placeholder="Menu Link" name="link" value="">
+                                        <label for="link">Slug <span class='text-danger text-sm'>*</span></label>
+                                        <input type="text" class="form-control" id="link" placeholder="Menu Slug" name="link" value="<?= old('link') ?>">
                                     </div>
                                 </div>
 
                                 <div class="form-group row">
                                     <div class="col-sm-6">
-                                        <label for="image_top">Image Top</label>
+                                        <label for="image_top">Image Top <span class='text-danger text-sm'>*</span></label>
                                         <input type="file" id="image_top" name="image_top" class="form-control" required="true" />
                                     </div>
                                     <div class="col-sm-6">
@@ -76,8 +76,8 @@
                                     <div class="col-sm-6">
                                         <label for="type">Type</label>
                                         <select name="type" id="type" class="form-control type_event_trigger" required="">
-                                            <option value="type_1">Type 1</option>
-                                            <option value="type_2">Type 2</option>
+                                            <option value="type_1" <?php if("type_1" == old('type')){ echo "selected"; } ?>>Type 1</option>
+                                            <option value="type_2" <?php if("type_2" == old('type')){ echo "selected"; } ?>>Type 2</option>
                                         </select>
                                     </div>
                                     <div class="col-sm-6">
@@ -89,7 +89,12 @@
                                 <div class="form-group row">
                                     <label for="description">Description </label>
                                     <div class="mb-3">
-                                        <textarea name="description" class="textarea addr_editor" id="description" placeholder="Place some text here"></textarea>
+                                        <textarea name="description" class="textarea addr_editor" id="description" placeholder="Place some text here">
+                                        <?php
+                                            $description = old('description');
+                                            echo isset($description) ? output_escaping(str_replace('\r\n', '&#13;&#10;', $description)) : "";
+                                        ?>
+                                        </textarea>
                                     </div>
                                 </div>
 

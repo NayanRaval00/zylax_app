@@ -13,6 +13,30 @@ $(document).ready(function () {
         }
     });
 
+    $(".toggle-password1").click(function () {
+        let input = $(this).parent().find(".passwordinput1");
+        let icon = $(this).find("i");
+        if (input.attr("type") === "password") {
+            input.attr("type", "text");
+            icon.removeClass("bi-eye-slash").addClass("bi-eye");
+        } else {
+            input.attr("type", "password");
+            icon.removeClass("bi-eye").addClass("bi-eye-slash");
+        }
+    });
+
+    $(".toggle-password2").click(function () {
+        let input = $(this).parent().find(".passwordinput2");
+        let icon = $(this).find("i");
+        if (input.attr("type") === "password") {
+            input.attr("type", "text");
+            icon.removeClass("bi-eye-slash").addClass("bi-eye");
+        } else {
+            input.attr("type", "password");
+            icon.removeClass("bi-eye").addClass("bi-eye-slash");
+        }
+    });
+
     $(".product-detail-content-block .product-colors li").click(function () {
         $(this).addClass("active").siblings().removeClass("active");
     });
@@ -53,7 +77,7 @@ $(document).ready(function () {
         e.preventDefault();
         $("#loginForm").addClass("d-none");
         $("#forgotPasswordForm").removeClass("d-none");
-        $(".popup-image img").attr("src","assets/images/forgot-pass-image.png");
+        $(".popup-image img").attr("src","assets/frontend/images/forgot-pass-image.png");
         
     });
 
@@ -62,7 +86,7 @@ $(document).ready(function () {
         e.preventDefault();
         $("#forgotPasswordForm").addClass("d-none");
         $("#loginForm").removeClass("d-none");
-        $(".popup-image img").attr("src","assets/images/login-image.png");
+        $(".popup-image img").attr("src","assets/frontend/images/login-image.png");
     });
 
     // Switch to Sign Up Form
@@ -70,7 +94,7 @@ $(document).ready(function () {
         e.preventDefault();
         $("#loginForm").addClass("d-none");
         $("#signUpForm").removeClass("d-none");
-        $(".popup-image img").attr("src","assets/images/sign-up-image.png");
+        $(".popup-image img").attr("src","assets/frontend/images/sign-up-image.png");
     });
 
     // Back to Login Form from Sign Up
@@ -78,7 +102,7 @@ $(document).ready(function () {
         e.preventDefault();
         $("#signUpForm").addClass("d-none");
         $("#loginForm").removeClass("d-none");
-        $(".popup-image img").attr("src","assets/images/login-image.png");
+        $(".popup-image img").attr("src","assets/frontend/images/login-image.png");
     });
 
 
@@ -155,9 +179,9 @@ $(document).ready(function () {
     // // Check on document ready and window resize events
     if (isMobile()) {
         // Modify the href of anchor elements with class 'arrow-icon'
-        $('.sub-category-item a.arrow-icon').each(function() {
-            $(this).attr('href', 'javascript:void(0)');
-        });
+        // $('.sub-category-item a.arrow-icon').each(function() {
+        //     $(this).attr('href', 'javascript:void(0)');
+        // });
       
        $('#megaMenupro .close-icon').click(function() {
        
@@ -165,21 +189,56 @@ $(document).ready(function () {
 
         });
       
-          $(document).on('click', '.child-menu-mega .sub-category-item', function() {
-            if($(this).hasClass("arrow-icon")){
-              $(".child-menu-mega .sub-category-item").removeClass("open");
-              $(this).toggleClass("open");
-              $(".child-menu-mega").find("ul").removeClass("show");
-              if($(this).hasClass("open")){
-                $(this).find("ul").addClass("show");
-              }else{
-                $(this).find("ul").removeClass("show");
-                $(this).removeClass("open");
-              }
+        //   $(document).on('click', '.child-menu-mega .sub-category-item', function() {
+        //     if($(this).hasClass("arrow-icon")){
+        //       $(".child-menu-mega .sub-category-item").removeClass("open");
+        //       $(this).toggleClass("open");
+        //       $(".child-menu-mega").find("ul").removeClass("show");
+        //       if($(this).hasClass("open")){
+        //         $(this).find("ul").addClass("show");
+        //       }else{
+        //         $(this).find("ul").removeClass("show");
+        //         $(this).removeClass("open");
+        //       }
               
-            }
+        //     }
 
-        });
+        // });
+
+        // Parent Arrow Toggle (1st level)
+$(document).on('click', '.sub-category-item.arrow-icon > .arrow-toggle', function(e) {
+    if (isMobile()) {
+      e.preventDefault();
+      e.stopPropagation();
+  
+      const parent = $(this).closest('.sub-category-item');
+  
+      // Close other top-level dropdowns only (not nested)
+      $('.sub-category-item.arrow-icon').not(parent).removeClass('open').children('ul').removeClass('show');
+  
+      parent.toggleClass('open');
+      parent.children('ul').first().toggleClass('show');
+    }
+  });
+  
+  // Child Arrow Toggle (2nd level)
+  $(document).on('click', '.sub-category-item .arrow-toggle-child', function(e) {
+    if (isMobile()) {
+      e.preventDefault();
+      e.stopPropagation();
+  
+      const parent = $(this).closest('.sub-category-item');
+  
+      // Close sibling dropdowns (same level only)
+      parent.siblings('.arrow-icon').removeClass('open').children('ul').removeClass('show');
+  
+      parent.toggleClass('open');
+      parent.children('ul').first().toggleClass('show');
+    }
+  });
+
+        
+
 
         $("#toggleBtn").click(function () {
             if(listview == true){

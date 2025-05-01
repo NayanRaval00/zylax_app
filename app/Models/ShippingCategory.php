@@ -14,7 +14,7 @@ class ShippingCategory extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['shipping_id', 'price', 'status'];
+    protected $allowedFields    = ['shipping_id', 'price', 'status', 'ordermaxprice', 'orderminprice'];
 
     function getShippingCategory()
     {

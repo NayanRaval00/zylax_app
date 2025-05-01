@@ -1,15 +1,15 @@
 <?= $this->include('frontend/layouts/header') ?>
 <?php $db = \Config\Database::connect(); ?>
-<?php
+<?php 
 
 // print_r("zy_" . uniqid(mt_rand(), true));
 // print_r($relatedProductOptions); 
 // die;
 
-// foreach($product  as $rr){
-//     // echo "<pre>";
-//     print_r($rr['category_id']);
-// }
+    // foreach($product  as $rr){
+    //     // echo "<pre>";
+    //     print_r($rr['category_id']);
+    // }
 
 // print_R($relatedProductOptions);
 
@@ -23,14 +23,14 @@
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="<?= base_url() ?>"><i class="bi bi-house-door" style="color: #EB4227;"></i></a>
                 </li>
-                <?php
+                <?php 
                 $link_append = "";
-                foreach ($breadcrumb as $bc):
+                foreach ($breadcrumb as $bc): 
                     $link_append .= esc($bc['slug']);
                 ?>
                     <li class="breadcrumb-item" aria-current="page"><a href="<?= base_url($link_append) ?>"><?= esc($bc['name']) ?></a></li>
-                <?php
-                    $link_append .= "/";
+                <?php 
+                $link_append .= "/";
                 endforeach; ?>
                 <li class="breadcrumb-item active" aria-current="page"><?= $product['name'] ?></li>
             </ol>
@@ -47,13 +47,13 @@
                 <div class="swiper-container main-product-slider">
                     <div class="swiper-wrapper">
                         <!-- Slides for Main Slider -->
-                        <?php foreach ($images as $image) { ?>
-                            <div class="swiper-slide">
-                                <a href="#" data-bs-toggle="modal" data-bs-target="#imageModal"
-                                    onclick="showImage('<?= base_url($image['image']); ?>')">
-                                    <img src="<?= base_url($image['image']); ?>" alt="Image 1">
-                                                </a>
-                            </div>
+                        <?php foreach($images as $image) {?>
+                        <div class="swiper-slide">
+                            <a href="#" data-bs-toggle="modal" data-bs-target="#imageModal"
+                                onclick="showImage('<?= base_url($image['image']); ?>')">
+                                <img src="<?= base_url($image['image']); ?>" alt="Image 1">
+                                            </a>
+                        </div>
                         <?php } ?>
                     </div>
                     <!-- Optional Navigation -->
@@ -65,10 +65,10 @@
                 <div class="swiper-container product-thumbnail-slider">
                     <div class="swiper-wrapper">
                         <!-- Slides for Thumbnails -->
-                        <?php foreach ($images as $image) { ?>
-                            <div class="swiper-slide">
-                                <img src="<?= base_url($image['image']); ?>" alt="Thumbnail 1">
-                            </div>
+                        <?php foreach($images as $image) {?>
+                        <div class="swiper-slide">
+                            <img src="<?= base_url($image['image']); ?>" alt="Thumbnail 1">
+                        </div>
                         <?php } ?>
                     </div>
                     <!-- Optional Navigation -->
@@ -78,13 +78,13 @@
             </div>
             <div class="col-md-6">
                 <div class="product-detail-content-block">
-                    <div class="rating">
+                   <!-- <div class="rating">
                         <b><i class="bi bi-star-fill"></i> <i class="bi bi-star-fill"></i> <i
                                 class="bi bi-star-half"></i> <i class="bi bi-star"></i> <i class="bi bi-star"></i>
                             <span class="rating-percent">4.7 Star Rating</span>
                             <span class="rating-count">(21,671 User feedback)</span>
                         </b>
-                    </div>
+                    </div>-->
                     <h2 class="mt-1"><?= $product['name'] ?></h2>
 
                     <div class="row mt-3">
@@ -95,10 +95,10 @@
                         </div>
                         <div class="col-md-6">
                             <p class="product-attributes">Availability:
-                                <?php if ($products_variants[0]['status'] == 1) { ?>
-                                    <span class="color-green">In Stock</span>
-                                <?php } else { ?>
-                                    <span class="color-red">Out of Stock</span>
+                                <?php if($products_variants[0]['status'] == 1){ ?>
+                                <span class="color-green">In Stock</span>
+                                <?php }else{ ?>
+                                <span class="color-red">Out of Stock</span>
                                 <?php } ?>
                             </p>
                         </div>
@@ -113,43 +113,43 @@
                             </p>
                         </div>
                         <div class="col-md-12 display-flex py-4">
-                            <?php
-                            $discount = product_off_percentage($products_variants[0]['price'], $products_variants[0]['rrp']);
-                            ?>
+                        <?php 
+                        $discount = product_off_percentage($products_variants[0]['price'], $products_variants[0]['rrp']); 
+                        ?>
                             <div class="price-column">
                                 <span class="product-price">$<?= $products_variants[0]['price'] ?> </span>
-                                <?php if ($discount !== "0%") { ?>
+                                <?php if($discount !== "0%"){ ?>
                                     <span class="product-strike-price">$<?= $products_variants[0]['rrp'] ?></span>
                                     <span class="label-yellow"><?= $discount ?> OFF</span>
                                 <?php } ?>
                             </div>
                         </div>
-                        <?php if (isset($product_color_variants) && count($product_color_variants) >= 1) { ?>
-                            <div class="col-md-6">
-                                <p class="product-variant">Color:</p>
-                                <ul class="product-colors">
-                                    <?php foreach ($product_color_variants as $product_color) { ?>
-                                        <li><a href="<?= base_url($product_color['product_slug']); ?>"
-                                                style="background-color:<?= $product_color['color'] ?>;"><?= $product_color['label'] ?></a>
-                                        </li>
-                                    <?php } ?>
-                                </ul>
-                            </div>
+                        <?php if(isset($product_color_variants) && count($product_color_variants) >= 1){ ?>
+                        <div class="col-md-6">
+                            <p class="product-variant">Color:</p>
+                            <ul class="product-colors">
+                                <?php foreach($product_color_variants as $product_color) { ?>
+                                <li><a href="<?= base_url($product_color['product_slug']); ?>"
+                                        style="background-color:<?= $product_color['color'] ?>;"><?= $product_color['label'] ?></a>
+                                </li>
+                                <?php } ?>
+                            </ul>
+                        </div>
                         <?php } ?>
 
-                        <?php if (isset($product['configure_me']) && $product['configure_me'] == 0) { ?>
-                            <?php foreach ($product_attributes as $attribute) { ?>
-                                <!-- <div class="col-md-6">
+                        <?php if(isset($product['configure_me']) && $product['configure_me'] == 0){ ?>
+                        <?php foreach($product_attributes as $attribute) { ?>
+                        <!-- <div class="col-md-6">
                             <p class="product-variant"><?= $attribute['set_name'] ?>:</p>
                             <select class="form-control" name="Size">
                                 <option value="">Select <?= $attribute['set_name'] ?></option>
-                                <?php foreach ($attribute['dropdowns'] as $dropdowns) { ?>
+                                <?php foreach($attribute['dropdowns'] as $dropdowns) { ?>
                                 <option value="<?= $dropdowns['attribute_value'] ?>"><?= $dropdowns['attribute_name'] ?>
                                 </option>
                                 <?php } ?>
                             </select>
                         </div> -->
-                            <?php } ?>
+                        <?php } ?>
                         <?php } ?>
 
                         <div class="col-md-12">
@@ -166,17 +166,18 @@
                                     </div>
                                 </div>
                                 <div class="col-md-6 addCart">
-                                    <button class="add-to-cart" pid="<?= $product['id'] ?>" ppn="<?= $product['name'] ?>" ppp="<?= $products_variants[0]['price'] ?>" ppimage="<?= isset($images[0]['image']) ? $images[0]['image'] : '' ?>" pbaseurl="<?= base_url() ?>" cat_id="<?= $product['category_id'] ?>"
+                                    <button class="add-to-cart" pid="<?= $product['id'] ?>" ppn="<?= $product['name'] ?>"  ppp="<?= $products_variants[0]['price'] ?>"  ppimage="<?= isset($images[0]['image']) ? $images[0]['image'] : '' ?>"  pbaseurl = "<?= base_url() ?>"  cat_id="<?= $product['category_id'] ?>"
                                         onclick="add_to_cart(this)"
                                         name="add_cart">Add to cart </button>
                                 </div>
                                 <div class="col-md-3 buyNow">
-                                    <button class="buy-now" name="buy_now">Buy Now</button>
+                                    <button class="buy-now" name="buy_now" pid="<?= $product['id'] ?>" ppn="<?= $product['name'] ?>"  ppp="<?= $products_variants[0]['price'] ?>"  ppimage="<?= isset($images[0]['image']) ? $images[0]['image'] : '' ?>"  pbaseurl = "<?= base_url() ?>"  cat_id="<?= $product['category_id'] ?>"
+                                    onclick="add_to_cart(this)">Buy Now</button>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="col-md-12 py-3">
+                      <!--  <div class="col-md-12 py-3">
                             <div class="row wishlist-share-content">
                                 <div class="col-md-7 wishlist">
                                     <a class="wishlist-btn" href="javascript:void(0);"><i class="bi bi-heart"></i> Add
@@ -196,10 +197,10 @@
                                 </div>
 
                             </div>
-                        </div>
+                        </div>-->
 
-
-                        <?php if ($product['configure_me'] == 1) { ?>
+                        
+                        <?php if($product['configure_me'] == 1){ ?>
                             <hr />
                             <div class="customize-me">
                                 <h6 class="title"><strong>Product Configuration (Customize Me)</strong></h6>
@@ -208,64 +209,57 @@
 
                                     <?php
                                     $index = 1;
-                                    foreach ($attributeSets as $attribute) {
+                                    foreach ($attributeSets as $attribute) { 
                                         $product_id = $product['id'];
                                         $attribute_set_id = $attribute['id'];
-
+                                        
                                         $query = $db->query("SELECT pa.id as id, s.name as attribute_set, a.name as attribute_name, pa.added_attribute_value as price  FROM product_attributes pa LEFT join attribute_set s on s.id=pa.attribute_id LEFT join attributes a on a.id=pa.attribute_value_id WHERE pa.product_id='$product_id' AND pa.attribute_id = '$attribute_set_id'");
                                         $attribute_values = $query->getResultArray();
                                         // print_r($attribute_values); exit;
-                                        if (!empty($attribute_values) && count($attribute_values) > 0) {
-                                    ?>
-                                            <div class="accordion-item">
-                                                <h2 class="accordion-header" id="headingOne<?= $attribute['id'] ?>">
-                                                    <button class="accordion-button <?php if ($index != 1) {
-                                                                                        echo 'collapsed';
-                                                                                    } ?>" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne<?= $attribute['id'] ?>" aria-expanded="true" aria-controls="collapseOne<?= $attribute['id'] ?>">
-                                                        <?= $attribute['name'] ?>
-                                                    </button>
-                                                </h2>
-                                                <div id="collapseOne<?= $attribute['id'] ?>" class="accordion-collapse collapse <?php if ($index == 1) {
-                                                                                                                                    echo 'show';
-                                                                                                                                } ?> " aria-labelledby="headingOne<?= $attribute['id'] ?>" data-bs-parent="#productConfigAccordion<?= $attribute['id'] ?>" style="">
-                                                    <div class="accordion-body">
+                                        if(!empty($attribute_values) && count($attribute_values) > 0){
+                                        ?>
+                                        <div class="accordion-item">
+                                            <h2 class="accordion-header" id="headingOne<?= $attribute['id'] ?>">
+                                                <button class="accordion-button <?php if($index != 1){ echo 'collapsed'; } ?>" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne<?= $attribute['id'] ?>" aria-expanded="true" aria-controls="collapseOne<?= $attribute['id'] ?>">
+                                                    <?= $attribute['name'] ?>
+                                                </button>
+                                            </h2>
+                                            <div id="collapseOne<?= $attribute['id'] ?>" class="accordion-collapse collapse <?php if($index == 1){ echo 'show'; } ?> " aria-labelledby="headingOne<?= $attribute['id'] ?>" data-bs-parent="#productConfigAccordion<?= $attribute['id'] ?>" style="">
+                                                <div class="accordion-body">
 
-                                                        <div class="btn-radio style2">
+                                                    <div class="btn-radio style2">
 
-                                                            <div class="radio-info" id="492" data-comp-id="8" data-price="0" data-option="">
-                                                                <input checked="true" type="radio" id="radio-transfer_<?= $attribute['id'] ?>" value="0" class="radio" name="comp_option_<?= $attribute['id'] ?>">
-                                                                <label for="radio-transfer_<?= $attribute['id'] ?>" class="clearfix">
-                                                                    <span class="price-notice ml-2">&nbsp; +
-                                                                        <span class="price">$0</span>
+                                                        <div class="radio-info" id="492" data-comp-id="8" data-price="0" data-option="">
+                                                            <input checked="true" type="radio" id="radio-transfer_<?= $attribute['id'] ?>" value="0" class="radio" name="comp_option_<?= $attribute['id'] ?>">
+                                                            <label for="radio-transfer_<?= $attribute['id'] ?>" class="clearfix">    
+                                                                <span class="price-notice ml-2">&nbsp; +
+                                                                    <span class="price">$0</span>
+                                                                </span>
+                                                            </label>
+                                                        </div>
+
+                                                        <?php
+                                                            foreach ($attribute_values as $value){
+                                                                if(!empty($value['price']) && $value['price'] > 0){
+                                                        ?>
+                                                            <div class="radio-info" id="633" data-comp-id="8" data-price="1100" data-option="16GB NVIDIA Quadro RTX A4000 ">
+                                                                <input type="radio" id="radio-transfer_<?= $value['id'] ?>" value="<?= $value['price'] ?>" class="radio" name="comp_option_<?= $attribute['id'] ?>">
+                                                                <label for="radio-transfer_<?= $value['id'] ?>" class="clearfix">&nbsp; <?= $value['attribute_name'] ?>
+                                                                    <span class="price-notice ml-2">+
+                                                                        <span class="price ">
+                                                                            $<?= $value['price'] ?>
+                                                                        </span>
                                                                     </span>
                                                                 </label>
                                                             </div>
-
-                                                            <?php
-                                                            foreach ($attribute_values as $value) {
-                                                                if (!empty($value['price']) && $value['price'] > 0) {
-                                                            ?>
-                                                                    <div class="radio-info" id="633" data-comp-id="8" data-price="1100" data-option="16GB NVIDIA Quadro RTX A4000 ">
-                                                                        <input type="radio" id="radio-transfer_<?= $value['id'] ?>" value="<?= $value['price'] ?>" class="radio" name="comp_option_<?= $attribute['id'] ?>">
-                                                                        <label for="radio-transfer_<?= $value['id'] ?>" class="clearfix">&nbsp; <?= $value['attribute_name'] ?>
-                                                                            <span class="price-notice ml-2">+
-                                                                                <span class="price ">
-                                                                                    $<?= $value['price'] ?>
-                                                                                </span>
-                                                                            </span>
-                                                                        </label>
-                                                                    </div>
-                                                            <?php }
-                                                            } ?>
-
-                                                        </div>
+                                                        <?php } } ?>
 
                                                     </div>
+
                                                 </div>
                                             </div>
-                                    <?php $index++;
-                                        }
-                                    }  ?>
+                                        </div>
+                                    <?php  $index++; } }  ?>
 
                                 </div>
 
@@ -279,31 +273,31 @@
                                     alt="Thumbnail 3">
                             </div>
                         </div>
-                        <?php if (!empty($relatedProductOptions)) { ?>
+                        <?php if(!empty($relatedProductOptions)){ ?>
                             <div class="col-md-12 pt-3" id="related_product" style="display:none;">
-                                <?php foreach ($relatedProductOptions as $rrpo) { ?>
-                                    <div class="product-options">
-                                        <div class="option-title">
-                                            <img src="<?= base_url($rrpo['product_image']) ?>" alt="Thumbnail 3">
-                                            <h5><?= $rrpo['product_name'] ?></h5>
-                                        </div>
-
-                                        <p class="option-description"><?= $rrpo['short_description'] ?></p>
-
-                                        <label for="option-1" class="checkbox-label">
-                                            <input type="checkbox" onclick="add_to_cart(this)" id="option-1" name="option-1" pid="<?= $rrpo['product_id'] ?>" ppn="<?= $rrpo['product_name'] ?>" ppp="<?= $rrpo['pv_price'] ?>" ppimage="<?= isset($rrpo['product_image']) ? $rrpo['product_image'] : '' ?>" pbaseurl="<?= base_url() ?>" cat_id="<?php echo $rrpo['category_id'] ?>" value="extended_warranty">
-                                            <span class="price">$<?= $rrpo['pv_price'] ?></span>
-                                        </label>
-
-                                        <!-- Warranty Details -->
-                                        <div class="option-details">
-                                            <p><?= $rrpo['description'] ?></p>
-                                        </div>
-
-                                        <a href="<?= base_url('products'); ?>">More information</a>
-
+                            <?php  foreach($relatedProductOptions as $rrpo){ ?>
+                                <div class="product-options">
+                                    <div class="option-title">
+                                        <img src="<?= base_url($rrpo['product_image']) ?>" alt="<?= $rrpo['product_name'] ?>">
+                                        <h5><?= $rrpo['product_name'] ?></h5>
                                     </div>
-                                <?php } ?>
+                                
+                                    <p class="option-description"><?= $rrpo['short_description'] ?></p>
+                                
+                                    <label for="option-1" class="checkbox-label">
+                                        <input type="checkbox" onclick="add_to_cart(this)" id="option-1" name="option-1" pid="<?= $rrpo['product_id'] ?>" ppn="<?= $rrpo['product_name'] ?>" ppp="<?= $rrpo['pv_price'] ?>" ppimage="<?= isset($rrpo['product_image']) ? $rrpo['product_image'] : '' ?>" pbaseurl = "<?= base_url() ?>" cat_id="<?php echo $rrpo['category_id'] ?>" value="extended_warranty">
+                                        <span class="price">$<?= $rrpo['pv_price'] ?></span>
+                                    </label>
+                                
+                                    <!-- Warranty Details -->
+                                    <div class="option-details">
+                                        <p><?= $rrpo['description'] ?></p>
+                                    </div>
+
+                                    <a href="<?= base_url('products'); ?>">More information</a>
+                                    
+                                </div>
+                            <?php }?>
                             </div>
                         <?php } ?>
                     </div>
@@ -337,12 +331,12 @@
                     Specification
                 </button>
             </li>
-            <li class="nav-item" role="presentation">
+           <!-- <li class="nav-item" role="presentation">
                 <button class="nav-link" id="review-tab" data-bs-toggle="tab" data-bs-target="#review" type="button"
                     role="tab" aria-controls="review" aria-selected="false">
                     Review
                 </button>
-            </li>
+            </li>-->
         </ul>
 
         <!-- Tabs Content -->
@@ -362,11 +356,11 @@
                                 <p class="title">Feature</p>
                                 <p class="description features">
 
-                                    <?php foreach ($product_features as $feature) { ?>
-                                        <span class="icon">
-                                            <img src="<?= base_url($feature['icon']); ?>" class="" alt="">
-                                            <?= $feature['text']; ?>
-                                        </span>
+                                    <?php foreach($product_features as $feature) { ?>
+                                    <span class="icon">
+                                        <img src="<?= base_url($feature['icon']); ?>" class="" alt="<?= $feature['text']; ?>">
+                                        <?= $feature['text']; ?>
+                                    </span>
                                     <?php } ?>
 
                                 </p>
@@ -375,10 +369,10 @@
                                 <p class="title">Shipping Information</p>
                                 <p class="description shipping">
                                     <!-- <span class="shipping">Courier: <span> 2 - 4 days, free shipping</span></span> -->
-                                    <?php foreach ($shipping_prices as $shipping) { ?>
-                                        <span class="shipping"><?= $shipping['shipping_name'] ?>: <span>
-                                                <?= $shipping['shipping_description'] ?>,
-                                                $<?= $shipping['price'] ?></span></span>
+                                    <?php foreach($shipping_prices as $shipping) { ?>
+                                    <span class="shipping"><?= $shipping['shipping_name'] ?>: <span>
+                                            <?= $shipping['shipping_description'] ?>,
+                                            $<?= $shipping['price'] ?></span></span>
                                     <?php } ?>
                                 </p>
                             </div>
@@ -482,35 +476,35 @@
                 <div class="swiper related-product-slider">
                     <div class="swiper-wrapper">
 
-                        <?php foreach ($related_products as $productsss) { ?>
-                            <div class=" swiper-slide product-card text-center p-3">
-                                <div class="product-title">
-                                    <a href="<?= base_url($productsss['product_slug']); ?>">
-                                        <?= $productsss['product_name'] ?>
-                                    </a>
-                                </div>
-                                <div class="rating py-2 mb-2">
-                                    <center><i class="bi bi-star-fill"></i> <i class="bi bi-star-fill"></i> <i
-                                            class="bi bi-star-fill"></i> <i class="bi bi-star-half"></i> <i
-                                            class="bi bi-star"></i> (2)</center>
-                                </div>
-                                <a href="<?= base_url($productsss['product_slug']); ?>" class="product-image">
-                                    <img src="<?= base_url($productsss['product_image']); ?>" alt="Product">
+                        <?php foreach($related_products as $productsss) { ?>
+                        <div class=" swiper-slide product-card text-center p-3">
+                            <div class="product-title">
+                                <a href="<?= base_url($productsss['product_slug']); ?>">
+                                    <?= $productsss['product_name'] ?>
                                 </a>
-                                <div class="price-row">
-                                    <div>
-                                        <span class="price">$<?= $productsss['pv_price'] ?></span>
-                                        <span class="crossed-price">$<?= $productsss['pv_rrp'] ?></span>
-                                    </div>
-                                    <div class="discount-label">
-                                        <?= product_off_percentage($productsss['pv_price'], $productsss['pv_rrp']) ?> OFF</div>
-                                </div>
-                                <div class="purchase-row">
-                                    <span>1,286 <span>Purchases</span></span>
-                                    <span class="wishlist"><i class="bi bi-heart-fill"></i></span>
-                                </div>
-                                <button class="add-to-cart" name="add_cart" pid="<?= $productsss['product_id'] ?>" ppn="<?= $productsss['product_name'] ?>" ppp="<?= $productsss['pv_price'] ?>" ppimage="<?= $productsss['product_image'] ?>" pbaseurl="<?= base_url() ?>" cat_id="<?= $productsss['category_id'] ?>" onclick="add_to_cart(this)">Add to cart </button>
                             </div>
+                          <!--  <div class="rating py-2 mb-2">
+                                <center><i class="bi bi-star-fill"></i> <i class="bi bi-star-fill"></i> <i
+                                        class="bi bi-star-fill"></i> <i class="bi bi-star-half"></i> <i
+                                        class="bi bi-star"></i> (2)</center>
+                            </div>-->
+                            <a href="<?= base_url($productsss['product_slug']); ?>" class="product-image">
+                                <img src="<?= base_url($productsss['product_image']); ?>" alt="<?= $productsss['product_name'] ?>">
+                            </a>
+                            <div class="price-row">
+                                <div>
+                                    <span class="price">$<?= $productsss['pv_price'] ?></span>
+                                    <span class="crossed-price">$<?= $productsss['pv_rrp'] ?></span>
+                                </div>
+                                <div class="discount-label">
+                                    <?= product_off_percentage($productsss['pv_price'], $productsss['pv_rrp']) ?> OFF</div>
+                            </div>
+                           <!-- <div class="purchase-row">
+                                <span>1,286 <span>Purchases</span></span>
+                                <span class="wishlist"><i class="bi bi-heart-fill"></i></span>
+                            </div>-->
+                            <button class="add-to-cart" name="add_cart" pid="<?= $productsss['product_id'] ?>" ppn="<?= $productsss['product_name'] ?>"  ppp="<?= $productsss['pv_price'] ?>"  ppimage="<?= $productsss['product_image']?>"  pbaseurl = "<?= base_url() ?>"  cat_id="<?= $productsss['category_id'] ?>" onclick="add_to_cart(this)">Add to cart </button>
+                        </div>
                         <?php } ?>
 
                     </div>
@@ -544,90 +538,91 @@
 </div>
 
 <script>
-    function showImage(imageSrc) {
-        document.getElementById('modalImage').src = imageSrc;
+function showImage(imageSrc) {
+    document.getElementById('modalImage').src = imageSrc;
+}
+  
+  $(".customize-me .title").on("click", function () {
+            $(this).parent().toggleClass("active");
+        });
+
+// $(".cart-plus-minus").append('<div class="dec qtybutton">-</div><div class="inc qtybutton">+</div>');
+$(".qtybutton").on("click", function() {
+var $button = $(this);
+var $input = $button.siblings("input"); // Select input next to button
+
+var oldValue = parseFloat($input.val()) || 1; // Default to 1 if NaN
+var newVal = oldValue;
+
+if ($button.text().trim() === "+") {
+    newVal = oldValue + 1;
+} else {
+    newVal = Math.max(1, oldValue - 1); // Prevent going below 1
+}
+$input.val(newVal).trigger("input").trigger("change"); // Ensure UI updates
+});
+
+
+var relatedSlider = new Swiper(".related-product-slider", {
+    loop: true,
+    slidesPerView: 2, // Default for mobile
+    spaceBetween: 20,
+    breakpoints: {
+        768: {
+            slidesPerView: 2
+        },
+        1024: {
+            slidesPerView: 4
+        }
+    },
+    navigation: {
+        nextEl: ".swiper-related-product-button-next",
+        prevEl: ".swiper-related-product-button-prev",
+    }
+});
+
+$(document).ready(function () {
+    console.log("loading");
+
+    function getCheckedRadios() {
+        let checkedRadios = {};
+
+        let basePrice = "<?php echo $products_variants[0]['price'] ?>";
+
+        let checkboxPrice = 0;
+        $("input[type='radio']:checked").each(function () {
+            let name = $(this).attr("name");
+            let value = $(this).val();
+            // checkedRadios[name] = value;
+            checkboxPrice += parseFloat(value);
+        });
+
+        // console.log("Checked radio buttons:", checkedRadios);
+        // console.log("checkboxPrice", checkboxPrice);
+
+        let totalPrice = parseFloat(basePrice) + parseFloat(checkboxPrice);
+        $(".product-price").html(`$${totalPrice}`);
+        $('.add-to-cart').attr('ppp', `${totalPrice}`);
+
+        if(checkboxPrice !== 0){
+            Swal.fire({
+                title: "Total Price : $" + totalPrice,
+                text: "successfully addon added! please add to cart the product",
+                icon: "success",
+                toast: true,
+                position: "top-end",
+                showConfirmButton: true,
+                timer: 3000,
+            });
+        }
+
     }
 
-    // $(".cart-plus-minus").append('<div class="dec qtybutton">-</div><div class="inc qtybutton">+</div>');
-    $(".qtybutton").on("click", function() {
-        var $button = $(this);
-        var $input = $button.siblings("input"); // Select input next to button
+    // Run on page load
+    getCheckedRadios();
 
-        var oldValue = parseFloat($input.val()) || 1; // Default to 1 if NaN
-        var newVal = oldValue;
+    // Run when any radio button is changed
+    $("input[type='radio']").change(getCheckedRadios);
+});
 
-        if ($button.text().trim() === "+") {
-            newVal = oldValue + 1;
-        } else {
-            newVal = Math.max(1, oldValue - 1); // Prevent going below 1
-        }
-        $input.val(newVal).trigger("input").trigger("change"); // Ensure UI updates
-    });
-
-
-    var relatedSlider = new Swiper(".related-product-slider", {
-        loop: true,
-        slidesPerView: 2, // Default for mobile
-        spaceBetween: 20,
-        breakpoints: {
-            768: {
-                slidesPerView: 2
-            },
-            1024: {
-                slidesPerView: 4
-            }
-        },
-        navigation: {
-            nextEl: ".swiper-related-product-button-next",
-            prevEl: ".swiper-related-product-button-prev",
-        }
-    });
-
-    $(document).ready(function() {
-        console.log("loading");
-
-        function getCheckedRadios() {
-            let checkedRadios = {};
-
-            let basePrice = "<?php echo $products_variants[0]['price'] ?>";
-
-            let checkboxPrice = 0;
-            $("input[type='radio']:checked").each(function() {
-                let name = $(this).attr("name");
-                let value = $(this).val();
-                // checkedRadios[name] = value;
-                checkboxPrice += parseFloat(value);
-            });
-
-            // console.log("Checked radio buttons:", checkedRadios);
-            // console.log("checkboxPrice", checkboxPrice);
-
-            let totalPrice = parseFloat(basePrice) + parseFloat(checkboxPrice);
-            $(".product-price").html(`$${totalPrice}`);
-
-            if (checkboxPrice !== 0) {
-                Swal.fire({
-                    title: "Total Price : $" + totalPrice,
-                    icon: "success",
-                    toast: true,
-                    position: "top-end",
-                    showConfirmButton: true,
-                    confirmButtonText: "Go to Cart",
-                    timer: 3000,
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // Action goes here, for example redirecting to the cart page
-                        window.location.href = "/add-to-cart"; // Change the URL to your actual cart route
-                    }
-                });
-            }
-
-        }
-
-        // Run on page load
-        getCheckedRadios();
-
-        // Run when any radio button is changed
-        $("input[type='radio']").change(getCheckedRadios);
-    });
 </script>

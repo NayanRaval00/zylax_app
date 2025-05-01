@@ -96,6 +96,7 @@ class Slider extends Controller
                     'type_id' =>  $this->request->getPost('category_id') ? $this->request->getPost('category_id') : 0,
                     'image' =>  "uploads/sliders/".$mainImage,
                     'link'  => $this->request->getPost('url'),
+                    'image_alt'  => $this->request->getPost('image_alt'),
                 ];
 
                 // dd($data);
@@ -208,6 +209,7 @@ class Slider extends Controller
                         'type_id' =>  ($this->request->getPost('slider_type') == 'categories' ) ? $this->request->getPost('category_id') : 0,
                         'image' =>  "uploads/sliders/".$mainImage,
                         'link'  => $this->request->getPost('url'),
+                        'image_alt'  => $this->request->getPost('image_alt'),
                     ];
    
                     $updated = $this->slidersTable->update($edit_slider_id, $data);
@@ -231,6 +233,7 @@ class Slider extends Controller
                     'type' =>  $this->request->getPost('slider_type'),
                     'type_id' =>  ($this->request->getPost('slider_type') == 'categories' ) ? $this->request->getPost('category_id') : 0,
                     'link'  => $this->request->getPost('url'),
+                    'image_alt'  => $this->request->getPost('image_alt'),
                 ];
 
                 // dd($data);

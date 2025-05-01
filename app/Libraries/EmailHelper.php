@@ -50,15 +50,39 @@ class EmailHelper
         return $this->sendEmail($toEmail, $subject, $message);
     }
 
-
-    private function sendEmail($toEmail, $subject, $message)
+    public function contactUsFormSubmit($toEmail, $firstName, $lastName, $email, $phone, $country, $subjectTitle, $messageContent)
     {
-        $this->email->setFrom('vinod.bodypower@gmail.com', 'Zylax Admin');
+        $subject = 'Contact Us Email';
+        $message = view('emails/contact_us', ['firstName' => $firstName, 'lastName' => $lastName, 'email' => $email, 'phone' => $phone, 'country' => $country, 'subjectTitle' => $subjectTitle, 'messageContent' => $messageContent]);
+
+        return $this->sendEmail($toEmail, $subject, $message);
+    }
+
+    public function pageFormSubmit($toEmail, $data, $image)
+    {
+        $subject = $data['slug_url'];
+        $message = view('emails/page_form', ['data' => $data]);
+
+        return $this->sendEmail($toEmail, $subject, $message, $image);
+    }
+
+    private function sendEmail($toEmail, $subject, $message, $imagePath = null)
+    {
+        $adminEmail = env('ADMIN_EMAIL');
+        $adminBccEmail = env('ADMIN_BCC_EMAIL');
+        $this->email->setFrom($adminEmail, 'Zylax Admin');
         $this->email->setTo($toEmail);
-        $this->email->setBCC("stikadia@gmail.com");
+        if($adminBccEmail){
+            $this->email->setBCC($adminBccEmail);
+        }
         $this->email->setSubject($subject);
         $this->email->setMessage($message);
         $this->email->setMailType('html');
+
+        // Attach image if path is provided
+        if ($imagePath && file_exists($imagePath)) {
+            $this->email->attach($imagePath);
+        }
 
         if ($this->email->send()) {
             return true;

@@ -88,7 +88,8 @@ class Menu extends Controller
             if (!$this->validate($rules)) {
                 // Validation failed, return with errors
                 $session->setFlashdata('validation', $this->validator);
-                return redirect()->to('/admin/menu/create_menu');
+                $session->setFlashdata('old_input', $this->request->getPost()); // Store old input
+                return redirect()->to('/admin/menu/create_menu')->withInput(); // Redirect with input
             }
 
              // Get uploaded file
@@ -97,12 +98,14 @@ class Menu extends Controller
 
             $slug_tables = $this->slugTable
                                 ->where('slug', $this->request->getPost('link'))
-                                ->where('type', 'mega_menu')
+                                // ->where('type', 'mega_menu')
                                 ->first();
 
             if($slug_tables){
                 $session->setFlashdata('status', 'error');
                 $session->setFlashdata('message', 'Slug Already exist you should use a different name');
+                $session->setFlashdata('old_input', $this->request->getPost()); // Store old input
+                return redirect()->to('/admin/menu/create_menu')->withInput(); // Redirect with input
             }else{
 
                 // Move the file to the public/uploads directory
@@ -233,7 +236,7 @@ class Menu extends Controller
             $image_right = $this->request->getFile('image_right');
 
             $exist_menu = $this->slugTable
-                                ->where('type', 'mega_menu')
+                                // ->where('type', 'mega_menu')
                                 ->where('slug', $this->request->getPost('link'))
                                 ->where('ref_id <>', $edit_id)
                                 ->first();
@@ -593,17 +596,20 @@ class Menu extends Controller
             if (!$this->validate($rules)) {
                 // Validation failed, return with errors
                 $session->setFlashdata('validation', $this->validator);
-                return redirect()->to('/admin/menu/create_custommenu');
+                $session->setFlashdata('old_input', $this->request->getPost()); // Store old input
+                return redirect()->to('/admin/menu/create_custommenu')->withInput(); // Redirect with input
             }
 
             $slug_tables = $this->slugTable
                                 ->where('slug', $this->request->getPost('link'))
-                                ->where('type', 'mega_custommenu')
+                                // ->where('type', 'mega_custommenu')
                                 ->first();
 
             if($slug_tables){
                 $session->setFlashdata('status', 'error');
                 $session->setFlashdata('message', 'Slug Already exist you should use a different name');
+                $session->setFlashdata('old_input', $this->request->getPost()); // Store old input
+                return redirect()->to('/admin/menu/create_custommenu')->withInput(); // Redirect with input
             }else{
 
                 $new_categories = $this->request->getPost('category') ? $this->request->getPost('category') : [];
@@ -732,7 +738,7 @@ class Menu extends Controller
             $difference_categories = array_diff($existing_custommenu_categories_array, $new_categories);
 
             $exist_menu = $this->slugTable
-                                ->where('type', 'mega_custommenu')
+                                // ->where('type', 'mega_custommenu')
                                 ->where('slug', $this->request->getPost('link'))
                                 ->where('ref_id <>', $edit_id)
                                 ->first();
@@ -961,17 +967,20 @@ class Menu extends Controller
              if (!$this->validate($rules)) {
                  // Validation failed, return with errors
                  $session->setFlashdata('validation', $this->validator);
-                 return redirect()->to('/admin/menu/create_subcustommenu/'.$parent_id);
+                 $session->setFlashdata('old_input', $this->request->getPost()); // Store old input
+                 return redirect()->to('/admin/menu/create_subcustommenu/'.$parent_id)->withInput(); // Redirect with input
              }
 
             $slug_tables = $this->slugTable
                                 ->where('slug', $this->request->getPost('link'))
-                                ->where('type', 'mega_custommenu_sub')
+                                // ->where('type', 'mega_custommenu_sub')
                                 ->first();
 
             if($slug_tables){
                 $session->setFlashdata('status', 'error');
                 $session->setFlashdata('message', 'Slug Already exist you should use a different name');
+                $session->setFlashdata('old_input', $this->request->getPost()); // Store old input
+                 return redirect()->to('/admin/menu/create_subcustommenu/'.$parent_id)->withInput(); // Redirect with input
             }else{
 
                 $new_categories = $this->request->getPost('category') ? $this->request->getPost('category') : [];
@@ -1109,7 +1118,7 @@ class Menu extends Controller
             $difference_categories = array_diff($existing_custommenu_categories_array, $new_categories);
 
             $exist_menu = $this->slugTable
-                                ->where('type', 'mega_custommenu_sub')
+                                // ->where('type', 'mega_custommenu_sub')
                                 ->where('slug', $this->request->getPost('link'))
                                 ->where('ref_id <>', $edit_id)
                                 ->first();

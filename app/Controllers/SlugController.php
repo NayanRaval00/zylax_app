@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 use App\Controllers\ProductController;
+use App\Controllers\PageController;
 use App\Controllers\BrandController;
 use App\Controllers\CategoryController;
 use CodeIgniter\Config\Services;
@@ -37,6 +38,11 @@ class SlugController extends BaseController
 
             $productController = new ProductController();
             return $productController->show($page->slug);
+
+        } else if(isset($page->type) && $page->type == "static_page"){
+
+            $pageController = new PageController();
+            return $pageController->show($page->slug);
 
         } else if(isset($page->type) && $page->type == "brand"){
 
@@ -93,6 +99,12 @@ class SlugController extends BaseController
 
             if( isset($custom_menu['link_url']) && $custom_menu['link_url'] != ""){
 
+                // echo $custom_menu['link_url']; 
+                
+                $check_url_global_search = strpos($custom_menu['link_url'], 'autosearch');
+                // echo $check_url_global_search;
+                // exit;
+
                 $get_split_query = explode('?', $custom_menu['link_url']);
 
                 $get_first = ltrim($get_split_query[0], '/');
@@ -102,13 +114,47 @@ class SlugController extends BaseController
                 // echo $get_2nd[0]; exit;
                 // echo $check_count; exit;
 
-                if($check_count == 1){
-                    return $categoryController->sub_category($get_2nd[0], $get_split_query[1], $page);
-                }else if($check_count == 2){
-                    return $categoryController->sub_sub_category($get_2nd[0], $get_2nd[1], $get_split_query[1], $page);
-                }else if($check_count == 3){
-                    return $categoryController->sub_sub_sub_category($get_2nd[0], $get_2nd[1], $get_2nd[2], $get_split_query[1], $page);
+
+                if($check_url_global_search === 1){
+
+                    // echo "fff"; 
+                    // print_r($get_split_query);
+
+                    $queryString = $get_split_query[1];
+
+                    // Parse the query string
+                    parse_str($queryString, $queryParams);
+
+                    if (isset($queryParams['q'])) {
+                        $searchQuery = str_replace('+', ' ', $queryParams['q']);
+                        // echo $searchQuery;
+
+                        $FindsearchController = new Findsearch();
+                        return $FindsearchController->autosearch($searchQuery);
+
+                        
+                    } else {
+                        echo "No 'q' parameter found.";
+                    }
+
+                    exit;
+
+                    // $FindsearchController = new Findsearch();
+                    // return $FindsearchController->autosearch();
+
+                    
+
+                }else{
+                    if($check_count == 1){
+                        return $categoryController->sub_category($get_2nd[0], $get_split_query[1], $page);
+                    }else if($check_count == 2){
+                        return $categoryController->sub_sub_category($get_2nd[0], $get_2nd[1], $get_split_query[1], $page);
+                    }else if($check_count == 3){
+                        return $categoryController->sub_sub_sub_category($get_2nd[0], $get_2nd[1], $get_2nd[2], $get_split_query[1], $page);
+                    }
+
                 }
+
 
                 // print_r($get_2nd);
                 // echo "set"; 
@@ -136,6 +182,10 @@ class SlugController extends BaseController
 
             if( isset($custom_menu_sub['link_url']) && $custom_menu_sub['link_url'] != ""){
 
+                $check_url_global_search = strpos($custom_menu_sub['link_url'], 'autosearch');
+                // echo $check_url_global_search;
+                // exit;
+
                 $get_split_query = explode('?', $custom_menu_sub['link_url']);
 
                 $get_first = ltrim($get_split_query[0], '/');
@@ -147,12 +197,43 @@ class SlugController extends BaseController
                 //     return $categoryController->sub_sub_category($get_2nd[0], $get_2nd[1], $get_split_query[1]);
                 // }
 
-                if($check_count == 1){
-                    return $categoryController->sub_category($get_2nd[0], $get_split_query[1], $page);
-                }else if($check_count == 2){
-                    return $categoryController->sub_sub_category($get_2nd[0], $get_2nd[1], $get_split_query[1], $page);
-                }else if($check_count == 3){
-                    return $categoryController->sub_sub_sub_category($get_2nd[0], $get_2nd[1], $get_2nd[2], $get_split_query[1], $page);
+                if($check_url_global_search === 1){
+
+                    // echo "fff"; 
+                    // print_r($get_split_query);
+
+                    $queryString = $get_split_query[1];
+
+                    // Parse the query string
+                    parse_str($queryString, $queryParams);
+
+                    if (isset($queryParams['q'])) {
+                        $searchQuery = str_replace('+', ' ', $queryParams['q']);
+                        // echo $searchQuery;
+
+                        $FindsearchController = new Findsearch();
+                        return $FindsearchController->autosearch($searchQuery);
+
+                        
+                    } else {
+                        echo "No 'q' parameter found.";
+                    }
+
+                    exit;
+
+                    // $FindsearchController = new Findsearch();
+                    // return $FindsearchController->autosearch();
+
+                    
+
+                }else{
+                    if($check_count == 1){
+                        return $categoryController->sub_category($get_2nd[0], $get_split_query[1], $page);
+                    }else if($check_count == 2){
+                        return $categoryController->sub_sub_category($get_2nd[0], $get_2nd[1], $get_split_query[1], $page);
+                    }else if($check_count == 3){
+                        return $categoryController->sub_sub_sub_category($get_2nd[0], $get_2nd[1], $get_2nd[2], $get_split_query[1], $page);
+                    }
                 }
 
                 // print_r($get_2nd);
@@ -166,8 +247,29 @@ class SlugController extends BaseController
             }
 
         } 
+
+        $routes = service('routes');
+        $uri = $slug; // The URI you want to check
+
+        $route = $routes->getRoutes();
+        $routeMatched = false;
+
+        foreach ($route as $key => $val) {
+            // $key will be the route path like 'hello', 'home', etc.
+            if (preg_match('#^' . str_replace('/', '\/', $key) . '$#', $uri)) {
+                $routeMatched = true;
+                break;
+            }
+        }
+
+        // echo $routeMatched; exit;
+
+        if (! $routeMatched) {
+            return redirect()->route($slug);
+        }
+        return redirect()->route('404');
       
-        return redirect()->route($slug);
+        // return redirect()->route($slug);
 
     }
     

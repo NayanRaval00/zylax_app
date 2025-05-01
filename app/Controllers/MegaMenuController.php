@@ -13,6 +13,7 @@ use App\Models\AttributeSetCategory;
 use App\Models\Categories;
 use App\Models\Brands;
 use App\Models\AttributeSet;
+use App\Models\Attributes;
 use App\Models\ProductMasterTags;
 use App\Models\ProductTags;
 use App\Models\Menus;
@@ -21,6 +22,8 @@ use App\Models\Custommenus;
 use App\Models\CustommenuCategory;
 use App\Models\CustommenusSub;
 use App\Models\CustommenuSubCategory;
+
+use Config\Database;
 
 class MegaMenuController extends BaseController
 {
@@ -57,24 +60,26 @@ class MegaMenuController extends BaseController
         $filter_category_ids = array_column($get_categories, 'category_id');
         // dd($filter_category_ids);
 
-        $categories = [];
-        foreach ($filter_category_ids as $category_id) {
+        // $categories = [];
+        // foreach ($filter_category_ids as $category_id) {
 
-            $filterChildIds = array_unique($categoriesModel->getChildCategoryIds($category_id));
-            // $filterCategoryIds = array_merge($filterCategory, $filterChildIds);
-            // dd($filterChildIds);
+        //     // $filterChildIds = array_unique($categoriesModel->getChildCategoryIds($category_id));
+        //     // // $filterCategoryIds = array_merge($filterCategory, $filterChildIds);
+        //     // // dd($filterChildIds);
 
-            $categoryGets = $categoriesModel->getProductCountWithMultpleCategory($filterChildIds);
+        //     // $categoryGets = $categoriesModel->getProductCountWithMultpleCategory($filterChildIds);
+        //     $categoryGets = $categoriesModel->getProductCountWithCategory('', $category_id);
 
-            $categories = array_merge($categories, $categoryGets);
+        //     $categories = array_merge($categories, $categoryGets);
             
-        }
+        // }
 
-        // dd($filterCategoryListing);
-
+        // dd($categories);
+        
         $filterCategory = [];
-
-
+        
+        
+        // dd($get_categories);
         foreach ($get_categories as $key => $category) {
             // array_push($filterCategory,$category['category_id']);
 
@@ -87,9 +92,99 @@ class MegaMenuController extends BaseController
             
         }
 
+        $filterCategory = array_unique($filterCategory);
+
         // dd($filterCategory);
 
+        $categories = [];
+
+        $db = Database::connect(); // 🔹 Connect to DB
+
+        foreach ($filter_category_ids as $category_id) {
+            // Get all child category IDs (recursively)
+            $childIds = $categoriesModel->getChildCategoryIds($category_id);
+
+            // Include parent category in list
+            $allCategoryIds = array_merge([$category_id], $childIds);
+
+            // Count products in these categories
+            $builder = $db->table('products as p');
+            $builder->select('COUNT(p.id) as product_count');
+            $builder->whereIn('p.category_id', $allCategoryIds);
+            $builder->where('p.status', 1);
+            $query = $builder->get();
+            $result = $query->getRowArray();
+
+            // Get category info (name, slug, etc.)
+            $category = $categoriesModel->find($category_id); // Adjust this based on your model
+
+            $categories[] = [
+                'category_id' => $category_id,
+                'category_name' => $category['name'],
+                'category_slug' => $category['slug'],
+                'product_count' => $result['product_count']
+            ];
+        }
+
+        // dd($finalCounts);
+
+
         // $products = $categoriesModel->getCategoryProductsFiltersListing($parent_category['id']);
+
+        $attributeSetModel = new AttributeSet();
+        $attributeModel = new Attributes();
+
+        $excludedKeys = ['categories', 'brands', 'search', 'filterBy', 'page']; // Keys to exclude
+        $queryParams = array_diff_key($_GET, array_flip($excludedKeys));
+        // dd($queryParams);
+        // echo "<pre>";
+        $person = [];
+        if(!empty($queryParams)){
+            // print_r($queryParams); exit;
+
+            $index = 0;
+
+           
+           
+            // echo "<pre>";
+            foreach ($queryParams as $filterName => $filterValue) {
+                // echo $filterName.' - '.$filterValue.'<br>'; exit;
+
+                // $selectedCustomAttributes = isset($_GET[$filterName]) ? explode(' ', $_GET[$filterName]) : [];
+                // print_r($selectedCustomAttributes);
+                // foreach ($selectedCustomAttributes as $attributeName) {
+                //     // echo $index.' - '.$filterName.' - '.$attributeName.'<br>';
+                    // $attributeSetData = $attributeSetModel->select('id, name')->where('slug',$filterName)->first();
+                    // $attributeData = $attributeModel->select('id, attribute_set_id, name')->where('slug',$filterValue)->first();
+                    // print_r($filterName); exit;
+                    $attributeData = $attributeModel->getAttributesIdFromCategoryMultiple($filterCategory, $filterName);
+                    // print_r($attributeData); exit;
+                    // $attributeData = $attributeModel->select('id, attribute_set_id, name')->where('attribute_set_id',$attributeSetData['id'])->where('name',$attributeName)->first();
+                //     $person[$index]['filter_name'] = $filterName;
+                //     $person[$index]['attribute_set_id'] = $attributeSetData['id'];
+                //     $person[$index]['attribute_name'] = $attributeName;
+                //     $person[$index]['attribute_id'] = $attributeData['id'];
+                //     $index++;
+                // }
+
+                // echo $attributeData['attribute_set_id']; exit;
+
+                
+                $person[$index]['filter_name'] = $filterName;
+                $person[$index]['filter_value'] = $filterValue;
+                if(!empty($attributeData['attribute_set_id'])){
+                    $person[$index]['attribute_set_id'] = $attributeData['attribute_set_id'];
+                }
+                // dd($person); exit;
+                // $person[$index]['attribute_name'] = $attributeName;
+                // $person[$index]['attribute_id'] = $attributeData['id'];
+
+                $index++;
+            }
+            // dd($person); exit;
+        }
+        // exit;
+        // dd($person); exit;
 
         // $categoriesModel = new Categories();
         $attributeSetModel = new AttributeSet();
@@ -98,7 +193,7 @@ class MegaMenuController extends BaseController
         $attributeSetCategoryModel = new AttributeSetCategory();
         $productTagsModel = new ProductTags();
 
-        // $selectedCategories = isset($_GET['categories']) ? explode(' ', $_GET['categories']) : [];
+        $selectedCategories = isset($_GET['categories']) ? explode(' ', $_GET['categories']) : [];
         $selectedBrands = isset($_GET['brands']) ? explode(' ', $_GET['brands']) : [];
         $selectedAttributeSets = isset($_GET['attribute_set']) ? explode(' ', $_GET['attribute_set']) : [];
         $selectedTags = isset($_GET['tags']) ? explode(' ', $_GET['tags']) : [];
@@ -108,6 +203,40 @@ class MegaMenuController extends BaseController
         $search = isset($_GET['search']) ? $_GET['search'] : '';
 
         // $filterCategory = [$sub_category['id']];
+
+        // if($selectedCategories && !empty($selectedCategories)){
+        //     $filterCategory = [];
+        //     $cate_list = "";
+        //     foreach ($selectedCategories as $cate_slug) {
+        //         $categoriesData = $categoriesModel->select('id, name')->where('slug',$cate_slug)->first();
+        //         $cate_list .= $categoriesData['id'] . ",";
+        //     }
+        //     $cate_comma_string = rtrim($cate_list,',');
+        //     $filterCategory = explode(',', $cate_comma_string);
+        // }
+
+        if ($selectedCategories && !empty($selectedCategories)) {
+            $filterCategory = [];
+            foreach ($selectedCategories as $cate_slug) {
+                // Get the category by slug
+                $category = $categoriesModel->select('id, name')->where('slug', $cate_slug)->first();
+        
+                if ($category) {
+                    // Add parent ID
+                    $filterCategory[] = $category['id'];
+        
+                    // Get all child category IDs recursively
+                    $childIds = $categoriesModel->getChildCategoryIds($category['id']); // Make sure this function exists
+        
+                    // Merge with filter category list
+                    $filterCategory = array_merge($filterCategory, $childIds);
+                }
+            }
+        
+            // Remove duplicate category IDs
+            $filterCategory = array_unique($filterCategory);
+            // dd($filterCategory);
+        }
 
         $filterBrand = [];
         if($selectedBrands && !empty($selectedBrands)){
@@ -152,8 +281,15 @@ class MegaMenuController extends BaseController
 
         if(!empty($filterCategory)){
 
-            $products = $productsModel->getProductsFiltersListing($search, $filterBy, $filterCategory, $filterBrand, $minPrice, $maxPrice, $filterAttributes, $filterTags, $perPage, $offset);
-            $totalProducts = count($productsModel->getProductsFiltersListingCount($search, $filterBy, $filterCategory, $filterBrand, $minPrice, $maxPrice, $filterAttributes, $filterTags)); // Total product count
+            if(!empty($person)){
+                $products = $productsModel->getProductsFiltersListing($search, $filterBy, $filterCategory, $filterBrand, $minPrice, $maxPrice, $person, $filterTags, $perPage, $offset);
+                $totalProducts = $productsModel->getProductsFiltersListingCount($search, $filterBy, $filterCategory, $filterBrand, $minPrice, $maxPrice, $person, $filterTags); // Total product count
+            }else{
+                $products = $productsModel->getProductsFiltersListing($search, $filterBy, $filterCategory, $filterBrand, $minPrice, $maxPrice, $filterAttributes, $filterTags, $perPage, $offset);
+                $totalProducts = $productsModel->getProductsFiltersListingCount($search, $filterBy, $filterCategory, $filterBrand, $minPrice, $maxPrice, $filterAttributes, $filterTags); // Total product count
+            }
+
+            
 
             $product_min_max = $productsModel->getProductsMinMaxPrice();
 
@@ -161,11 +297,56 @@ class MegaMenuController extends BaseController
 
             $brands = $brandModel->getProductCountWithBrandsMultipleCategory($filterCategory);
             
-            $productAttributesSets = $attributeSetCategoryModel->getProductAttributeSetWithCategory();
+            // $productAttributesSets = $attributeSetCategoryModel->getProductAttributeSetWithCategory();
+
+            // dd($filterCategory);
+            $productAttributesSets = $attributeSetCategoryModel->getProductAttributeSetWithCategoryMultipleGroup($filterCategory, $filterBrand);
+            // dd($productAttributesSets);
+            $productAttributesSetsValues = [];
+            $index = 0;
+    
+            // dd($productAttributesSets);
+    
+            foreach($productAttributesSets as $attributeSet){
+                $attrSetId = $attributeSet['id'];
+                $attributeCategoryId = $attributeSet['category_ids'];
+                $productAttributesSetsValues[$index] = [
+                    'set_id' => $attributeSet['id'],
+                    'set_name' => $attributeSet['name'],
+                    'set_slug' => $attributeSet['slug'],
+                ];
+                $productAttributesSetValues = $attributeSetCategoryModel->getProductAttributesSetValues($attributeSet['id']);
+                // dd($productAttributesSetValues);
+                $dropdownArray = [];
+                foreach($productAttributesSetValues as $attributeSetValue){
+                 
+                    if(!empty($person)){
+                        $attributeProductCounts = $attributeSetCategoryModel->getAttributeNameProductCountsParentAttributesMultipleCategory($attributeCategoryId, $attrSetId, $attributeSetValue['attribute_slug'], $filterBrand, $person);
+                    }else{
+                        $attributeProductCounts = $attributeSetCategoryModel->getAttributeNameProductCountsWithMultipleCategory($attributeCategoryId, $attrSetId, $attributeSetValue['attribute_slug'], $filterBrand);
+                    }
+    
+                    // dd($attributeProductCounts->countRes);
+                    if($attributeProductCounts->countRes > 0){
+                        $dropdownArray[] = [
+                            'attribute_id' => $attributeSetValue['attribute_id'],
+                            'attribute_name' => $attributeSetValue['attribute_name'],
+                            'attribute_slug' => $attributeSetValue['attribute_slug'],
+                            'product_count' => $attributeProductCounts->countRes,
+                        ];
+                    }
+                    // dd($dropdownArray);
+                }
+                $productAttributesSetsValues[$index]['dropdowns'] = $dropdownArray;
+                $index++;
+            }
+    
+            // dd($productAttributesSetsValues);
+            
             $productTags = $productTagsModel->getProductCountWithTags();
             
         }else{
-            $products = $brands = $productAttributesSets = $productTags = [];
+            $products = $brands = $productAttributesSetsValues = $productTags = [];
             $totalProducts = 0;
             $product_min_max = [
                 'min_price' => 0,
@@ -175,7 +356,7 @@ class MegaMenuController extends BaseController
         
 
         // dd($sub_category);
-        return view('frontend/custom_menu_products', ['mega_menu_title' => $mega_menus, 'products' => $products, 'total_products' => $totalProducts, 'attribute_sets' => $productAttributesSets, 'brands' => $brands, 'product_tags' => $productTags, 'product_min_max' => $product_min_max, 'selectedBrands' => $selectedBrands,'selectedAttributeSets' => $selectedAttributeSets, 'selectedTags' => $selectedTags, 'minPrice' => $minPrice, 'maxPrice' => $maxPrice, 'filterBy' => $filterBy, 'search' => $search, 'categories' => $categories, 'pager' => ( $totalProducts > $perPage ? $pager->makeLinks($page, $perPage, $totalProducts) : '') ]);
+        return view('frontend/custom_menu_products', ['mega_menu_title' => $mega_menus, 'products' => $products, 'total_products' => $totalProducts, 'attribute_set_values' => $productAttributesSetsValues, 'brands' => $brands, 'product_tags' => $productTags, 'product_min_max' => $product_min_max, 'selectedCategories' => $selectedCategories,'selectedBrands' => $selectedBrands,'selectedAttributeSets' => $selectedAttributeSets, 'selectedTags' => $selectedTags, 'minPrice' => $minPrice, 'maxPrice' => $maxPrice, 'filterBy' => $filterBy, 'search' => $search, 'categories' => $categories, 'pager' => ( $totalProducts > $perPage ? $pager->makeLinks($page, $perPage, $totalProducts) : '') ]);
 
     }
 
@@ -228,24 +409,26 @@ class MegaMenuController extends BaseController
         $filter_category_ids = array_column($get_categories, 'category_id');
         // dd($filter_category_ids);
 
-        $categories = [];
-        foreach ($filter_category_ids as $category_id) {
+        // $categories = [];
+        // foreach ($filter_category_ids as $category_id) {
 
-            $filterChildIds = array_unique($categoriesModel->getChildCategoryIds($category_id));
-            // $filterCategoryIds = array_merge($filterCategory, $filterChildIds);
-            // dd($filterChildIds);
+        //     // $filterChildIds = array_unique($categoriesModel->getChildCategoryIds($category_id));
+        //     // // $filterCategoryIds = array_merge($filterCategory, $filterChildIds);
+        //     // // dd($filterChildIds);
 
-            $categoryGets = $categoriesModel->getProductCountWithMultpleCategory($filterChildIds);
+        //     // $categoryGets = $categoriesModel->getProductCountWithMultpleCategory($filterChildIds);
+        //     $categoryGets = $categoriesModel->getProductCountWithCategory('', $category_id);
 
-            $categories = array_merge($categories, $categoryGets);
+        //     $categories = array_merge($categories, $categoryGets);
             
-        }
+        // }
 
-        // dd($filterCategoryListing);
+        // dd($categories);
         
-
-
         $filterCategory = [];
+        
+        
+        // dd($get_categories);
         foreach ($get_categories as $key => $category) {
             // array_push($filterCategory,$category['category_id']);
 
@@ -258,9 +441,98 @@ class MegaMenuController extends BaseController
             
         }
 
+        $filterCategory = array_unique($filterCategory);
+
         // dd($filterCategory);
 
+        $categories = [];
+
+        $db = Database::connect(); // 🔹 Connect to DB
+
+        foreach ($filter_category_ids as $category_id) {
+            // Get all child category IDs (recursively)
+            $childIds = $categoriesModel->getChildCategoryIds($category_id);
+
+            // Include parent category in list
+            $allCategoryIds = array_merge([$category_id], $childIds);
+
+            // Count products in these categories
+            $builder = $db->table('products as p');
+            $builder->select('COUNT(p.id) as product_count');
+            $builder->whereIn('p.category_id', $allCategoryIds);
+            $builder->where('p.status', 1);
+            $query = $builder->get();
+            $result = $query->getRowArray();
+
+            // Get category info (name, slug, etc.)
+            $category = $categoriesModel->find($category_id); // Adjust this based on your model
+
+            $categories[] = [
+                'category_id' => $category_id,
+                'category_name' => $category['name'],
+                'category_slug' => $category['slug'],
+                'product_count' => $result['product_count']
+            ];
+        }
+
+        // dd($finalCounts);
+
         // $products = $categoriesModel->getCategoryProductsFiltersListing($parent_category['id']);
+
+        $attributeSetModel = new AttributeSet();
+        $attributeModel = new Attributes();
+
+        $excludedKeys = ['categories', 'brands', 'search', 'filterBy', 'page']; // Keys to exclude
+        $queryParams = array_diff_key($_GET, array_flip($excludedKeys));
+        // dd($queryParams);
+        // echo "<pre>";
+        $person = [];
+        if(!empty($queryParams)){
+            // print_r($queryParams); exit;
+
+            $index = 0;
+
+           
+           
+            // echo "<pre>";
+            foreach ($queryParams as $filterName => $filterValue) {
+                // echo $filterName.' - '.$filterValue.'<br>'; exit;
+
+                // $selectedCustomAttributes = isset($_GET[$filterName]) ? explode(' ', $_GET[$filterName]) : [];
+                // print_r($selectedCustomAttributes);
+                // foreach ($selectedCustomAttributes as $attributeName) {
+                //     // echo $index.' - '.$filterName.' - '.$attributeName.'<br>';
+                    // $attributeSetData = $attributeSetModel->select('id, name')->where('slug',$filterName)->first();
+                    // $attributeData = $attributeModel->select('id, attribute_set_id, name')->where('slug',$filterValue)->first();
+                    // print_r($filterName); exit;
+                    $attributeData = $attributeModel->getAttributesIdFromCategoryMultiple($filterCategory, $filterName);
+                    // print_r($attributeData); exit;
+                    // $attributeData = $attributeModel->select('id, attribute_set_id, name')->where('attribute_set_id',$attributeSetData['id'])->where('name',$attributeName)->first();
+                //     $person[$index]['filter_name'] = $filterName;
+                //     $person[$index]['attribute_set_id'] = $attributeSetData['id'];
+                //     $person[$index]['attribute_name'] = $attributeName;
+                //     $person[$index]['attribute_id'] = $attributeData['id'];
+                //     $index++;
+                // }
+
+                // echo $attributeData['attribute_set_id']; exit;
+
+                
+                $person[$index]['filter_name'] = $filterName;
+                $person[$index]['filter_value'] = $filterValue;
+                if(!empty($attributeData['attribute_set_id'])){
+                    $person[$index]['attribute_set_id'] = $attributeData['attribute_set_id'];
+                }
+                // dd($person); exit;
+                // $person[$index]['attribute_name'] = $attributeName;
+                // $person[$index]['attribute_id'] = $attributeData['id'];
+
+                $index++;
+            }
+            // dd($person); exit;
+        }
+        // exit;
+        // dd($person); exit;
 
         // $categoriesModel = new Categories();
         $attributeSetModel = new AttributeSet();
@@ -269,7 +541,7 @@ class MegaMenuController extends BaseController
         $attributeSetCategoryModel = new AttributeSetCategory();
         $productTagsModel = new ProductTags();
 
-        // $selectedCategories = isset($_GET['categories']) ? explode(' ', $_GET['categories']) : [];
+        $selectedCategories = isset($_GET['categories']) ? explode(' ', $_GET['categories']) : [];
         $selectedBrands = isset($_GET['brands']) ? explode(' ', $_GET['brands']) : [];
         $selectedAttributeSets = isset($_GET['attribute_set']) ? explode(' ', $_GET['attribute_set']) : [];
         $selectedTags = isset($_GET['tags']) ? explode(' ', $_GET['tags']) : [];
@@ -279,6 +551,40 @@ class MegaMenuController extends BaseController
         $search = isset($_GET['search']) ? $_GET['search'] : '';
 
         // $filterCategory = [$sub_category['id']];
+
+        // if($selectedCategories && !empty($selectedCategories)){
+        //     $filterCategory = [];
+        //     $cate_list = "";
+        //     foreach ($selectedCategories as $cate_slug) {
+        //         $categoriesData = $categoriesModel->select('id, name')->where('slug',$cate_slug)->first();
+        //         $cate_list .= $categoriesData['id'] . ",";
+        //     }
+        //     $cate_comma_string = rtrim($cate_list,',');
+        //     $filterCategory = explode(',', $cate_comma_string);
+        // }
+
+        if ($selectedCategories && !empty($selectedCategories)) {
+            $filterCategory = [];
+            foreach ($selectedCategories as $cate_slug) {
+                // Get the category by slug
+                $category = $categoriesModel->select('id, name')->where('slug', $cate_slug)->first();
+        
+                if ($category) {
+                    // Add parent ID
+                    $filterCategory[] = $category['id'];
+        
+                    // Get all child category IDs recursively
+                    $childIds = $categoriesModel->getChildCategoryIds($category['id']); // Make sure this function exists
+        
+                    // Merge with filter category list
+                    $filterCategory = array_merge($filterCategory, $childIds);
+                }
+            }
+        
+            // Remove duplicate category IDs
+            $filterCategory = array_unique($filterCategory);
+            // dd($filterCategory);
+        }
 
         $filterBrand = [];
         if($selectedBrands && !empty($selectedBrands)){
@@ -323,8 +629,15 @@ class MegaMenuController extends BaseController
 
         if(!empty($filterCategory)){
 
-            $products = $productsModel->getProductsFiltersListing($search, $filterBy, $filterCategory, $filterBrand, $minPrice, $maxPrice, $filterAttributes, $filterTags, $perPage, $offset);
-            $totalProducts = count($productsModel->getProductsFiltersListingCount($search, $filterBy, $filterCategory, $filterBrand, $minPrice, $maxPrice, $filterAttributes, $filterTags)); // Total product count
+            if(!empty($person)){
+                $products = $productsModel->getProductsFiltersListing($search, $filterBy, $filterCategory, $filterBrand, $minPrice, $maxPrice, $person, $filterTags, $perPage, $offset);
+                $totalProducts = $productsModel->getProductsFiltersListingCount($search, $filterBy, $filterCategory, $filterBrand, $minPrice, $maxPrice, $person, $filterTags); // Total product count
+            }else{
+                $products = $productsModel->getProductsFiltersListing($search, $filterBy, $filterCategory, $filterBrand, $minPrice, $maxPrice, $filterAttributes, $filterTags, $perPage, $offset);
+                $totalProducts = $productsModel->getProductsFiltersListingCount($search, $filterBy, $filterCategory, $filterBrand, $minPrice, $maxPrice, $filterAttributes, $filterTags); // Total product count
+            }
+
+            
 
             $product_min_max = $productsModel->getProductsMinMaxPrice();
 
@@ -332,11 +645,55 @@ class MegaMenuController extends BaseController
 
             $brands = $brandModel->getProductCountWithBrandsMultipleCategory($filterCategory);
             
-            $productAttributesSets = $attributeSetCategoryModel->getProductAttributeSetWithCategory();
+            // $productAttributesSets = $attributeSetCategoryModel->getProductAttributeSetWithCategory();
+
+            $productAttributesSets = $attributeSetCategoryModel->getProductAttributeSetWithCategoryMultipleGroup($filterCategory, $filterBrand);
+            // dd($productAttributesSets);
+            $productAttributesSetsValues = [];
+            $index = 0;
+    
+            // dd($productAttributesSets);
+    
+            foreach($productAttributesSets as $attributeSet){
+                $attrSetId = $attributeSet['id'];
+                $attributeCategoryId = $attributeSet['category_ids'];
+                $productAttributesSetsValues[$index] = [
+                    'set_id' => $attributeSet['id'],
+                    'set_name' => $attributeSet['name'],
+                    'set_slug' => $attributeSet['slug'],
+                ];
+                $productAttributesSetValues = $attributeSetCategoryModel->getProductAttributesSetValues($attributeSet['id']);
+                // dd($productAttributesSetValues);
+                $dropdownArray = [];
+                foreach($productAttributesSetValues as $attributeSetValue){
+                 
+                    if(!empty($person)){
+                        $attributeProductCounts = $attributeSetCategoryModel->getAttributeNameProductCountsParentAttributesMultipleCategory($attributeCategoryId, $attrSetId, $attributeSetValue['attribute_slug'], $filterBrand, $person);
+                    }else{
+                        $attributeProductCounts = $attributeSetCategoryModel->getAttributeNameProductCountsWithMultipleCategory($attributeCategoryId, $attrSetId, $attributeSetValue['attribute_slug'], $filterBrand);
+                    }
+    
+                    // dd($attributeProductCounts->countRes);
+                    if($attributeProductCounts->countRes > 0){
+                        $dropdownArray[] = [
+                            'attribute_id' => $attributeSetValue['attribute_id'],
+                            'attribute_name' => $attributeSetValue['attribute_name'],
+                            'attribute_slug' => $attributeSetValue['attribute_slug'],
+                            'product_count' => $attributeProductCounts->countRes,
+                        ];
+                    }
+                    // dd($dropdownArray);
+                }
+                $productAttributesSetsValues[$index]['dropdowns'] = $dropdownArray;
+                $index++;
+            }
+    
+            // dd($productAttributesSetsValues);
+
             $productTags = $productTagsModel->getProductCountWithTags();
             
         }else{
-            $products = $brands = $productAttributesSets = $productTags = [];
+            $products = $brands = $productAttributesSetsValues = $productTags = [];
             $totalProducts = 0;
             $product_min_max = [
                 'min_price' => 0,
@@ -346,7 +703,7 @@ class MegaMenuController extends BaseController
         
 
         // dd($sub_category);
-        return view('frontend/custom_menu_products', ['mega_menu_title' => $custommenus_sub, 'breadcrumb' => $breadcrumb, 'products' => $products, 'total_products' => $totalProducts, 'attribute_sets' => $productAttributesSets, 'brands' => $brands, 'product_tags' => $productTags, 'product_min_max' => $product_min_max, 'selectedBrands' => $selectedBrands,'selectedAttributeSets' => $selectedAttributeSets, 'selectedTags' => $selectedTags, 'minPrice' => $minPrice, 'maxPrice' => $maxPrice, 'filterBy' => $filterBy, 'search' => $search, 'categories' => $categories, 'pager' => ( $totalProducts > $perPage ? $pager->makeLinks($page, $perPage, $totalProducts) : '') ]);
+        return view('frontend/custom_menu_products', ['mega_menu_title' => $custommenus_sub, 'breadcrumb' => $breadcrumb, 'products' => $products, 'total_products' => $totalProducts, 'attribute_set_values' => $productAttributesSetsValues, 'brands' => $brands, 'product_tags' => $productTags, 'product_min_max' => $product_min_max, 'selectedCategories' => $selectedCategories, 'selectedBrands' => $selectedBrands,'selectedAttributeSets' => $selectedAttributeSets, 'selectedTags' => $selectedTags, 'minPrice' => $minPrice, 'maxPrice' => $maxPrice, 'filterBy' => $filterBy, 'search' => $search, 'categories' => $categories, 'pager' => ( $totalProducts > $perPage ? $pager->makeLinks($page, $perPage, $totalProducts) : '') ]);
 
     }
 
@@ -413,26 +770,26 @@ class MegaMenuController extends BaseController
         $filter_category_ids = array_column($get_categories, 'category_id');
         // dd($filter_category_ids);
 
-        $categories = [];
-        foreach ($filter_category_ids as $category_id) {
+        // $categories = [];
+        // foreach ($filter_category_ids as $category_id) {
 
-            $filterChildIds = array_unique($categoriesModel->getChildCategoryIds($category_id));
-            // $filterCategoryIds = array_merge($filterCategory, $filterChildIds);
-            // dd($filterChildIds);
+        //     // $filterChildIds = array_unique($categoriesModel->getChildCategoryIds($category_id));
+        //     // // $filterCategoryIds = array_merge($filterCategory, $filterChildIds);
+        //     // // dd($filterChildIds);
 
-            $categoryGets = $categoriesModel->getProductCountWithMultpleCategory($filterChildIds);
+        //     // $categoryGets = $categoriesModel->getProductCountWithMultpleCategory($filterChildIds);
+        //     $categoryGets = $categoriesModel->getProductCountWithCategory('', $category_id);
 
-            $categories = array_merge($categories, $categoryGets);
+        //     $categories = array_merge($categories, $categoryGets);
             
-        }
+        // }
 
-        // dd($filterCategoryListing);
-
+        // dd($categories);
+        
         $filterCategory = [];
-
-
-        // $categoriesModel = new Categories();
-
+        
+        
+        // dd($get_categories);
         foreach ($get_categories as $key => $category) {
             // array_push($filterCategory,$category['category_id']);
 
@@ -445,7 +802,41 @@ class MegaMenuController extends BaseController
             
         }
 
+        $filterCategory = array_unique($filterCategory);
+
         // dd($filterCategory);
+
+        $categories = [];
+
+        $db = Database::connect(); // 🔹 Connect to DB
+
+        foreach ($filter_category_ids as $category_id) {
+            // Get all child category IDs (recursively)
+            $childIds = $categoriesModel->getChildCategoryIds($category_id);
+
+            // Include parent category in list
+            $allCategoryIds = array_merge([$category_id], $childIds);
+
+            // Count products in these categories
+            $builder = $db->table('products as p');
+            $builder->select('COUNT(p.id) as product_count');
+            $builder->whereIn('p.category_id', $allCategoryIds);
+            $builder->where('p.status', 1);
+            $query = $builder->get();
+            $result = $query->getRowArray();
+
+            // Get category info (name, slug, etc.)
+            $category = $categoriesModel->find($category_id); // Adjust this based on your model
+
+            $categories[] = [
+                'category_id' => $category_id,
+                'category_name' => $category['name'],
+                'category_slug' => $category['slug'],
+                'product_count' => $result['product_count']
+            ];
+        }
+
+        // dd($finalCounts);
 
         $categoriesModel = new Categories();
 
@@ -479,6 +870,61 @@ class MegaMenuController extends BaseController
 
         // $products = $categoriesModel->getCategoryProductsFiltersListing($parent_category['id']);
 
+        $attributeSetModel = new AttributeSet();
+        $attributeModel = new Attributes();
+
+        $excludedKeys = ['categories', 'brands', 'search', 'filterBy', 'page']; // Keys to exclude
+        $queryParams = array_diff_key($_GET, array_flip($excludedKeys));
+        // dd($queryParams);
+        // echo "<pre>";
+        $person = [];
+        if(!empty($queryParams)){
+            // print_r($queryParams); exit;
+
+            $index = 0;
+
+           
+           
+            // echo "<pre>";
+            foreach ($queryParams as $filterName => $filterValue) {
+                // echo $filterName.' - '.$filterValue.'<br>'; exit;
+
+                // $selectedCustomAttributes = isset($_GET[$filterName]) ? explode(' ', $_GET[$filterName]) : [];
+                // print_r($selectedCustomAttributes);
+                // foreach ($selectedCustomAttributes as $attributeName) {
+                //     // echo $index.' - '.$filterName.' - '.$attributeName.'<br>';
+                    // $attributeSetData = $attributeSetModel->select('id, name')->where('slug',$filterName)->first();
+                    // $attributeData = $attributeModel->select('id, attribute_set_id, name')->where('slug',$filterValue)->first();
+                    // print_r($filterName); exit;
+                    $attributeData = $attributeModel->getAttributesIdFromCategoryMultiple($filterCategory, $filterName);
+                    // print_r($attributeData); exit;
+                    // $attributeData = $attributeModel->select('id, attribute_set_id, name')->where('attribute_set_id',$attributeSetData['id'])->where('name',$attributeName)->first();
+                //     $person[$index]['filter_name'] = $filterName;
+                //     $person[$index]['attribute_set_id'] = $attributeSetData['id'];
+                //     $person[$index]['attribute_name'] = $attributeName;
+                //     $person[$index]['attribute_id'] = $attributeData['id'];
+                //     $index++;
+                // }
+
+                // echo $attributeData['attribute_set_id']; exit;
+
+                
+                $person[$index]['filter_name'] = $filterName;
+                $person[$index]['filter_value'] = $filterValue;
+                if(!empty($attributeData['attribute_set_id'])){
+                    $person[$index]['attribute_set_id'] = $attributeData['attribute_set_id'];
+                }
+                // dd($person); exit;
+                // $person[$index]['attribute_name'] = $attributeName;
+                // $person[$index]['attribute_id'] = $attributeData['id'];
+
+                $index++;
+            }
+            // dd($person); exit;
+        }
+        // exit;
+        // dd($person); exit;
+
         $categoriesModel = new Categories();
         $attributeSetModel = new AttributeSet();
         $productMasterTagsModel = new ProductMasterTags();
@@ -486,7 +932,7 @@ class MegaMenuController extends BaseController
         $attributeSetCategoryModel = new AttributeSetCategory();
         $productTagsModel = new ProductTags();
 
-        // $selectedCategories = isset($_GET['categories']) ? explode(' ', $_GET['categories']) : [];
+        $selectedCategories = isset($_GET['categories']) ? explode(' ', $_GET['categories']) : [];
         $selectedBrands = isset($_GET['brands']) ? explode(' ', $_GET['brands']) : [];
         $selectedAttributeSets = isset($_GET['attribute_set']) ? explode(' ', $_GET['attribute_set']) : [];
         $selectedTags = isset($_GET['tags']) ? explode(' ', $_GET['tags']) : [];
@@ -496,6 +942,40 @@ class MegaMenuController extends BaseController
         $search = isset($_GET['search']) ? $_GET['search'] : '';
 
         // $filterCategory = [$sub_category['id']];
+
+        // if($selectedCategories && !empty($selectedCategories)){
+        //     $filterCategory = [];
+        //     $cate_list = "";
+        //     foreach ($selectedCategories as $cate_slug) {
+        //         $categoriesData = $categoriesModel->select('id, name')->where('slug',$cate_slug)->first();
+        //         $cate_list .= $categoriesData['id'] . ",";
+        //     }
+        //     $cate_comma_string = rtrim($cate_list,',');
+        //     $filterCategory = explode(',', $cate_comma_string);
+        // }
+
+        if ($selectedCategories && !empty($selectedCategories)) {
+            $filterCategory = [];
+            foreach ($selectedCategories as $cate_slug) {
+                // Get the category by slug
+                $category = $categoriesModel->select('id, name')->where('slug', $cate_slug)->first();
+        
+                if ($category) {
+                    // Add parent ID
+                    $filterCategory[] = $category['id'];
+        
+                    // Get all child category IDs recursively
+                    $childIds = $categoriesModel->getChildCategoryIds($category['id']); // Make sure this function exists
+        
+                    // Merge with filter category list
+                    $filterCategory = array_merge($filterCategory, $childIds);
+                }
+            }
+        
+            // Remove duplicate category IDs
+            $filterCategory = array_unique($filterCategory);
+            // dd($filterCategory);
+        }
 
         $filterBrand = [];
         if($selectedBrands && !empty($selectedBrands)){
@@ -537,8 +1017,15 @@ class MegaMenuController extends BaseController
 
         $productsModel = new Products();
         // $products = $productsModel->getProductsFiltersListing($search, $filterBy, [8, 9], [1]);
-        $products = $productsModel->getProductsFiltersListing($search, $filterBy, $filterCategory, $filterBrand, $minPrice, $maxPrice, $filterAttributes, $filterTags, $perPage, $offset);
-        $totalProducts = count($productsModel->getProductsFiltersListingCount($search, $filterBy, $filterCategory, $filterBrand, $minPrice, $maxPrice, $filterAttributes, $filterTags)); // Total product count
+
+        if(!empty($person)){
+            $products = $productsModel->getProductsFiltersListing($search, $filterBy, $filterCategory, $filterBrand, $minPrice, $maxPrice, $person, $filterTags);
+            $totalProducts = $productsModel->getProductsFiltersListingCount($search, $filterBy, $filterCategory, $filterBrand, $minPrice, $maxPrice, $person, $filterTags); // Total product count
+        }else{
+            $products = $productsModel->getProductsFiltersListing($search, $filterBy, $filterCategory, $filterBrand, $minPrice, $maxPrice, $filterAttributes, $filterTags, $perPage, $offset);
+            $totalProducts = $productsModel->getProductsFiltersListingCount($search, $filterBy, $filterCategory, $filterBrand, $minPrice, $maxPrice, $filterAttributes, $filterTags); // Total product count
+        }
+        
 
         $product_min_max = $productsModel->getProductsMinMaxPrice();
 
@@ -546,11 +1033,55 @@ class MegaMenuController extends BaseController
 
         $brands = $brandModel->getProductCountWithBrandsMultipleCategory($filterCategory);
         
-        $productAttributesSets = $attributeSetCategoryModel->getProductAttributeSetWithCategory();
+        // $productAttributesSets = $attributeSetCategoryModel->getProductAttributeSetWithCategory();
+
+        $productAttributesSets = $attributeSetCategoryModel->getProductAttributeSetWithCategoryMultipleGroup($filterCategory, $filterBrand);
+        // dd($productAttributesSets);
+        $productAttributesSetsValues = [];
+        $index = 0;
+
+        // dd($productAttributesSets);
+
+        foreach($productAttributesSets as $attributeSet){
+            $attrSetId = $attributeSet['id'];
+            $attributeCategoryId = $attributeSet['category_ids'];
+            $productAttributesSetsValues[$index] = [
+                'set_id' => $attributeSet['id'],
+                'set_name' => $attributeSet['name'],
+                'set_slug' => $attributeSet['slug'],
+            ];
+            $productAttributesSetValues = $attributeSetCategoryModel->getProductAttributesSetValues($attributeSet['id']);
+            // dd($productAttributesSetValues);
+            $dropdownArray = [];
+            foreach($productAttributesSetValues as $attributeSetValue){
+             
+                if(!empty($person)){
+                    $attributeProductCounts = $attributeSetCategoryModel->getAttributeNameProductCountsParentAttributesMultipleCategory($attributeCategoryId, $attrSetId, $attributeSetValue['attribute_slug'], $filterBrand, $person);
+                }else{
+                    $attributeProductCounts = $attributeSetCategoryModel->getAttributeNameProductCountsWithMultipleCategory($attributeCategoryId, $attrSetId, $attributeSetValue['attribute_slug'], $filterBrand);
+                }
+
+                // dd($attributeProductCounts->countRes);
+                if($attributeProductCounts->countRes > 0){
+                    $dropdownArray[] = [
+                        'attribute_id' => $attributeSetValue['attribute_id'],
+                        'attribute_name' => $attributeSetValue['attribute_name'],
+                        'attribute_slug' => $attributeSetValue['attribute_slug'],
+                        'product_count' => $attributeProductCounts->countRes,
+                    ];
+                }
+                // dd($dropdownArray);
+            }
+            $productAttributesSetsValues[$index]['dropdowns'] = $dropdownArray;
+            $index++;
+        }
+
+        // dd($productAttributesSetsValues);
+
         $productTags = $productTagsModel->getProductCountWithTags();
 
         // dd($sub_category);
-        return view('frontend/custom_menu_products', ['mega_menu_title' => $custommenus_sub, 'breadcrumb' => $breadcrumb, 'parent_category' => $parent_category, 'products' => $products, 'total_products' => $totalProducts, 'attribute_sets' => $productAttributesSets, 'brands' => $brands, 'product_tags' => $productTags, 'product_min_max' => $product_min_max, 'selectedBrands' => $selectedBrands,'selectedAttributeSets' => $selectedAttributeSets, 'selectedTags' => $selectedTags, 'minPrice' => $minPrice, 'maxPrice' => $maxPrice, 'filterBy' => $filterBy, 'search' => $search, 'categories' => $categories, 'pager' => ( $totalProducts > $perPage ? $pager->makeLinks($page, $perPage, $totalProducts) : '') ]);
+        return view('frontend/custom_menu_products', ['mega_menu_title' => $custommenus_sub, 'breadcrumb' => $breadcrumb, 'parent_category' => $parent_category, 'products' => $products, 'total_products' => $totalProducts, 'attribute_set_values' => $productAttributesSetsValues, 'brands' => $brands, 'product_tags' => $productTags, 'product_min_max' => $product_min_max, 'selectedCategories' => $selectedCategories, 'selectedBrands' => $selectedBrands,'selectedAttributeSets' => $selectedAttributeSets, 'selectedTags' => $selectedTags, 'minPrice' => $minPrice, 'maxPrice' => $maxPrice, 'filterBy' => $filterBy, 'search' => $search, 'categories' => $categories, 'pager' => ( $totalProducts > $perPage ? $pager->makeLinks($page, $perPage, $totalProducts) : '') ]);
 
     }
 

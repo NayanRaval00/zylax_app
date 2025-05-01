@@ -29,22 +29,18 @@
                                         placeholder="Select Date Range">
                                 </div>
                                 <div class="col-md-3">
-                                    <label for="search" class="form-label"><strong>Order ID</strong></label>
+                                    <label for="search" class="form-label"><strong>Keyword</strong></label>
                                     <input type="text" id="orderEmail" name="orderEmail" class="form-control"
-                                        placeholder="Search by Order ID...">
+                                        placeholder="Search by Keyword...">
                                 </div>
                                 <div class="col-md-2">
                                     <label for="orderStatusGet" class="form-label"><strong>Order Status</strong></label>
                                     <select id="orderStatusGet" name="order_status" class="form-control">
                                         <option value="all">All Orders</option>
-                                        <option value="completed">Completed</option>
-                                        <option value="cancel">Canceled</option>
-                                        <option value="missing">Missing Orders</option>
-                                        <option value="paid">Paid</option>
-                                        <option value="pending">Pending</option>
                                         <option value="progress">In Progress</option>
                                         <option value="shipped">Shipped</option>
-                                        <option value="unpaid">Unpaid</option>
+                                        <option value="completed">Completed</option>
+                                        <option value="cancel">Canceled</option>
                                     </select>
                                 </div>
                                 <div class="col-md-2">
@@ -57,10 +53,18 @@
                                         <option value="refunded">Refunded</option>
                                     </select>
                                 </div>
-                                <div class="col-md-2 d-flex align-items-end">
-                                    <input type="submit" class="btn btn-success w-100" value="Search">
+                                <div class="col-lg-2">
+                                    <label>User Type</label>
+                                    <select class="form-control" name="usertype" id="usertype">
+                                        <option value="">Select...</option>
+                                        <option value="guest"> Guest</option>
+                                        <option value="regular">Regular</option>
+                                    </select>
                                 </div>
                             </div>
+                            <div class="col-md-2 d-flex align-items-end">
+                                    <input type="submit" class="btn btn-success w-100" value="Search">
+                                </div>
                         </form>
                     </div><!-- .card-content -->
                 </div><!-- .col-md-12 -->
@@ -80,9 +84,11 @@
                                     <th scope="col">Reference</th>
                                     <th scope="col">Amount</th>
                                     <th scope="col">Email</th>
+                                    <th scope="col">Company Name</th>
                                     <th scope="col">Method</th>
                                     <th scope="col">Order Status</th>
                                     <th scope="col">Order Date</th>
+                                    <th scope="col">User Type</th>
                                     <th scope="col">View</th>
                                     <th scope="col">Print</th>
                                 </tr>
@@ -99,6 +105,7 @@
 <script>
 $(document).ready(function () {
     let table = $('#orderTable').DataTable({
+        "sDom":"ltipr",
         scrollX: true,
         "processing": true,
         "serverSide": true,
@@ -110,6 +117,7 @@ $(document).ready(function () {
                 d.orderEmail = $('#orderEmail').val() || '';
                 d.order_status = $('#orderStatusGet').val() || 'all';
                 d.payment_status = $('#paymentStatusGet').val() || 'all';
+                d.usertype = $('#usertype').val() || '';
             }
         }
     });
@@ -123,31 +131,52 @@ $(document).ready(function () {
 
 
 
-$(document).ready(function() {
-    // Get today's date in YYYY-MM-DD format
-    var today = moment().format('YYYY-MM-DD');
+// $(document).ready(function() {
+//     // Get today's date in YYYY-MM-DD format
+//     var today = moment().format('YYYY-MM-DD');
 
-    // Set default date range to today's date
+//     // Set default date range to today's date
+//     $('#order_daterange').daterangepicker({
+//         startDate: today,
+//         endDate: today,
+//         locale: {
+//             format: 'YYYY-MM-DD',
+//             cancelLabel: 'Clear'
+//         }
+//     });
+
+//     // Update input value when date is selected
+//     $('#order_daterange').on('apply.daterangepicker', function(ev, picker) {
+//         $(this).val(picker.startDate.format('YYYY-MM-DD') + ' - ' + picker.endDate.format(
+//         'YYYY-MM-DD'));
+//     });
+
+//     // Clear input when cancel is clicked
+//     $('#order_daterange').on('cancel.daterangepicker', function(ev, picker) {
+//         $(this).val('');
+//     });
+// });
+
+$(document).ready(function () {
     $('#order_daterange').daterangepicker({
-        startDate: today,
-        endDate: today,
+        autoUpdateInput: false, // Do not auto-fill input
         locale: {
             format: 'YYYY-MM-DD',
             cancelLabel: 'Clear'
         }
     });
 
-    // Update input value when date is selected
-    $('#order_daterange').on('apply.daterangepicker', function(ev, picker) {
-        $(this).val(picker.startDate.format('YYYY-MM-DD') + ' - ' + picker.endDate.format(
-        'YYYY-MM-DD'));
+    // When a date is selected, update the input
+    $('#order_daterange').on('apply.daterangepicker', function (ev, picker) {
+        $(this).val(picker.startDate.format('YYYY-MM-DD') + ' - ' + picker.endDate.format('YYYY-MM-DD'));
     });
 
     // Clear input when cancel is clicked
-    $('#order_daterange').on('cancel.daterangepicker', function(ev, picker) {
+    $('#order_daterange').on('cancel.daterangepicker', function (ev, picker) {
         $(this).val('');
     });
 });
+
 
 // $(document).ready(function () {
 //     $("#ordersData").submit(function (event) {

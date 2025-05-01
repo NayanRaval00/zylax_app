@@ -14,7 +14,7 @@ class Home extends BaseController
     public function index()
     {
         $slider = new Sliders();
-        $slider = $slider->select("sliders.type, sliders.type_id, sliders.link, sliders.image, slider_categories.slider_name")
+        $slider = $slider->select("sliders.type, sliders.type_id, sliders.link, sliders.image, sliders.image_alt, slider_categories.slider_name")
         ->join("slider_categories", "slider_categories.id = sliders.type_id", "left")
         ->orderBy("sliders.id", "desc")
         ->findAll();
@@ -30,7 +30,8 @@ class Home extends BaseController
         $Products = new Products();
         $product = $Products->getProductsFiltersListing();
         $bestArrivals = $Products->getProductsBestArrivals();
-        $bestseller = $Products->getProductsBestSellers();
+        $bestsellerMain = $Products->getProductsBestSellers(1, 0);
+        $bestseller = $Products->getProductsBestSellers(15, 1);
         $hotdeals = $Products->getProductshotdeals();
         
         $brands = new Brands();
@@ -43,8 +44,8 @@ class Home extends BaseController
         $categories = new Categories();
         $categories = $categories->where('is_show', 1)->orderBy('id','asc')->findAll();
 
-    
-        return view('frontend/index', ['slider' => $slider, 'blogs' => $blog, 'products' => $product, 'brands' => $brands, 'arrivals' => $bestArrivals, 'categories' => $categories, 'bestseller' => $bestseller, 'hotdeals' => $hotdeals ]);
+        // dd($bestseller);
+        return view('frontend/index', ['slider' => $slider, 'blogs' => $blog, 'products' => $product, 'brands' => $brands, 'arrivals' => $bestArrivals, 'categories' => $categories, 'bestsellerMain' => $bestsellerMain, 'bestseller' => $bestseller, 'hotdeals' => $hotdeals ]);
     }
     
     public function product_list()

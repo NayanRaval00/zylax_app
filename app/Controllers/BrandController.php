@@ -100,7 +100,7 @@ class BrandController extends BaseController
 
         $productsModel = new Products();
         $products = $productsModel->getProductsFiltersListing($search, $filterBy, $filterCategory, $filterBrand, $minPrice, $maxPrice, $filterAttributes, $filterTags, $perPage, $offset);
-        $totalProducts = count($productsModel->getProductsFiltersListingCount($search, $filterBy, $filterCategory, $filterBrand, $minPrice, $maxPrice, $filterAttributes, $filterTags)); // Total product count
+        $totalProducts = $productsModel->getProductsFiltersListingCount($search, $filterBy, $filterCategory, $filterBrand, $minPrice, $maxPrice, $filterAttributes, $filterTags); // Total product count
 
         $product_min_max = $productsModel->getProductsMinMaxPrice();
 

@@ -35,6 +35,25 @@ class Attributes extends Model
         return $query->getRowArray();
     }
 
+    public function getAttributesIdFromCategoryMultiple($category_ids, $attribute_slug)
+    {
+        $builder = $this->db->table('attribute_set_category');
+        $builder->select('attribute_set_category.*');
+        $builder->join('attribute_set', 'attribute_set.id = attribute_set_category.attribute_set_id');
+
+        if (!empty($category_ids)) {
+            $builder->whereIn('attribute_set_category.category_id', $category_ids);
+        }
+
+        $builder->where('attribute_set.slug', $attribute_slug);
+
+        $builder->groupBy('attribute_set.id');
+
+        $query = $builder->get();
+        return $query->getRowArray(); // return all matching rows for multiple categories
+    }
+
+
     function getAttributeSetAttributeName($attribute_set_id = null)
     {
         $builder = $this->db->table('attributes a');

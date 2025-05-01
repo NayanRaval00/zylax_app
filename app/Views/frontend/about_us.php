@@ -3,13 +3,14 @@
 <section class="breadcrumb-img" style="background-image:url(<?= base_url('assets/frontend/images/breadcrump.jpg'); ?>)">
 	<div class="container">
 	<nav aria-label="breadcrumb">
-  <ol class="breadcrumb">
-    <li class="breadcrumb-item"><a href="#"><i class="bi bi-house-door" style="color: #EB4227;"></i></a></li>   
-	  <li class="breadcrumb-item active" aria-current="page">About Us</li>
-  </ol>
-</nav>
-		</div>
-	</section>
+		<ol class="breadcrumb">
+			<li class="breadcrumb-item"><a href="<?= base_url() ?>"><i class="bi bi-house-door" style="color: #EB4227;"></i></a></li>   
+			<li class="breadcrumb-item active" aria-current="page">About Us</li>
+		</ol>
+	</nav>
+	</div>
+</section>
+
     <!-- Content Section -->
    <section class="pt-100 about-page">
             <div class="container">

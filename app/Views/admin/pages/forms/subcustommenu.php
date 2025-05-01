@@ -5,13 +5,22 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
+                <?php if(!empty($parent_id) && !empty($subcustom_id)){ ?>
+                    <h4>Add Sub Sub Custom Menu</h4>
+                <?php }else{ ?>
                     <h4>Add Sub Custom Menu</h4>
+                <?php } ?>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href="<?= base_url('admin/home') ?>">Home</a></li>
-                        <li class="breadcrumb-item active"><a href="<?= base_url('admin/menu/subcustommenus/'.$parent_id) ?>">Sub Custom Menu</a></li>
-                        <li class="breadcrumb-item active">Add Sub Custom Menu</li>
+                        <?php if(!empty($parent_id) && !empty($subcustom_id)){ ?>
+                            <li class="breadcrumb-item active"><a href="<?= base_url('admin/menu/sub_subcustommenus/'.$parent_id.'/'.$subcustom_id) ?>">Sub Sub Custom Menu</a></li>
+                            <li class="breadcrumb-item active">Add Sub Sub Custom Menu</li>
+                        <?php }else{ ?>
+                            <li class="breadcrumb-item active"><a href="<?= base_url('admin/menu/subcustommenus/'.$parent_id) ?>">Sub Custom Menu</a></li>
+                            <li class="breadcrumb-item active">Add Sub Custom Menu</li>
+                        <?php } ?>
                     </ol>
                 </div>
             </div>
@@ -46,7 +55,7 @@
                                 <div class="form-group row">
                                     <div class="col-sm-12">
                                         <label for="title">Menu Title <span class='text-danger text-sm'>*</span></label>
-                                        <input type="text" class="form-control" id="title" placeholder="Menu Title" name="title" value="">
+                                        <input type="text" class="form-control" id="title" placeholder="Menu Title" name="title" value="<?= old('title') ?>">
                                     </div>
                                     <!-- <div class="col-sm-6">
                                         <label for="custommenu_id">Parent Sub Custom</label>
@@ -65,15 +74,15 @@
 
                                 <div class="form-group row">
                                     <div class="col-sm-12">
-                                        <label for="link">Link <span class='text-danger text-sm'>*</span></label>
-                                        <input type="text" class="form-control" id="link" placeholder="Menu Link" name="link" value="">
+                                        <label for="link">Slug <span class='text-danger text-sm'>*</span></label>
+                                        <input type="text" class="form-control" id="link" placeholder="Menu Slug" name="link" value="<?= old('link') ?>">
                                     </div>
                                 </div>
 
                                 <div class="form-group row">
                                     <div class="col-sm-12">
                                         <label for="link_url">Link Url</label>
-                                        <input type="text" class="form-control" id="link_url" placeholder="Menu Link Url" name="link_url" value="">
+                                        <input type="text" class="form-control" id="link_url" placeholder="Menu Link Url" name="link_url" value="<?= old('link_url') ?>">
                                     </div>
                                 </div>
 
@@ -98,7 +107,11 @@
 
                                 <div class="form-group my-3">
                                     <button type="reset" class="btn btn-warning ">Reset</button>
-                                    <button type="submit" class="btn btn-success">Add Sub Custom Menu</button>
+                                    <?php if(!empty($parent_id) && !empty($subcustom_id)){ ?>
+                                        <button type="submit" class="btn btn-success">Add Sub Sub Custom Menu</button>
+                                    <?php }else{ ?>
+                                        <button type="submit" class="btn btn-success">Add Sub Custom Menu</button>
+                                    <?php } ?>
                                 </div>
                             </div>
 

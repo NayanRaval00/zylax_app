@@ -1,4 +1,8 @@
-<?= $this->include('frontend/layouts/header') ?>
+<?= $this->include('frontend/layouts/header');
+
+// print_r($orders_details);
+// die;
+?>
 <section class="breadcrumb-img" style="background-image:url(<?= base_url('assets/frontend/images/breadcrump.jpg') ?>)">
     <div class="container">
         <nav aria-label="breadcrumb">
@@ -37,6 +41,7 @@
 
                                         <label for="status-1">Status:</label>
                                         <h4><?php echo $orders_details[0]['order_status'] ?></h4>
+                                        <div><?php echo isset($orders_details[0]['company']) ? 'Company Name: ' . $orders_details[0]['company'] : ''; ?></div>  
                                     </div>
 
                                     <!-- Billing Section -->
@@ -88,40 +93,59 @@
                         </div>
 
                         <?php
-                            if (!empty($orders_details) && isset($orders_details[0]['products'])) {
-                                $products = json_decode('[' . $orders_details[0]['products'] . ']', true);
+if (!empty($orders_details) && isset($orders_details[0]['products'])) {
+    $products = json_decode($orders_details[0]['products'], true); // ✅ NO square brackets here
 
-                                if (is_array($products) && count($products) > 0) {
-                                    foreach ($products as $product) { ?>
-                                    <div class="row mb-3 border p-2">
-                                        <div class="col-md-3 col-sm-6 col-12">
-                                            <p>
-                                                <a href="<?php echo htmlspecialchars($product['product_image']); ?>"
-                                                    target="_blank">
-                                                    <img src="<?php echo htmlspecialchars($product['product_image']); ?>"
-                                                        alt="Product Image" width="50" height="50">
-                                                </a>
-                                            </p>
-                                        </div>
-                                        <div class="col-md-3 col-sm-6 col-12">
-                                            <p><?php echo htmlspecialchars($product['product_name']); ?>
-                                                (x<?php echo htmlspecialchars($product['quantity']); ?>)</p>
-                                        </div>
-                                        <div class="col-md-3 col-sm-6 col-12">
-                                            <p>GST: $<?php echo number_format($product['product_gst'], 2); ?></p>
-                                        </div>
-                                        <div class="col-md-3 col-sm-6 col-12">
-                                            <p>Price: $<?php echo number_format($product['price'], 2); ?></p>
-                                        </div>
-                                    </div>
-                                    <?php }
-                                } else {
-                                    echo "<div class='row'><div class='col-12'><p>No products found.</p></div></div>";
-                                }
-                            } else {
-                                echo "<div class='row'><div class='col-12'><p>No order details found.</p></div></div>";
-                            }
-                        ?>
+    if (is_array($products) && count($products) > 0) {
+        foreach ($products as $product) {
+?>
+            <div class="row mb-3 border p-2">
+            <div class="col-md-3 col-sm-6 col-12">
+                                <p>
+                                    <a href="<?php echo isset($product['product_image']) ? htmlspecialchars($product['product_image']) : '#'; ?>"
+                                        target="_blank">
+                                        <img src="<?php echo isset($product['product_image']) ? htmlspecialchars($product['product_image']) : ''; ?>"
+                                            alt="Product Image" width="50" height="50">
+                                    </a>
+                                </p>
+                            </div>
+                            <div class="col-md-2 col-sm-6 col-12">
+                                <p>SKU: <?php echo htmlspecialchars($product['sku_id']); ?></p>
+                            </div>
+                            <div class="col-md-3 col-sm-6 col-12">
+                                <p><?php echo htmlspecialchars($product['product_name']); ?>
+                                    (x<?php echo htmlspecialchars($product['quantity']); ?>)</p>
+                            </div>
+                            <div class="col-md-2 col-sm-6 col-12">
+                                <p>GST: $<?php echo number_format($product['product_gst'], 2); ?></p>
+                            </div>
+                            <div class="col-md-2 col-sm-6 col-12">
+                                <p>Price: $<?php echo number_format($product['price'], 2); ?></p>
+                            </div>
+
+                <?php
+                // ✅ Display Addons (already an array)
+                if (!empty($product['addon_products']) && is_array($product['addon_products'])) {
+                    echo '<div class="col-12 mt-2">';
+                    echo '<strong>Addons:</strong><ul class="mb-0">';
+                    foreach ($product['addon_products'] as $addon) {
+                        echo '<li>' . htmlspecialchars($addon['addon_set']) . ' - ' . htmlspecialchars($addon['addon_name']) . ' ($' . number_format($addon['addon_price'], 2) . ')</li>';
+                    }
+                    echo '</ul></div>';
+                }
+                ?>
+            </div>
+<?php
+        }
+    } else {
+        echo "<div class='row'><div class='col-12'><p>No products found.</p></div></div>";
+    }
+} else {
+    echo "<div class='row'><div class='col-12'><p>No order details found.</p></div></div>";
+}
+?>
+
+
                         <!-- Total Breakdown in Separate Row -->
                         <div class="row">
                             <div class="col-12">

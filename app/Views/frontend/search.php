@@ -4,7 +4,7 @@
     <div class="container">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="#"><i class="bi bi-house-door" style="color: #EB4227;"></i></a>
+                <li class="breadcrumb-item"><a href="<?= base_url() ?>"><i class="bi bi-house-door" style="color: #EB4227;"></i></a>
                 </li>
                 <li class="breadcrumb-item" aria-current="page">Products</li>
             </ol>
@@ -32,7 +32,7 @@
                         <i class="bi bi-grid"></i>
                     </button>
                 </div>
-                <div class="col-lg-3 col-md-6" id="thirdrow"><b><?= $total_products ?></b> Results Found</div>
+                <div class="col-lg-3 col-md-6" id="thirdrow"><b><?= $total_products ?></b> Results Found <br /> ( show page no. <?= $pageNo ?> of <?php echo ceil($total_products/12) ?> )</div>
 
                 <div class="col-lg-3 col-md-6" id="firstrow">
                     <div class="input-group">
@@ -98,14 +98,17 @@
                     <div id="collapseBrands" class="accordion-collapse collapse show" aria-labelledby="headingBrand">
                         <div class="accordion-body" style="font-size: 14px;max-height: 300px;overflow-y: scroll;">
                             <?php foreach($brands as $brand) {?>
-                                <label class="radioopt"><input type="checkbox" class="brand-checkbox" name="brand" value="<?= $brand['brand_slug'] ?>" <?php echo in_array($brand['brand_slug'], $selectedBrands) ? 'checked' : ''; ?> > <?= $brand['brand_name'] ?> (<?= $brand['product_count'] ?>)</label>
+                                <?php if($brand['product_count'] > 0) {?>
+                                    <label class="radioopt"><input type="checkbox" class="brand-checkbox" name="brand" value="<?= $brand['brand_slug'] ?>" <?php echo in_array($brand['brand_slug'], $selectedBrands) ? 'checked' : ''; ?> > <?= $brand['brand_name'] ?> (<?= $brand['product_count'] ?>)</label>
+                                <?php } ?>
                             <?php } ?>
                         </div>
                     </div>
                 </div>
                 
                 <?php foreach($attribute_set_values as $attribute_set) {
-                    // print_r($attribute_set);
+                    // print_r($attribute_set['dropdowns']);
+                    if(!empty($attribute_set['dropdowns'])){
                     ?>
                     <hr>
                     <div class="accordion-item">
@@ -127,9 +130,9 @@
                             </div>
                         </div>
                     </div>
-                <?php } ?>
+                <?php } } ?>
                 
-                <hr>
+                <!-- <hr>
                 <div class="accordion-item">
                     <h2 class="accordion-header" id="headingTwo">
                         <button class="accordion-button " type="button" data-bs-toggle="collapse"
@@ -205,19 +208,9 @@
                                     </label>
                                 <?php } ?>
                             </div>          
-
-                            <!-- <div class="popular-tag">Monitor</div>
-                            <div class="popular-tag-active">Monitor</div>
-                            <div class="popular-tag">Monitor</div>
-                            <div class="popular-tag">Keyborad</div>
-                            <div class="popular-tag">Computers</div>
-                            <div class="popular-tag">Monitor</div>
-                            <div class="popular-tag">Monitor</div>
-                            <div class="popular-tag">Monitor</div> -->
-
                         </div>
                     </div>
-                </div>
+                </div> -->
             </div>
         </div>
 
@@ -235,7 +228,7 @@
                                     (2)</center>
                             </div>
                             <a href="<?= base_url($product['product_slug']); ?>" class="product-image">
-                                <img src="<?= base_url($product['product_image']); ?>" alt="Product">
+                                <img src="<?= base_url($product['product_image']); ?>" alt="<?= $product['product_name'] ?>">
                             </a>
                             <div class="product-brand-sku"> 
                                 <span class="brand">Brand : <span><?= $product['brand_name'] ?></span> </span>
@@ -287,9 +280,11 @@
             </div> -->
 
              <!-- Pagination Links -->
-            <div>
-                <?= $pager ?>
-            </div>
+            <?php if(count($products) > 0): ?>
+                <div>
+                    <?= $pager ?>
+                </div>
+            <?php endif; ?>
             
         </div>
 
@@ -348,20 +343,50 @@
         });
     });
 
-     document.querySelectorAll(".attribute-set-checkbox").forEach(checkbox => {
+    //  document.querySelectorAll(".attribute-set-checkbox").forEach(checkbox => {
+    //     checkbox.addEventListener("change", function () {
+    //         let params = new URLSearchParams(window.location.search);
+    //         let selectedValues = [];
+
+    //         // Collect checked brands
+    //         document.querySelectorAll(".attribute-set-checkbox:checked").forEach(checkedBox => {
+    //             selectedValues.push(checkedBox.value);
+    //         });
+
+    //         if (selectedValues.length > 0) {
+    //             params.set("attribute_set", selectedValues.join("+"));
+    //         } else {
+    //             params.delete("attribute_set");
+    //         }
+
+    //         // Reload the page with the new URL
+    //         var newUrl = window.location.pathname + "?" + params.toString();
+    //         newUrl = decodeURIComponent(newUrl);
+    //         // console.log(newUrl); 
+    //         window.location.href = newUrl;
+    //     });
+    // });
+    
+    document.querySelectorAll(".attribute-checkbox").forEach(checkbox => {
         checkbox.addEventListener("change", function () {
+            var attr_name = $(this).attr("name");
+            let attr_value = $(this).val();
+
+            console.log("attr_name", attr_name);
+            console.log("attr_value", attr_value);
             let params = new URLSearchParams(window.location.search);
             let selectedValues = [];
 
             // Collect checked brands
-            document.querySelectorAll(".attribute-set-checkbox:checked").forEach(checkedBox => {
+            // document.querySelectorAll(".attribute-checkbox:checked").forEach(checkedBox => {
+            document.querySelectorAll('[name="'+attr_name+'"]:checked').forEach(checkedBox => {
                 selectedValues.push(checkedBox.value);
             });
 
             if (selectedValues.length > 0) {
-                params.set("attribute_set", selectedValues.join("+"));
+                params.set(attr_name, selectedValues.join("+"));
             } else {
-                params.delete("attribute_set");
+                params.delete(attr_name);
             }
 
             // Reload the page with the new URL

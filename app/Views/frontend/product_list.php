@@ -4,7 +4,7 @@
     <div class="container">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="#"><i class="bi bi-house-door" style="color: #EB4227;"></i></a>
+                <li class="breadcrumb-item"><a href="<?= base_url() ?>"><i class="bi bi-house-door" style="color: #EB4227;"></i></a>
                 </li>
                 <li class="breadcrumb-item" aria-current="page">Products</li>
             </ol>
@@ -229,13 +229,13 @@
                     <div class="col-lg-custom col-md-4 col-sm-6">
                         <div class="product-card text-center p-3">
                             <a href="<?= base_url($product['product_slug']); ?>" class="product-title"><?= $product['product_name'] ?></a>
-                            <div class="rating py-2 mb-2">
+                            <!--<div class="rating py-2 mb-2">
                                 <center><i class="bi bi-star-fill"></i> <i class="bi bi-star-fill"></i> <i
                                         class="bi bi-star-half"></i> <i class="bi bi-star"></i> <i class="bi bi-star"></i>
                                     (2)</center>
-                            </div>
+                            </div>-->
                             <a href="<?= base_url($product['product_slug']); ?>" class="product-image">
-                                <img src="<?= base_url($product['product_image']); ?>" alt="Product">
+                                <img src="<?= base_url($product['product_image']); ?>" alt="<?= $product['product_name'] ?>">
                             </a>
                             <div class="product-brand-sku"> 
                                 <span class="brand">Brand : <span><?= $product['brand_name'] ?></span> </span>
@@ -256,10 +256,10 @@
                                     <div class="discount-label"><?= $discount ?> OFF</div>
                                 <?php } ?>
                             </div>
-                            <div class="purchase-row">
+                           <!-- <div class="purchase-row">
                                 <span>1,286 <span>Purchases</span></span>
                                 <a href="javascript:void(0);" class="wishlist-btn "><i class="bi bi-heart"></i></a>
-                            </div>
+                            </div>-->
                             <div class="buy-now"><a href="javascript:void(0);" pid="<?= $product['product_id'] ?>" ppn="<?= $product['product_name'] ?>"  ppp="<?= $product['pv_price'] ?>"  ppimage="<?= isset($product['product_image']) ? $product['product_image'] : '' ?>"  pbaseurl = "<?= base_url() ?>"  cat_id="<?= $product['category_id'] ?>"
                                 onclick="add_to_cart(this)" class="buynow-btn">Buy Now</a></div>
                             <?php if(isset($product['pv_status']) && $product['pv_status'] == 0){ ?>

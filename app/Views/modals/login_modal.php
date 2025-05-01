@@ -51,7 +51,7 @@
                            <label for="forgotEmail" class="form-label">Email</label>
                            <input type="email" class="form-control" id="forgotEmail" name="email" placeholder="Enter your email">
                         </div>
-                        <button type="submit" class="btn btn-warning w-100 mt-3">Reset Password</button>
+                        <button type="submit" id="forgetp" class="btn btn-warning w-100 mt-3">Reset Password</button>
                      </form>
                   </div>
                   <!-- Sign Up Form (Initially Hidden) -->
@@ -93,6 +93,10 @@
                               <span class="toggle-password position-absolute end-0 top-50 me-3" style="cursor: pointer;">
                               <i class="bi bi-eye-slash"></i>
                               </span>
+                           </div>
+                           <div class="col-md-12 mb-2 form-group">
+                              <label for="companyname" class="form-label">Company Name</label>
+                              <input type="text" class="form-control" id="companyname" name="companyname" />
                            </div>
                         </div>
                         <!-- Terms and Privacy Policy Checkbox -->

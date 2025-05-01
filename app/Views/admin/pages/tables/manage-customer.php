@@ -14,105 +14,152 @@
                     </ol>
                 </div>
             </div>
+            <!-- <div class="modal fade " tabindex="-1" role="dialog" aria-hidden="true" id='customer-address-modal'>
+                <div class="modal-dialog modal-xl">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">View Address Details</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div> -->
         </div><!-- /.container-fluid -->
     </section>
     <section class="content">
         <div class="container-fluid">
             <div class="row">
-                <div class="col-md-12 main-content">
+                <div class="col-md-12">
                     <div class="card content-area p-4">
-                        <div class="card-innr">
+                        <form id="ordersData" method="post">
+                            <div class="row mb-3">
+                                <div class="col-md-3">
+                                    <label for="order_daterange" cla ss="form-label"><strong>Date Range</strong></label>
+                                    <input id="order_daterange" class="form-control" type="text" name="order_daterange"
+                                        placeholder="Select Date Range">
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="search" class="form-label"><strong>Keyword</strong></label>
+                                    <input type="text" id="orderEmail" name="orderEmail" class="form-control"
+                                        placeholder="Search by Keyword...">
+                                </div>
 
+                                <div class="col-lg-3">
+                                    <label>User Status</label>
+                                    <select class="form-control" name="userstatus" id="userstatus">
+                                        <option value="">Select...</option>
+                                        <option value="1"> Active</option>
+                                        <option value="0">Inactive</option>
+                                    </select>
+                                </div>
 
-                            <div class="">
-                                <ul class="nav nav-pills">
-                                    <li class="nav-item">
-                                        <a class="nav-link active" data-toggle="pill" href="#content1">List Users</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link" data-toggle="pill" href="#content2">List Admins</a>
-                                    </li>
-
-                                </ul>
-
-                                <div class="tab-content">
-                                    <div class="tab-pane active" id="content1">
-                                        <div class="gaps-1-5x row d-flex adjust-items-center">
-                                            <h1>List Users</h1>
-                                        </div>
-                                        <table id="custom_category_table" class='table-striped'>
-                                            <thead>
-                                                <tr>
-                                                    <th data-field="id" data-sortable="true">ID</th>
-                                                    <th data-field="name" data-sortable="false">Name</th>
-                                                    <th data-field="email" data-sortable="true">Email</th>
-                                                    <th data-field="mobile" data-sortable="true">Mobile No</th>
-                                                    <th data-field="balance" data-sortable="true">Balance</th>
-                                                    <th data-field="date" data-sortable="true">Date</th>
-                                                    <th data-field="status" data-sortable="true">Status</th>
-                                                </tr>
-                                            </thead>
-
-                                            <tbody>
-                                                <?php foreach ($users as $user) : ?>
-                                                    <tr>
-                                                        <td><?= $user['id'] ?></td>
-                                                        <td><?= $user['username'] ?></td>
-                                                        <td><?= $user['email'] ?></td>
-                                                        <td><?= $user['mobile'] ?></td>
-                                                        <td><?= $user['balance'] ?></td>
-                                                        <td><?= $user['created_at'] ?></td>
-                                                        <td><?= $user['status'] == 1 ? 'Active' : 'Inactive' ?></td>
-
-                                                    </tr>
-                                                <?php endforeach; ?>
-                                            </tbody>
-                                            <tbody>
-
-                                                <tr>
-                                                    <td colspan="8" class="text-center">No data found</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    <div class="tab-pane" id="content2">
-                                        <div class="gaps-1-5x row d-flex adjust-items-center">
-                                            <h1>List Admins</h1>
-                                        </div>
-                                        <table id="" class='table table-striped'>
-                                            <thead>
-                                                <tr>
-                                                    <th data-field="id" data-sortable="true">ID</th>
-                                                    <th data-field="name" data-sortable="false">UserName</th>
-                                                    <th data-field="email" data-sortable="true">Email</th>
-                                                    <th data-field="mobile" data-sortable="true">Mobile No</th>
-                                                    <th data-field="date" data-sortable="true">Date</th>
-                                                </tr>
-                                            </thead>
-
-                                            <tbody>
-                                                <?php foreach ($admins as $admin) : ?>
-                                                    <tr>
-                                                        <td><?= $admin['id'] ?></td>
-                                                        <td><?= $admin['username'] ?></td>
-                                                        <td><?= $admin['email'] ?></td>
-                                                        <td><?= $admin['mobile'] ?></td>
-                                                        <td><?= $admin['created_at'] ?></td>
-
-                                                    </tr>
-                                                <?php endforeach; ?>
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                <div class="col-lg-3">
+                                    <label>User Type</label>
+                                    <select class="form-control" name="usertype" id="usertype">
+                                        <option value="">Select...</option>
+                                        <option value="guest"> Guest</option>
+                                        <option value="regular">Regular</option>
+                                    </select>
                                 </div>
                             </div>
+                            <div class="row">
+                                <div class="col-md-3 d-flex align-items-end">
+                                    <input type="submit" class="btn btn-success w-100" value="Search">
+                                </div>
+                            </div>
+                    </form>
+                </div><!-- .card-content -->
+            </div><!-- .col-md-12 -->
+        </div><!-- .row -->
+</div><!-- .container-fluid -->
+</section>
 
-                        </div><!-- .card-innr -->
-                    </div><!-- .card -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <?php if (session()->getFlashdata('success')): ?>
+                <div class="alert alert-success">
+                    <?= session()->getFlashdata('success') ?>
                 </div>
-            </div>
-            <!-- /.row -->
-        </div><!-- /.container-fluid -->
-    </section>
-    <!-- /.content -->
+                <?php endif; ?>
+
+                <?php if (session()->getFlashdata('error')): ?>
+                <div class="alert alert-danger">
+                    <?= session()->getFlashdata('error') ?>
+                </div>
+                <?php endif; ?>
+                <div class="card content-area p-4">
+                    <table id="orderTable" class="table table-striped display nowrap" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th data-field="id" data-sortable="true">ID</th>
+                                <th data-field="name" data-sortable="false">Name</th>
+                                <th data-field="email" data-sortable="true">Email</th>
+                                <th data-field="mobile" data-sortable="true">Company</th>
+                                <th data-field="mobile" data-sortable="true">Mobile No</th>
+                                <th data-field="balance" data-sortable="true">User Type</th>
+                                <th data-field="date" data-sortable="true">Date</th>
+                                <th data-field="status" data-sortable="true">Status</th>
+                                <th data-field="status" data-sortable="true">Action</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div><!-- .card-content -->
+            </div><!-- .col-md-12 -->
+        </div><!-- .row -->
+    </div><!-- .container-fluid -->
+</section>
+<!-- /.content -->
 </div>
+
+<script>
+$(document).ready(function() {
+    let table = $('#orderTable').DataTable({
+        "sDom": "ltipr",
+        scrollX: true,
+        "processing": true,
+        "serverSide": true,
+        "ajax": {
+            "url": "<?= base_url('admin/Customer/fetch_user') ?>",
+            "type": "POST",
+            "data": function(d) {
+                d.order_daterange = $('#order_daterange').val() || '';
+                d.orderEmail = $('#orderEmail').val() || '';
+                d.userstatus = $('#userstatus').val() || '';
+                d.usertype = $('#usertype').val() || '';
+            }
+        }
+    });
+
+    // Reload table when filters change
+    $("#ordersData").on("submit", function(event) {
+        event.preventDefault();
+        table.ajax.reload(null, false); // Keep pagination state after reload
+    });
+});
+
+
+$(document).ready(function() {
+    $('#order_daterange').daterangepicker({
+        autoUpdateInput: false, // Do not auto-fill input
+        locale: {
+            format: 'YYYY-MM-DD',
+            cancelLabel: 'Clear'
+        }
+    });
+
+    // When a date is selected, update the input
+    $('#order_daterange').on('apply.daterangepicker', function(ev, picker) {
+        $(this).val(picker.startDate.format('YYYY-MM-DD') + ' - ' + picker.endDate.format(
+            'YYYY-MM-DD'));
+    });
+
+    // Clear input when cancel is clicked
+    $('#order_daterange').on('cancel.daterangepicker', function(ev, picker) {
+        $(this).val('');
+    });
+});
+</script>

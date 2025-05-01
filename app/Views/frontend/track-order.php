@@ -44,39 +44,51 @@
                 <h2 class="text-bold">Order Details</h2>
                 <ul class="timeline">
                     <?php 
-        // Database se aaya hua data ($order) ko process karenge
-        $statuses = array_column($order, 'tracking_status'); // Sirf tracking_status extract karna hai
-        
-        // Possible statuses ka sequence (Yahi order maintain hoga)
-        $status_sequence = [
-            'order_accepted' => ['paid', 'missing', 'pending', 'unpaid', 'progress'], // Yeh saare status "Order Accepted" me dikhaye jayenge
-            'progress' => ['progress','paid', 'missing', 'pending', 'unpaid'],
-            'shipped' => ['shipped'],
-            'completed' => ['completed']
-        ];
-    ?>
+                        // Extract just the tracking_status column
+                        $statuses = array_column($order, 'tracking_status');
+
+                        // Define status precedence
+                        $status_priority = ['order_accepted', 'progress', 'shipped', 'completed'];
+
+                        // Define which actual tracking_status maps to which stage
+                        $status_map = [
+                            'order_accepted' => ['paid', 'missing', 'pending', 'unpaid'],
+                            'progress' => ['progress'],
+                            'shipped' => ['shipped'],
+                            'completed' => ['completed']
+                        ];
+
+                        // Determine the highest stage reached
+                        $active_stage_index = -1;
+
+                        foreach ($status_priority as $index => $stage) {
+                            if (array_intersect($status_map[$stage], $statuses)) {
+                                $active_stage_index = $index;
+                            }
+                        }
+                    ?>
 
                     <!-- Order Accepted -->
-                    <li class="timeline-item"
-                        data-active="<?= array_intersect($status_sequence['order_accepted'], $statuses) ? 'true' : 'false'; ?>">
+                    <li class="timeline-item" data-active="<?= $active_stage_index >= 0 ? 'true' : 'false'; ?>">
                         <div class="timeline-content">Order Accepted</div>
                     </li>
 
                     <!-- In Progress -->
-                    <li class="timeline-item" data-active="<?= in_array('progress', $statuses) ? 'true' : 'false'; ?>">
+                    <li class="timeline-item" data-active="<?= $active_stage_index >= 1 ? 'true' : 'false'; ?>">
                         <div class="timeline-content">In Progress</div>
                     </li>
 
                     <!-- Shipped -->
-                    <li class="timeline-item" data-active="<?= in_array('shipped', $statuses) ? 'true' : 'false'; ?>">
+                    <li class="timeline-item" data-active="<?= $active_stage_index >= 2 ? 'true' : 'false'; ?>">
                         <div class="timeline-content">Shipped</div>
                     </li>
 
                     <!-- Order Delivered -->
-                    <li class="timeline-item" data-active="<?= in_array('completed', $statuses) ? 'true' : 'false'; ?>">
+                    <li class="timeline-item" data-active="<?= $active_stage_index >= 3 ? 'true' : 'false'; ?>">
                         <div class="timeline-content">Order Delivered</div>
                     </li>
                 </ul>
+
 
 
 

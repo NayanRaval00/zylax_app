@@ -11,6 +11,10 @@
     </style>
 </head>
 
+<?php 
+//echo '<pre>'; print_r(json_decode($orders_details[0]['products'], true)); echo '</pre>'; die;
+
+?>
 <body>
     <?php $order = $orders_details[0]; ?>
     <table width="100%" border="0" cellspacing="0" cellpadding="0" bgcolor="#ffffff">
@@ -35,7 +39,7 @@
                                         <h1>INVOICE</h1>
                                         Invoice <strong>#<?php echo $order['tracking_order_id']; ?></strong><br>
                                         Date: <strong><?php echo date('M d, Y', strtotime($order['created_at'])); ?></strong><br>
-                                        Amount: <strong>$<?php echo number_format($order['total_price'], 2); ?></strong><br>
+                                        Amount: <strong>$<?php echo number_format($order['tran_total_amt'], 2); ?></strong><br>
                                         Payment Method: <strong><?php echo $order['payment_source']; ?></strong>
                                     </td>
                                 </tr>
@@ -55,6 +59,7 @@
                                                     <?php echo $order['billing_addr_1'] . ', ' . $order['billing_city'] . ', ' . $order['billing_state'] . ' ' . $order['billing_pincode']; ?><br>
                                                     <?php echo $order['billing_email']; ?><br>
                                                     <?php echo $order['billing_phone_number']; ?></p>
+                                                    <?php echo $order['company']; ?></p>
                                             </address>
                                         </td>
                                         <td style="padding: 5px 10px; vertical-align: top;">
@@ -78,14 +83,27 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach (json_decode("[" . $order['products'] . "]", true) as $product): ?>
-                                        <tr>
-                                            <td style="padding: 5px 10px;"> <?php echo $product['product_name']; ?> </td>
-                                            <td style="padding: 5px 10px; text-align: center;"> <?php echo $product['quantity']; ?> </td>
-                                            <td style="padding: 5px 10px; text-align: center;"> $<?php echo number_format($product['price'], 2); ?> </td>
-                                            <td style="padding: 5px 10px; text-align: right;"> $<?php echo number_format($product['price'] * $product['quantity'], 2); ?> </td>
-                                        </tr>
-                                    <?php endforeach; ?>
+                                <?php foreach (json_decode($order['products'], true) as $product): ?>
+                                    <tr>
+                                        <td style="padding: 5px 10px;"> <?php echo $product['product_name']; ?> </td>
+                                        <td style="padding: 5px 10px; text-align: center;"> <?php echo $product['quantity']; ?> </td>
+                                        <td style="padding: 5px 10px; text-align: center;"> $<?php echo number_format($product['price'], 2); ?> </td>
+                                        <td style="padding: 5px 10px; text-align: right;"> $<?php echo number_format($product['price'] * $product['quantity'], 2); ?> </td>
+                                    </tr>
+
+                                    <!-- Addon products -->
+                                    <?php if (!empty($product['addon_products'])): ?>
+                                        <?php foreach ($product['addon_products'] as $addon): ?>
+                                            <tr>
+                                                <td style="padding: 5px 10px; padding-left: 30px;"> ➤ <?php echo $addon['addon_set']; ?>: <?php echo $addon['addon_name']; ?> </td>
+                                                <td style="padding: 5px 10px; text-align: center;"> - </td>
+                                                <td style="padding: 5px 10px; text-align: center;"> $<?php echo number_format($addon['addon_price'], 2); ?> </td>
+                                                <td style="padding: 5px 10px; text-align: right;"> $<?php echo number_format($addon['addon_price'], 2); ?> </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                <?php endforeach; ?>
+
                                     <tr>
                                         <td colspan="2" align="right"><strong>Subtotal</strong></td>
                                         <td colspan="2" align="right">$<?php echo number_format($order['product_amount'], 2); ?></td>

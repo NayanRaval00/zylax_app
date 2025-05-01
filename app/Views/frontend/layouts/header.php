@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+<?php $db = \Config\Database::connect(); ?>
 
 <head>
     <meta charset="UTF-8">
@@ -76,10 +77,12 @@
                     </div>
                     <div class="col-6 col-lg-2 header-logo">
                         <a class="navbar-brand" href="<?= base_url();?>"><img
-                                src="<?= base_url('assets/frontend/images/zylax-logo.png');?>" class="" alt="" /></a>
+                                src="<?= base_url('assets/frontend/images/zylax-logo.png');?>" class=""
+                                alt="Zylax Computers" /></a>
                     </div>
                     <div class="col-6 search-form">
-                        <form class="form-search" accept-charset="utf-8" action="<?php echo base_url('autosearch') ?>" method="get">
+                        <form class="form-search" accept-charset="utf-8" action="<?php echo base_url('autosearch') ?>"
+                            method="get">
 
                             <!-- Search Input -->
                             <div class="input-group box-search">
@@ -113,15 +116,71 @@
                     </div>
                     <div class="col-3 col-lg-4 col-md-4">
                         <div class="float-end price-support">
+                            <?php
+                                // Session aur database ka kaam
+                                $guestid = $userid = '';
+                                $cart_values = [];
+                                $totalPrice = 0;
+
+                                $session = session();
+
+                                if ($session->has('guest_id')) {
+                                    $guestid = $session->get('guest_id');
+                                } elseif ($session->has('user_id')) {
+                                    $userid = $session->get('user_id');
+                                }
+
+                                // Ab database query karo sirf jab guestid ya userid mile
+                                if (!empty($userid) || !empty($guestid)) {
+                                    if (!empty($userid)) {
+                                        $query = $db->query("SELECT id, product_id, product_name, product_price, quantity, product_image FROM product_cart WHERE user_id = ?", [$userid]);
+                                    } else {
+                                        $query = $db->query("SELECT id, product_id, product_name, product_price, quantity, product_image FROM product_cart WHERE guest_userid = ?", [$guestid]);
+                                    }
+                                    $cart_values = $query->getResultArray();
+
+                                    foreach ($cart_values as $item) {
+                                        $totalPrice += $item['product_price']; // **Corrected** total price (quantity ka multiply bhool gaye the bhai!)
+                                    }
+                                }
+
+                                // Fallback agar kuch nahi mile
+                                $cart_values = $cart_values ?? [];
+                                $totalPrice = $totalPrice ?? 0;
+                            ?>
+
                             <div class="cart-container" id="cartContainer">
-                                <a class="total-price"> $00.00<span>0</span></a>
+                                <!-- Total Price and Item Count -->
+                                <a class="total-price">
+                                    $<?= number_format($totalPrice, 2) ?><span><?= count($cart_values) ?></span>
+                                </a>
+
+                                <!-- Cart Dropdown -->
                                 <div class="cart-dropdown" id="cartDropdown">
+                                    <?php if (!empty($cart_values)): ?>
+                                        <?php foreach ($cart_values as $item): ?>
+                                            <div class="d-flex align-items-center border-bottom p-2">
+                                                <img src="<?php echo base_url().$item['product_image'] ?>" alt="Product" class="me-2" style="width: 60px; height: 60px;">
+                                                <div class="flex-grow-1">
+                                                    <a class="mb-1 product-title"><?= esc($item['product_name']) ?></a>
+                                                    <p class="text-danger"><?= esc($item['quantity']) ?> x $<?= number_format($item['product_price'], 2) ?></p>
+                                                </div>
+                                                <button class="remove-fromcart btn btn-sm btn-danger" data-product-id="<?= esc($item['id']) ?>">X</button>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <p class="p-2">Your cart is empty.</p>
+                                    <?php endif; ?>
+
+                                    <!-- Cart Actions -->
                                     <div class="d-flex justify-content-between p-2">
-                                        <button class="btn btn-success btn-sm view-cart">View Cart</button>
-                                        <button class="btn btn-success btn-sm checkout">Checkout</button>
+                                        <a href="../add-to-cart"><button class="btn btn-success btn-sm view-cart">View Cart</button></a>
+                                        <a href="../checkout"><button class="btn btn-success btn-sm checkout">Checkout</button></a>
                                     </div>
                                 </div>
                             </div>
+
+
                             <span class="support d-none d-sm-block">
                                 <a class="tel">(+021) 345 678 910</a>
                                 <a class="email">support@gmail.com</a>
@@ -133,7 +192,6 @@
         </div>
         <!-- Navbar -->
         <?php
-            $db = \Config\Database::connect();
             $query = $db->query("SELECT * FROM menus WHERE active='1'");
             $mega_menu = $query->getResultArray();
             // print_r($mega_menu); exit;
@@ -183,7 +241,7 @@
                                           $sub_category = $sub_query->getResultArray();
                                         //   print_r($sub_category); exit;
                                           ?>
-                                            <li class="sub-category-item <?php if(isset($sub_category) && count($sub_category) > 0){ echo 'arrow-icon'; } ?> "
+                                            <!-- <li class="sub-category-item <?php if(isset($sub_category) && count($sub_category) > 0){ echo 'arrow-icon'; } ?> "
                                                 data-subcategory="<?= $category['name'] ?>">
                                                 <a class=" arrow-icon "
                                                     href="<?php if(isset($category['slug'])){ echo base_url($category['slug']); } ?>">
@@ -191,7 +249,7 @@
                                                 <?php 
                                                 if($sub_category){
                                             ?>
-                                                <ul>
+                                                <span class="arrow-toggle"></span><ul>
                                                     <?php 
                                                     foreach ($sub_category as $sub_cate):
                                                 ?>
@@ -203,7 +261,7 @@
                                                     <?php endforeach; ?>
                                                 </ul>
                                                 <?php } ?>
-                                            </li>
+                                            </li> -->
                                             <?php endforeach; ?>
 
                                             <!-- custom menu and sub custom -->
@@ -235,7 +293,7 @@
                                                 <?php 
                                             // if(count($ub_custom_category_results) > 0 || count($sub_custom_result) > 0){
                                             if(count($sub_custom_result) > 0){
-                                                echo "<ul>";
+                                                echo "<span class='arrow-toggle'></span><ul>";
                                             }
                                         ?>
                                                 <?php  if($ub_custom_category_results){ ?>
@@ -247,7 +305,16 @@
                                                 <?php } ?>
 
                                                 <?php  if($sub_custom_result){ ?>
-                                                <?php foreach ($sub_custom_result as $sub_custom_menu):
+
+                                            <li class="sub-category-item"
+                                                data-subcategory="<?= $custom_menu['title'] ?>">
+                                                <a class=" arrow-icon "
+                                                    href="<?php if(isset($custom_menu['link'])){ echo base_url($custom_menu['link']); } ?>">
+                                                    All <?= $custom_menu['title'] ?>
+                                                </a>
+                                            </li>
+
+                                            <?php foreach ($sub_custom_result as $sub_custom_menu):
                                                         $append_link = $custom_menu['link']. '/'.$sub_custom_menu['link'];
                                                         ?>
                                             <li class="sub-category-item"
@@ -267,7 +334,7 @@
                                                 <?php 
                                                                 // if(count($ub_custom_category_results) > 0 || count($sub_custom_result) > 0){
                                                                 if(count($sub_sub_custom_result) > 0){
-                                                                    echo '<ul class="sub-category">';
+                                                                    echo '<span class="arrow-toggle-child"></span><ul class="sub-category">';
                                                                 }
                                                             ?>
                                                 <?php
@@ -424,7 +491,8 @@
                         <div class="sub-category" id="subCategory" style="display: none;">
                             <div class="row menu-inside-header">
                                 <div class="col-md-12 parent-category">
-                                    <div class="back-button" id="backButton" style="display: none;"><i class="bi bi-arrow-left"></i></div>
+                                    <div class="back-button" id="backButton" style="display: none;"><i
+                                            class="bi bi-arrow-left"></i></div>
                                     <span id="parentCategoryTitle">
                                         <div class="icon-box"><i class="fa fa-laptop"></i></div>
                                     </span>
@@ -462,14 +530,17 @@
                             </li>
                             <li><a class="dropdown-item" href="/email-support-and-services">Email Support And
                                     Services</a></li>
-                            <li><a class="dropdown-item" href="/email-support-and-services">Email Support And
-                                    Services</a></li>
+                            <li><a class="dropdown-item" href="/computer-repairs">Computer Repair Services</a></li>
+                            <li><a class="dropdown-item" href="/laptop-repairs-sydney">Laptop Repairs Sydney</a></li>
+                            <li><a class="dropdown-item" href="/Mobile-Repairs">Mobile Phone Repairs</a></li>
+                            <li><a class="dropdown-item" href="/Tablet-Repairs">Tablet Repairs</a></li>
+                            <li><a class="dropdown-item" href="/macbook-repair">Macbook Repair</a></li>
                         </ul>
                     </li>
                     <li class="nav-item"><a class="nav-link" href="<?= base_url('brands') ?>">Shop By Brands</a></li>
                     <li class="nav-item"><a class="nav-link" href="<?= base_url('about-zylax-computers') ?>">About
                             Us</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Contact Us</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/contact-us">Contact Us</a></li>
                 </ul>
             </div>
             </div>

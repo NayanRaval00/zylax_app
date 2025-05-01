@@ -5,13 +5,22 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
+                <?php if(!empty($fetched_data['parent_id']) && !empty($fetched_data['custommenu_id'])){ ?>
+                    <h4>Edit Sub Sub Custom Menu</h4>
+                <?php }else{ ?>
                     <h4>Edit Sub Custom Menu</h4>
+                <?php } ?>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href="<?= base_url('admin/home') ?>">Home</a></li>
-                        <li class="breadcrumb-item active"><a href="<?= base_url('admin/menu/subcustommenus/'.$fetched_data['parent_id']) ?>">Sub Custom Menu</a></li>
-                        <li class="breadcrumb-item active">Edit Sub Custom Menu</li>
+                        <?php if(!empty($fetched_data['parent_id']) && !empty($fetched_data['custommenu_id'])){ ?>
+                            <li class="breadcrumb-item active"><a href="<?= base_url('admin/menu/sub_subcustommenus/'.$fetched_data['parent_id'].'/'.$fetched_data['custommenu_id']) ?>">Sub Sub Custom Menu</a></li>
+                            <li class="breadcrumb-item active">Edit Sub Sub Custom Menu</li>
+                        <?php }else{ ?>
+                            <li class="breadcrumb-item active"><a href="<?= base_url('admin/menu/subcustommenus/'.$fetched_data['parent_id']) ?>">Sub Custom Menu</a></li>
+                            <li class="breadcrumb-item active">Edit Sub Custom Menu</li>
+                        <?php } ?>
                     </ol>
                 </div>
             </div>
@@ -70,8 +79,8 @@
 
                                 <div class="form-group row">
                                     <div class="col-sm-12">
-                                        <label for="link">Link <span class='text-danger text-sm'>*</span></label>
-                                        <input type="text" class="form-control" id="link" placeholder="Menu Link" name="link" value="<?= isset($fetched_data['link']) ? $fetched_data['link'] : "" ?>">
+                                        <label for="link">Slug <span class='text-danger text-sm'>*</span></label>
+                                        <input type="text" class="form-control" id="link" placeholder="Menu Slug" name="link" value="<?= isset($fetched_data['link']) ? $fetched_data['link'] : "" ?>">
                                     </div>
                                 </div>
 
@@ -103,7 +112,11 @@
 
                                 <div class="form-group my-3">
                                     <button type="reset" class="btn btn-warning ">Reset</button>
-                                    <button type="submit" class="btn btn-success">Update Sub Custom Menu</button>
+                                    <?php if(!empty($fetched_data['parent_id']) && !empty($fetched_data['custommenu_id'])){ ?>
+                                        <button type="submit" class="btn btn-success">Update Sub Sub Custom Menu</button>
+                                    <?php }else{ ?>
+                                        <button type="submit" class="btn btn-success">Update Sub Custom Menu</button>
+                                    <?php } ?>
                                 </div>
                             </div>
 

@@ -17,8 +17,8 @@
                      <div class="col-lg-6">
                         <label>New Password</label>
                         <div class="input-group">
-                           <input type="password" name="newpassword" class="form-control passwordinput" id="password3" placeholder="New Password" required>
-                           <span class="input-group-text toggle-password" data-target="password3">
+                           <input type="password" name="newpassword" class="form-control passwordinput1" id="password3" placeholder="New Password" required>
+                           <span class="input-group-text toggle-password1" data-target="password3">
                               <i class="bi bi-eye-fill"></i>
                            </span>
                         </div>
@@ -26,8 +26,8 @@
                      <div class="col-lg-6">
                         <label>Confirm Password</label>
                         <div class="input-group">
-                           <input type="password" name="confirmpassword" class="form-control passwordinput" id="password2" placeholder="Confirm Password" required>
-                           <span class="input-group-text toggle-password" data-target="password2">
+                           <input type="password" name="confirmpassword" class="form-control passwordinput2" id="password2" placeholder="Confirm Password" required>
+                           <span class="input-group-text toggle-password2" data-target="password2">
                               <i class="bi bi-eye-fill"></i>
                            </span>
                         </div>
@@ -45,6 +45,5 @@
       </div>
    </div>
 </section>
-
 
 <?= $this->include('frontend/layouts/footer') ?>

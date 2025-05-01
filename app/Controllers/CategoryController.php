@@ -22,6 +22,8 @@ use App\Models\Menus;
 use App\Models\Custommenus;
 use App\Models\CustommenusSub;
 
+use Config\Database;
+
 class CategoryController extends BaseController
 {
 
@@ -70,13 +72,48 @@ class CategoryController extends BaseController
             // print_r($breadcrumb);
             // exit;
         }else{
-            $breadcrumb = $categoriesModel->getCategoryBreadcrumb($parent_category['parent_id']);
+            if(!empty($parent_category)){
+                $breadcrumb = $categoriesModel->getCategoryBreadcrumb($parent_category['parent_id']);
+            }
         }
 
-        $sub_categories = $categoriesModel
-                    ->where('parent_id', $parent_category['id'])
-                    ->where('status', 1)
-                    ->orderBy('name','asc')->findAll();
+        // $sub_categories = $categoriesModel
+        //             ->where('parent_id', $parent_category['id'])
+        //             ->where('status', 1)
+        //             ->orderBy('name','asc')->findAll();
+
+        $sub_categories = [];
+
+        $db = Database::connect(); // 🔹 Connect to DB
+
+        // Get all child category IDs (recursively)
+        $childIds = array_unique($categoriesModel->getChildCategoryIds($parent_category['id']));
+
+        foreach ($childIds as $cate_id) {
+
+            // Count products in these categories
+            $builder = $db->table('products as p');
+            $builder->select('COUNT(p.id) as product_count');
+            $builder->where('p.category_id', $cate_id);
+            $builder->where('p.status', 1);
+            $query = $builder->get();
+            $result = $query->getRowArray();
+
+            // // Get category info (name, slug, etc.)
+            $category = $categoriesModel->find($cate_id); // Adjust this based on your model
+
+            if($result['product_count'] > 0)
+            $sub_categories[] = [
+                'category_id' => $parent_category['id'],
+                'category_name' => $category['name'],
+                'category_slug' => $category['slug'],
+                'product_count' => $result['product_count']
+            ];
+
+        }
+
+        // dd($sub_categories);
+
 
         $subCategoryData = [
             'id' => $parent_category['id'],
@@ -88,15 +125,17 @@ class CategoryController extends BaseController
         $attributeSetModel = new AttributeSet();
         $attributeModel = new Attributes();
 
-        $excludedKeys = ['brands', 'search', 'filterBy', 'page']; // Keys to exclude
+        $excludedKeys = ['categories', 'brands', 'search', 'filterBy', 'page']; // Keys to exclude
         $queryParams = array_diff_key($_GET, array_flip($excludedKeys));
-
+        // dd($queryParams);
         // echo "<pre>";
         $person = [];
         if(!empty($queryParams)){
             // print_r($queryParams); exit;
 
             $index = 0;
+
+           
            
             // echo "<pre>";
             foreach ($queryParams as $filterName => $filterValue) {
@@ -108,7 +147,8 @@ class CategoryController extends BaseController
                 //     // echo $index.' - '.$filterName.' - '.$attributeName.'<br>';
                     // $attributeSetData = $attributeSetModel->select('id, name')->where('slug',$filterName)->first();
                     // $attributeData = $attributeModel->select('id, attribute_set_id, name')->where('slug',$filterValue)->first();
-                    $attributeData = $attributeModel->getAttributesIdFromCategory($parent_category['id'], $filterName);
+                    // print_r($filterName); exit;
+                    $attributeData = $attributeModel->getAttributesIdFromCategoryMultiple($childIds, $filterName);
                     // print_r($attributeData); exit;
                     // $attributeData = $attributeModel->select('id, attribute_set_id, name')->where('attribute_set_id',$attributeSetData['id'])->where('name',$attributeName)->first();
                 //     $person[$index]['filter_name'] = $filterName;
@@ -118,12 +158,15 @@ class CategoryController extends BaseController
                 //     $index++;
                 // }
 
+                // echo $attributeData['attribute_set_id']; exit;
+
                 
                 $person[$index]['filter_name'] = $filterName;
                 $person[$index]['filter_value'] = $filterValue;
                 if(!empty($attributeData['attribute_set_id'])){
                     $person[$index]['attribute_set_id'] = $attributeData['attribute_set_id'];
                 }
+                // dd($person); exit;
                 // $person[$index]['attribute_name'] = $attributeName;
                 // $person[$index]['attribute_id'] = $attributeData['id'];
 
@@ -132,6 +175,8 @@ class CategoryController extends BaseController
             // dd($person); exit;
         }
         // exit;
+        // dd($person); exit;
+
 
        
 
@@ -149,59 +194,78 @@ class CategoryController extends BaseController
         $minPrice = $maxPrice = $filterBy = $search = '';
 
 
-       if(!empty($filterParam) && empty($_GET)){
-        $filterParamFinal = ltrim($filterParam,"?");
-        $arrParam = explode('&', $filterParamFinal);
-
-        parse_str($filterParamFinal, $params);
-
-        foreach ($params as $key => $filter) {
-            // echo $key;
-            // print_r($filter);
-
-
-            if($key == 'brands'){
-                $selectedBrands = isset($filter) ? explode(' ', $filter) : [];
-                // print_r($selectedBrands); exit;
+        if (!empty($filterParam) && empty($_GET)) {
+            $filterParamFinal = ltrim($filterParam, "?");
+            $arrParam = explode('&', $filterParamFinal);
+        
+            parse_str($filterParamFinal, $params);
+        
+            // Initialize variables
+            $selectedCategories = [];
+            $selectedBrands = [];
+            $selectedTags = [];
+            $minPrice = '';
+            $maxPrice = '';
+            $filterBy = '';
+            $search = '';
+            $person = [];
+            $index = 0;
+        
+            $excludedKeys = ['brands', 'tags', 'minPrice', 'maxPrice', 'filterBy', 'search'];
+        
+            foreach ($params as $key => $filter) {
+        
+                switch ($key) {
+                    case 'categories':
+                        $selectedCategories = !empty($filter) ? explode(' ', $filter) : [];
+                        break;
+        
+                    case 'brands':
+                        $selectedBrands = !empty($filter) ? explode(' ', $filter) : [];
+                        break;
+        
+                    case 'tags':
+                        $selectedTags = !empty($filter) ? explode(' ', $filter) : [];
+                        break;
+        
+                    case 'minPrice':
+                        $minPrice = $filter;
+                        break;
+        
+                    case 'maxPrice':
+                        $maxPrice = $filter;
+                        break;
+        
+                    case 'filterBy':
+                        $filterBy = $filter;
+                        break;
+        
+                    case 'search':
+                        $search = $filter;
+                        break;
+        
+                    default:
+                        // Process custom attribute filters
+                        $attributeSetData = $attributeSetModel->select('id, name')->where('slug', $key)->first();
+        
+                        if ($attributeSetData) {
+                            $person[] = [
+                                'filter_name' => $key,
+                                'filter_value' => $filter,
+                                'attribute_set_id' => $attributeSetData['id'],
+                            ];
+                        }
+                        break;
+                }
             }
-            if($key == 'tags'){
-                $selectedTags = isset($filter) ? explode(' ', $filter) : [];
-                // print_r($selectedBrands); exit;
-            }
-            if($key == 'minPrice'){
-                $minPrice = isset($filter) ? $filter : '';
-                // print_r($selectedBrands); exit;
-            }
-            if($key == 'maxPrice'){
-                $maxPrice = isset($filter) ? $filter : '';
-                // print_r($selectedBrands); exit;
-            }
-            if($key == 'filterBy'){
-                $filterBy = isset($filter) ? $filter : '';
-                // print_r($selectedBrands); exit;
-            }
-            if($key == 'search'){
-                $search = isset($filter) ? $filter : '';
-                // print_r($selectedBrands); exit;
-            }
-
-            if($key != 'brands' && $key != 'tags' && $key != 'minPrice' && $key != 'maxPrice' && $key != 'filterBy' && $key != 'search'){
-       
-                $attributeSetData = $attributeSetModel->select('id, name')->where('slug',$key)->first();
-                $person[$index]['filter_name'] = $key;
-                $person[$index]['filter_value'] = $filter;
-                $person[$index]['attribute_set_id'] = $attributeSetData['id'];
-
-            }
-
+        
             $selectedAttributeSets = isset($_GET['attribute_set']) ? explode(' ', $_GET['attribute_set']) : [];
-
-        }        
-
-        // print_r($arrParam); exit;
-       }
+        
+            // Optional: Clear selectedCategories to reset, if needed.
+            // $selectedCategories = [];
+        }
        else{
-            // $selectedCategories = isset($_GET['categories']) ? explode(' ', $_GET['categories']) : [];
+            $selectedCategories = isset($_GET['categories']) ? explode(' ', $_GET['categories']) : [];
             $selectedBrands = isset($_GET['brands']) ? explode(' ', $_GET['brands']) : [];
             $selectedAttributeSets = isset($_GET['attribute_set']) ? explode(' ', $_GET['attribute_set']) : [];
             $selectedTags = isset($_GET['tags']) ? explode(' ', $_GET['tags']) : [];
@@ -210,7 +274,36 @@ class CategoryController extends BaseController
             $filterBy = isset($_GET['filterBy']) ? $_GET['filterBy'] : '';
             $search = isset($_GET['search']) ? $_GET['search'] : '';
        }
-        $filterCategory = [$parent_category['id']];
+        // $filterCategory = [$parent_category['id']];
+        // dd($filterCategory);
+        
+        $filterCategory = array_unique($categoriesModel->getChildCategoryIds($parent_category['id']));
+        // dd($selectedCategories);
+
+        if ($selectedCategories && !empty($selectedCategories)) {
+            $filterCategory = [];
+            foreach ($selectedCategories as $cate_slug) {
+                // Get the category by slug
+                $category = $categoriesModel->select('id, name')->where('slug', $cate_slug)->first();
+        
+                if ($category) {
+                    // Add parent ID
+                    $filterCategory[] = $category['id'];
+        
+                    // Get all child category IDs recursively
+                    $childIds = $categoriesModel->getChildCategoryIds($category['id']); // Make sure this function exists
+        
+                    // Merge with filter category list
+                    $filterCategory = array_merge($filterCategory, $childIds);
+                }
+            }
+        
+            // Remove duplicate category IDs
+            $filterCategory = array_unique($filterCategory);
+            // dd($filterCategory);
+        }
+
+        // dd($person);
 
         $filterBrand = [];
         if($selectedBrands && !empty($selectedBrands)){
@@ -252,8 +345,14 @@ class CategoryController extends BaseController
 
         $productsModel = new Products();
         // $products = $productsModel->getProductsFiltersListing($search, $filterBy, [8, 9], [1]);
-        $products = $productsModel->getProductsFiltersListing($search, $filterBy, $filterCategory, $filterBrand, $minPrice, $maxPrice, $person, $filterTags);
-        $totalProducts = count($productsModel->getProductsFiltersListingCount($search, $filterBy, $filterCategory, $filterBrand, $minPrice, $maxPrice, $person, $filterTags)); // Total product count
+
+        if(!empty($person)){
+            $products = $productsModel->getProductsFiltersListing($search, $filterBy, $filterCategory, $filterBrand, $minPrice, $maxPrice, $person, $filterTags);
+            $totalProducts = $productsModel->getProductsFiltersListingCount($search, $filterBy, $filterCategory, $filterBrand, $minPrice, $maxPrice, $person, $filterTags); // Total product count
+        }else{
+            $products = $productsModel->getProductsFiltersListing($search, $filterBy, $filterCategory, $filterBrand, $minPrice, $maxPrice, $filterAttributes, $filterTags);
+            $totalProducts = $productsModel->getProductsFiltersListingCount($search, $filterBy, $filterCategory, $filterBrand, $minPrice, $maxPrice, $filterAttributes, $filterTags); // Total product count
+        }
 
         $product_min_max = $productsModel->getProductsMinMaxPrice();
 
@@ -262,15 +361,17 @@ class CategoryController extends BaseController
         
 
         if(!empty($person)){
-            $brands = $brandModel->getProductCountWithBrandWithAttributes($subCategoryData['id'], $person);
+            $brands = $brandModel->getProductCountWithBrandWithAttributesMultiple($childIds, $person);
         }else{
-            $brands = $brandModel->getProductCountWithBrands($subCategoryData['id']);
+            // $brands = $brandModel->getProductCountWithBrands($subCategoryData['id']);
+            $brands = $brandModel->getProductCountWithBrandsMultipleCategory($filterCategory);
         }
         
         // $productAttributesSets = $attributeSetCategoryModel->getProductAttributeSetWithCategory();
 
-        $productAttributesSets = $attributeSetCategoryModel->getProductAttributeSetWithCategoryMultiple($filterCategory, $filterBrand);
-
+        // dd($filterCategory);
+        $productAttributesSets = $attributeSetCategoryModel->getProductAttributeSetWithCategoryMultipleGroup($filterCategory, $filterBrand);
+        // dd($productAttributesSets);
         $productAttributesSetsValues = [];
         $index = 0;
 
@@ -278,7 +379,7 @@ class CategoryController extends BaseController
 
         foreach($productAttributesSets as $attributeSet){
             $attrSetId = $attributeSet['id'];
-            $attributeCategoryId = $attributeSet['category_id'];
+            $attributeCategoryId = $attributeSet['category_ids'];
             $productAttributesSetsValues[$index] = [
                 'set_id' => $attributeSet['id'],
                 'set_name' => $attributeSet['name'],
@@ -290,9 +391,9 @@ class CategoryController extends BaseController
             foreach($productAttributesSetValues as $attributeSetValue){
              
                 if(!empty($person)){
-                    $attributeProductCounts = $attributeSetCategoryModel->getAttributeNameProductCountsParentAttributes($attributeCategoryId, $attrSetId, $attributeSetValue['attribute_name'], $filterBrand, $person);
+                    $attributeProductCounts = $attributeSetCategoryModel->getAttributeNameProductCountsParentAttributesMultipleCategory($attributeCategoryId, $attrSetId, $attributeSetValue['attribute_slug'], $filterBrand, $person);
                 }else{
-                    $attributeProductCounts = $attributeSetCategoryModel->getAttributeNameProductCounts($attributeCategoryId, $attrSetId, $attributeSetValue['attribute_name'], $filterBrand);
+                    $attributeProductCounts = $attributeSetCategoryModel->getAttributeNameProductCountsWithMultipleCategory($attributeCategoryId, $attrSetId, $attributeSetValue['attribute_slug'], $filterBrand);
                 }
 
                 // dd($attributeProductCounts->countRes);
@@ -315,7 +416,7 @@ class CategoryController extends BaseController
         $productTags = $productTagsModel->getProductCountWithTags();
 
         // dd($productTags);
-        return view('frontend/categories', ['category_data' => $subCategoryData, 'menu_breadcrumb' => $menu_breadcrumb, 'breadcrumb' => $breadcrumb, 'parent_category' => $parent_category, 'categories' => $sub_categories, 'products' => $products, 'total_products' => $totalProducts, 'attribute_set_values' => $productAttributesSetsValues, 'brands' => $brands, 'product_tags' => $productTags, 'product_min_max' => $product_min_max, 'selectedBrands' => $selectedBrands,'selectedAttributeSets' => $selectedAttributeSets, 'selectedTags' => $selectedTags, 'minPrice' => $minPrice, 'maxPrice' => $maxPrice, 'filterBy' => $filterBy, 'search' => $search, 'pager' => ( $totalProducts > $perPage ? $pager->makeLinks($page, $perPage, $totalProducts) : '')]);
+        return view('frontend/categories-products', ['category_data' => $subCategoryData, 'menu_breadcrumb' => $menu_breadcrumb, 'breadcrumb' => $breadcrumb, 'parent_category' => $parent_category, 'categories' => $sub_categories, 'products' => $products, 'total_products' => $totalProducts, 'attribute_set_values' => $productAttributesSetsValues, 'brands' => $brands, 'product_tags' => $productTags, 'product_min_max' => $product_min_max, 'selectedCategories' => $selectedCategories,'selectedBrands' => $selectedBrands,'selectedAttributeSets' => $selectedAttributeSets, 'selectedTags' => $selectedTags, 'minPrice' => $minPrice, 'maxPrice' => $maxPrice, 'filterBy' => $filterBy, 'search' => $search, 'pager' => ( $totalProducts > $perPage ? $pager->makeLinks($page, $perPage, $totalProducts) : '')]);
 
         // return view('frontend/categories', ['category_data' => $subCategoryData, 'parent_category' => $parent_category, 'categories' => $sub_categories, 'products' => $products]);
     }
@@ -418,7 +519,9 @@ class CategoryController extends BaseController
             // print_r($breadcrumb);
             // exit;
         }else{
-            $breadcrumb = $categoriesModel->getCategoryBreadcrumb($parent_category['id']);
+            if(!empty($parent_category)){
+                $breadcrumb = $categoriesModel->getCategoryBreadcrumb($parent_category['id']);
+            }
         }
 
         $selectedBrands = $selectedTags = [];
@@ -536,7 +639,7 @@ class CategoryController extends BaseController
         $productsModel = new Products();
         // $products = $productsModel->getProductsFiltersListing($search, $filterBy, [8, 9], [1]);
         $products = $productsModel->getProductsFiltersListing($search, $filterBy, $filterCategory, $filterBrand, $minPrice, $maxPrice, $person, $filterTags, $perPage, $offset);
-        $totalProducts = count($productsModel->getProductsFiltersListingCount($search, $filterBy, $filterCategory, $filterBrand, $minPrice, $maxPrice, $person, $filterTags)); // Total product count
+        $totalProducts = $productsModel->getProductsFiltersListingCount($search, $filterBy, $filterCategory, $filterBrand, $minPrice, $maxPrice, $person, $filterTags); // Total product count
 
         $product_min_max = $productsModel->getProductsMinMaxPrice();
 
@@ -709,7 +812,9 @@ class CategoryController extends BaseController
             // print_r($breadcrumb);
             // exit;
         }else{
-            $breadcrumb = $categoriesModel->getCategoryBreadcrumb($sub_parent_category['id']);
+            if(!empty($sub_parent_category)){
+                $breadcrumb = $categoriesModel->getCategoryBreadcrumb($sub_parent_category['id']);
+            }
         }
         
 
@@ -824,7 +929,7 @@ class CategoryController extends BaseController
         // echo "call"; exit;
         // print_r($person); exit;
         $products = $productsModel->getProductsFiltersListing($search, $filterBy, $filterCategory, $filterBrand, $minPrice, $maxPrice, $person, $filterTags, $perPage, $offset);
-        $totalProducts = count($productsModel->getProductsFiltersListingCount($search, $filterBy, $filterCategory, $filterBrand, $minPrice, $maxPrice, $person, $filterTags)); // Total product count
+        $totalProducts = $productsModel->getProductsFiltersListingCount($search, $filterBy, $filterCategory, $filterBrand, $minPrice, $maxPrice, $person, $filterTags); // Total product count
 
         $product_min_max = $productsModel->getProductsMinMaxPrice();
 

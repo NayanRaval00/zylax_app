@@ -10,7 +10,9 @@
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href="<?= base_url('admin/home') ?>">Home</a></li>
-                        <li class="breadcrumb-item active">Sub Custom Menus</li>
+                        <li class="breadcrumb-item"><a href="<?= base_url('admin/menu/custommenus') ?>">Custom Menus</a></li>
+                        <li class="breadcrumb-item"><a href="<?= base_url('admin/menu/subcustommenus/'.$parent_id) ?>">Sub Custom Menus</a></li>
+                        <li class="breadcrumb-item active">Sub Sub Custom Menus</li>
                     </ol>
                 </div>
             </div>

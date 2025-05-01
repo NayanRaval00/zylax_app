@@ -106,7 +106,7 @@ class ProductController extends BaseController
         $products = $productsModel->getProductsFiltersListing($search, $filterBy, $filterCategory, $filterBrand, $minPrice, $maxPrice, $filterAttributes, $filterTags, $perPage, $offset);
 
         // $totalProducts = $productsModel->countAll(); // Total product count
-        $totalProducts = count($productsModel->getProductsFiltersListingCount($search, $filterBy, $filterCategory, $filterBrand, $minPrice, $maxPrice, $filterAttributes, $filterTags)); // Total product count
+        $totalProducts = $productsModel->getProductsFiltersListingCount($search, $filterBy, $filterCategory, $filterBrand, $minPrice, $maxPrice, $filterAttributes, $filterTags); // Total product count
 
         $product_min_max = $productsModel->getProductsMinMaxPrice();
 

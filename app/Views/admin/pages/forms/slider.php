@@ -102,6 +102,12 @@
                                     </div>
                                 </div>
                                 <div class="form-group">
+                                    <div><label for="image_alt">Alt Tag Text</label></div>
+                                    <div class="col-sm-6">
+                                        <input type="text" id="image_alt" name="image_alt" class="form-control"/>
+                                    </div>
+                                </div>
+                                <div class="form-group">
                                     <div><label for="image">URL <span class='text-danger text-sm'>*</span></label></div>
                                     <div class="col-sm-6">
                                         <input type="text" id="url" name="url" class="form-control" required/>

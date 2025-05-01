@@ -7,6 +7,7 @@ use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
 use App\Models\orders as live_order;
 use App\Models\Transaction;
+use App\Models\UserModel;
 use App\Models\Tracking_logs;
 use Dompdf\Dompdf;
 use Dompdf\Options;
@@ -51,9 +52,10 @@ class Adminorders extends Controller
         // Filters from request
         $filters = [
             'order_daterange'  => $request->getPost('order_daterange') ?? '',
-            'orderID'       => $request->getPost('orderEmail') ?? '',
+            'orderID'          => trim($request->getPost('orderEmail')) ?? '',
             'order_status'     => $request->getPost('order_status') ?? 'all',
             'payment_status'   => $request->getPost('payment_status') ?? 'all',
+            'usertype'          => $request->getPost('usertype') ?? '',
         ];
 
         // print_r($filters);
@@ -77,6 +79,9 @@ class Adminorders extends Controller
         
         // Always apply pagination
         $orders = array_slice(array_values($orders), $start, $length);
+
+        // print_r($orders);
+        // die;
         
         // Format data for DataTables
         $data = [];
@@ -86,13 +91,18 @@ class Adminorders extends Controller
                 '#' . $order['tran_id'],
                 '$' . number_format($order['tran_total_amt'], 2),
                 $order['billing_email'],
+                $order['company'],
                 $order['payment_source'],
                 $order['order_status'],
-                date("d-M-Y : h:iA", strtotime($order['created_at'])),
+                date("d-M-Y", strtotime($order['created_at'])),
+                ($order['user_type'] == 'guest' 
+                    ? 'Guest <a href="' . base_url('admin/adminorders/editGuest/' . $order['user_id']) . '" class="btn btn-warning btn-sm"><i class="fa fa-edit"></i></a>' 
+                    : 'Regular'
+                ),
                 '<a href="' . base_url('admin/adminorders/showDetails/' . $order['tracking_order_id']) . '" target="_blank" class="btn btn-primary btn-sm">View</a>',
                 '<a href="' . base_url('admin/adminorders/downloadInvoice/' . $order['tracking_order_id']) . '" target="_blank" class="btn btn-primary btn-sm">Print</a>',
             ];
-        }
+        }        
         
         // Return JSON response
         return $this->response->setJSON([
@@ -223,5 +233,44 @@ class Adminorders extends Controller
     //         "data" => $data
     //     ]);
     // }
+
+    public function editGuest($user_id) {
+        $data['main_page'] = VIEW . 'editGuestusers';
+
+        $settings = get_settings('system_settings', true);
+        $data['title'] = 'editGuestusers | ' . $settings['app_name'];
+        $data['meta_description'] = 'editGuestusers | ' . $settings['app_name'];
+
+        $data['orders'] = get_settings('orders');
+
+        $UserModel = new UserModel();
+        $data['user'] = $UserModel->getUserByUserid($user_id);
+
+        return view('admin/template', $data);
+    }
+
+    public function updateguestuser(){
+        $session = session();
+        $data = [
+            'username' => $this->request->getPost('username'),
+            'email'    => $this->request->getPost('email'),
+            'password' => password_hash($this->request->getPost('password'), PASSWORD_DEFAULT),
+            'user_type' => 'regular',
+            'status' => 1
+        ];
+
+        $userID = $this->request->getPost('user_id');
+    
+        $userModel = new UserModel();
+    
+        if ($userModel->update($userID, $data)) {
+            session()->setFlashdata('success', 'User updated successfully.');
+        } else {
+            session()->setFlashdata('error', 'Failed to update user.');
+        }
+
+        return redirect()->to('/admin/adminorders/editGuest/' . $userID);
+
+    }
 
 }

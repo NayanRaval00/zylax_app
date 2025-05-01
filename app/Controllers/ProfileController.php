@@ -239,37 +239,30 @@ class ProfileController extends BaseController
         $userId = $session->get('user_id');
 
         // Load UserModel
-        $userModel = new UserModel();
+        // $userModel = new UserModel();
         $addressModel = new AddressModel();
 
         // Fetch user data from the database
-        $userData = $userModel->find($userId);
+        // $userData = $userModel->find($userId);
 
-        $countryModel = new Countries();
-        $countries = $countryModel->select("name, id")->whereIn('iso3', ['USA', 'AUS'])->orderBy('name','asc')->findAll();
+        // $countryModel = new Countries();
+        // $countries = $countryModel->select("name, id")->whereIn('iso3', ['USA', 'AUS'])->orderBy('name','asc')->findAll();
 
         $userAddress = $addressModel->select("
-                        address.*, 
-                        countries.name as country_name, 
-                        states.state as state_name, 
-                        cities.name as city_name
+                        address.*
                     ")
-                    ->join("countries", "countries.id = address.country_code", "left")
-                    ->join("states", "states.id = address.state_code", "left")
-                    ->join("cities", "cities.id = address.city_code", "left")
                     ->where("address.user_id", $userId)
-                    ->orderBy("states.state", "asc")
                     ->findAll();
 
-        $states = [];
-        $stateModel = new StateModel();
-        $states = $stateModel->where('status',1)->orderBy('state','asc')->findAll();
+        // $states = [];
+        // $stateModel = new StateModel();
+        // $states = $stateModel->where('status',1)->orderBy('state','asc')->findAll();
 
-        $cities = [];
-        $cityModel = new CityModel();
-        $cities = $cityModel->where('status',1)->orderBy('name','asc')->findAll();
+        // $cities = [];
+        // $cityModel = new CityModel();
+        // $cities = $cityModel->where('status',1)->orderBy('name','asc')->findAll();
 
-        return view('frontend/manage-address', ['user' => $userData,'countries' => $countries,'states' => $states,'cities' => $cities, 'address' => $userAddress]);
+        return view('frontend/manage-address', ['address' => $userAddress]);
     }
 
     public function insertAddress()
@@ -286,11 +279,12 @@ class ProfileController extends BaseController
         $validation->setRules([
             'email'     => 'required|valid_email',
             'phoneno'   => 'required|numeric|min_length[10]|max_length[15]',
-            'country_code'   => 'required',
+            'company'   => 'required',
             'state'     => 'required',
-            'city'      => 'required',
-            'pincode'   => 'required|min_length[4]|max_length[10]|numeric',
-            'address'   => 'required'
+            'city'    => 'required',
+            'pincode'   => 'required',
+            'address_1'   => 'required'
+
         ]);
     
         if (!$validation->withRequest($this->request)->run()) {
@@ -303,16 +297,16 @@ class ProfileController extends BaseController
             'user_id'      => $userId,
             'email'        => $this->request->getPost('email'),
             'phoneno'      => $this->request->getPost('phoneno'),
-            'country_code'      => $this->request->getPost('country_code'),
-            'state_code'        => $this->request->getPost('state'),
-            'city_code'         => $this->request->getPost('city'),
+            'company'      => $this->request->getPost('company'),
+            'address_1'      => $this->request->getPost('address_1'),
+            'address_2'      => $this->request->getPost('address_2'),
+            'state'        => $this->request->getPost('state'),
+            'city'         => $this->request->getPost('city'),
             'pincode'      => $this->request->getPost('pincode'),
-            'address'      => $this->request->getPost('address'),
             'status_addr'  => $insstatus,
         ]);
 
         $lastInsertedID = $addressModel->insertID();
-
         if($insstatus == '1'){
             $upstatus = 0;
             $addressModel->whereNotIn('address_id', [$lastInsertedID])
@@ -357,11 +351,12 @@ class ProfileController extends BaseController
         $validation->setRules([
             'email'     => 'required|valid_email',
             'phoneno'   => 'required|numeric|min_length[10]|max_length[15]',
-            'country_code'   => 'required',
+            'company'   => 'required',
             'state'     => 'required',
-            'city'      => 'required',
-            'pincode'   => 'required|min_length[4]|max_length[10]|numeric',
-            'address'   => 'required'
+            'city'    => 'required',
+            'pincode'   => 'required',
+            'address_1'   => 'required'
+
         ]);
 
         if (!$validation->withRequest($this->request)->run()) {
@@ -371,11 +366,12 @@ class ProfileController extends BaseController
         $addressModel->update($addr_id, [
             'email'        => $this->request->getPost('email'),
             'phoneno'      => $this->request->getPost('phoneno'),
-            'country_code'      => $this->request->getPost('country_code'),
-            'state_code'        => $this->request->getPost('state'),
-            'city_code'         => $this->request->getPost('city'),
+            'company'      => $this->request->getPost('company'),
+            'address_1'      => $this->request->getPost('address_1'),
+            'address_2'      => $this->request->getPost('address_2'),
+            'state'        => $this->request->getPost('state'),
+            'city'         => $this->request->getPost('city'),
             'pincode'      => $this->request->getPost('pincode'),
-            'address'      => $this->request->getPost('address'),
             'status_addr'  => $insstatus,
         ]);
 

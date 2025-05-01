@@ -27,13 +27,41 @@ class Categories extends Model
         return $query->getResultArray();
     }
 
-    function getProductCountWithCategory($brand = ''){
+    function getProductCountWithCategory($brand = '', $category = ''){
         $builder = $this->db->table('categories as c');
         $builder->select('c.id AS category_id, c.name AS category_name, c.slug AS category_slug, COUNT(p.id) AS product_count');
         $builder->join('products as p', 'c.id = p.category_id');
         
          if (!empty($brand) && $brand != "") {
             $builder->where('p.brand', $brand);
+        }
+         if (!empty($category) && $category != "") {
+            $builder->where('p.category_id', $category);
+        }
+        
+        $builder->where('c.status', 1);
+        $builder->where('p.status', 1);
+        $builder->groupBy(['c.id', 'c.name']);
+        // $builder->orderBy('c.id', 'ASC');
+        $builder->orderBy('c.name', 'ASC');
+        $query = $builder->get();
+        return $query->getResultArray();
+    }
+
+    function getProductCountWithCategoryAutoSearch( $cleanInput = '', $categoryMultiple = []){
+        $builder = $this->db->table('categories as c');
+        $builder->select('c.id AS category_id, c.name AS category_name, c.slug AS category_slug, COUNT(p.id) AS product_count');
+        $builder->join('products as p', 'c.id = p.category_id');
+        
+         if (!empty($brand) && $brand != "") {
+            $builder->where('p.brand', $brand);
+        }
+         if (!empty($category) && $category != "") {
+            $builder->where('p.category_id', $category);
+        }
+        
+        if (!empty($categoryMultiple) && $categoryMultiple != "") {
+            $builder->whereIn('p.category_id', $categoryMultiple);
         }
         
         $builder->where('c.status', 1);
@@ -103,4 +131,3 @@ class Categories extends Model
     }
     
 }
-

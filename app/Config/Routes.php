@@ -60,7 +60,12 @@ $routes->get('categories', 'CategoryController::index');
 // $routes->get('categories/(:segment)/(:segment)', 'CategoryController::sub_sub_category/$1/$2');
 $routes->get('brands', 'BrandController::index');
 $routes->get('brands/(:segment)', 'BrandController::brand_products/$1');
-$routes->get('about-zylax-computers', 'PageController::index');
+$routes->get('about-zylax-computers', 'PageController::about_us');
+$routes->get('contact-us', 'PageController::contact_us');
+$routes->post('contact-us', 'PageController::contact_us');
+$routes->post('form-submit', 'PageController::submit_page');
+$routes->get('faq', 'PageController::faq');
+$routes->get('404', 'ErrorController::index');
 $routes->set404Override('App\Controllers\ErrorController::index');
 
 

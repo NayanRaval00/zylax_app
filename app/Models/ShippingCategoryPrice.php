@@ -14,13 +14,15 @@ class ShippingCategoryPrice extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['shipping_id', 'category_id', 'price'];
+    protected $allowedFields    = ['shipping_id', 'category_id', 'price', 'ordermaxprice', 'orderminprice', 'priority'];
 
     function getShippingPricingListing($category_id)
     {
         $builder = $this->db->table('shipping_category_prices');
         $builder->select('shipping_category_prices.*, shipping.name as shipping_name, shipping.id as shipping_id, shipping.description as shipping_description');
         $builder->join('shipping', 'shipping_category_prices.shipping_id = shipping.id', 'left');
+        $builder->join('shipping_category', 'shipping_category_prices.shipping_id = shipping_category.id', 'left');
+        $builder->where('shipping_category.status', '1');
         $builder->where('shipping_category_prices.category_id', $category_id);
         $builder->orderBy('shipping_category_prices.id', 'ASC');
         $query = $builder->get();
@@ -33,6 +35,8 @@ class ShippingCategoryPrice extends Model
         $builder = $this->db->table('shipping_category_prices');
         $builder->select('shipping_category_prices.*, shipping.name as shipping_name, shipping.id as shipping_id, shipping.description as shipping_description');
         $builder->join('shipping', 'shipping_category_prices.shipping_id = shipping.id', 'left');
+        $builder->join('shipping_category', 'shipping_category_prices.shipping_id = shipping_category.id', 'left');
+        $builder->where('shipping_category.status', '1');
         
         // First, check if an exact match exists
         $exactMatch = clone $builder;
@@ -49,6 +53,18 @@ class ShippingCategoryPrice extends Model
         
         return $query->getResultArray();
     }
+
+
+    public function fetchPriorityShipping($priority)
+    {
+        $builder = $this->db->table('shipping_category_prices'); // plural table name
+        $builder->select('shipping_category_prices.*, shipping.name as shipping_name');
+        $builder->join('shipping', 'shipping.id = shipping_category_prices.shipping_id');
+        $builder->where('shipping_category_prices.priority', $priority);
+        
+        return $builder->get()->getFirstRow('array'); // return as associative array
+    }
+    
     
 
 }

@@ -61,8 +61,8 @@
 
                                 <div class="form-group row">
                                     <div class="col-sm-12">
-                                        <label for="link">Link <span class='text-danger text-sm'>*</span></label>
-                                        <input type="text" class="form-control" id="link" placeholder="Menu Link" name="link" value="<?= isset($fetched_data['link']) ? $fetched_data['link'] : "" ?>">
+                                        <label for="link">Slug <span class='text-danger text-sm'>*</span></label>
+                                        <input type="text" class="form-control" id="link" placeholder="Menu Slug" name="link" value="<?= isset($fetched_data['link']) ? $fetched_data['link'] : "" ?>">
                                     </div>
                                 </div>
 

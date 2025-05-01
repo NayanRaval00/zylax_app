@@ -14,7 +14,7 @@ class Pages extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['name', 'menu_name', 'slug', 'image', 'description', 'meta_title', 'meta_description', 'meta_keyword', 'active', 'place_to', 'page_type', 'page_script'];
+    protected $allowedFields    = ['name', 'menu_name', 'slug', 'image', 'description', 'meta_title', 'meta_description', 'meta_keyword', 'active', 'place_to', 'page_type', 'page_script', 'sort'];
 
 
 }

@@ -72,7 +72,29 @@
                 </div>
 
                 <div class="form-group row">
-                  <label for="price" class="col-sm-2 col-form-label">Price <span class='text-danger text-sm'>*</span></label>
+                  <div class="col-md-4">
+                    <label for="orderminprice" class="col-form-label">Order Min Price <span class='text-danger text-sm'>*</span></label>
+                    <input type="number" class="form-control" id="orderminprice" placeholder="Order Min Price" name="orderminprice" value="<?= @$fetched_data[0]['orderminprice'] ?>">
+                  </div>
+                  
+                  <div class="col-md-4">
+                    <label for="ordermaxprice" class="col-form-label">Order Max Price <span class='text-danger text-sm'>*</span></label>
+                    <input type="number" class="form-control" id="ordermaxprice" placeholder="Order Max Price" name="ordermaxprice" value="<?= @$fetched_data[0]['ordermaxprice'] ?>">
+                  </div>
+                  
+                  <div class="col-md-4">
+                    <label for="priority" class="col-form-label">Set Priority <span class='text-danger text-sm'>*</span></label>
+                    <select id="priority" name="priority" class="form-control">
+                      <option value="">Choose Priority</option>
+                      <option value="1">First Priority</option>
+                      <option value="2">Second Priority</option>
+                    </select>
+                  </div>
+                </div>
+
+
+                <div class="form-group row">
+                  <label for="price" class="col-sm-2 col-form-label">Including Price <span class='text-danger text-sm'>*</span></label>
                   <div class="col-md-6">
                     <input type="number" class="form-control" id="price" placeholder="Price" name="price" value="<?= @$fetched_data[0]['price'] ?>">
                   </div>

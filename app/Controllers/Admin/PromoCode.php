@@ -9,7 +9,7 @@ use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
 
 
-class PromoCode extends Controller
+class Promocode extends Controller
 {
 
     public $promoCodesTable;

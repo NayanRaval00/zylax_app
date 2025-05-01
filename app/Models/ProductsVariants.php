@@ -14,5 +14,5 @@ class ProductsVariants extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['product_id', 'price', 'rrp','weight', 'height', 'breadth', 'length', 'sku', 'stock'];
+    protected $allowedFields    = ['product_id', 'price', 'rrp','weight', 'height', 'breadth', 'length', 'sku', 'stock', 'status'];
 }

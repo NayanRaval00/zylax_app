@@ -57,6 +57,110 @@ class AttributeSetCategory extends Model
         return $this->db->query($sql)->getRow();
     }
 
+
+    function getAttributeNameProductCountsWithMultipleCategory($attribute_category_ids, $attribute_set_id, $attribute_slug, $brands = [])
+    {
+        if (empty($attribute_category_ids)) {
+            return 0; // or handle gracefully
+        }
+
+        // Convert category IDs array to comma-separated string
+        $category_ids_str = implode(',', array_map('intval', $attribute_category_ids));
+
+        // SQL query start
+        $sql = "SELECT COUNT(DISTINCT p_a.product_id) AS countRes 
+                FROM product_attributes AS p_a 
+                JOIN products AS pc ON p_a.product_id = pc.id 
+                WHERE (pc.category_id IN ($category_ids_str) 
+                    OR pc.category_id IN (
+                        SELECT id FROM categories WHERE parent_id IN ($category_ids_str)
+                    )) 
+                AND pc.status = '1' 
+                AND p_a.attribute_id = '$attribute_set_id' 
+                AND p_a.attribute_value_id IN (
+                    SELECT id FROM attributes WHERE slug = '$attribute_slug'
+                )";
+
+        // Apply brand filter if given
+        if (!empty($brands)) {
+            $brands_list = implode(',', array_map('intval', $brands));
+            $sql .= " AND pc.brand IN ($brands_list)";
+        }
+
+        // echo $sql. '<br>';
+
+        return $this->db->query($sql)->getRow();
+    }
+
+    function getAttributeNameProductCountsWithMultipleCategoryGlobalSearch(
+        array $attribute_category_ids,
+        $attribute_set_id,
+        $attribute_slug,
+        array $brands = [],
+        string $keyword = ''
+    ) {
+        if (empty($attribute_category_ids)) {
+            return 0;
+        }
+    
+        $category_ids_str = implode(',', array_map('intval', $attribute_category_ids));
+    
+        // Prepare full-text keyword match clause
+        $matchScoreClause = '';
+        $havingClause = '';
+        if (!empty($keyword)) {
+            $keyword = trim(preg_replace('/\s+/', ' ', $keyword));
+            $words = explode(' ', $keyword);
+            $searchStringFull = '+' . implode(' +', $words);
+    
+            $matchScoreClause = ",
+                (
+                    (MATCH(pc.name) AGAINST('$searchStringFull' IN BOOLEAN MODE) * 50) +
+                    (MATCH(pc.short_description, pc.model, pc.vpn) AGAINST('$searchStringFull' IN BOOLEAN MODE) * 20) +
+                    " . implode(' + ', array_map(function ($word) {
+                        $plainWord = str_replace('+', '', $word);
+                        return "(CASE WHEN LOCATE('$plainWord', pc.name) > 0 THEN (1000 - LOCATE('$plainWord', pc.name)) ELSE 0 END)";
+                    }, $words)) . "
+                ) AS match_score";
+    
+            $havingClause = " HAVING match_score > 0";
+        }
+    
+        // Build SQL
+        $sql = "SELECT COUNT(*) AS countRes FROM (
+            SELECT DISTINCT p_a.product_id $matchScoreClause
+            FROM product_attributes AS p_a
+            JOIN products AS pc ON p_a.product_id = pc.id
+            WHERE (pc.category_id IN ($category_ids_str)
+                OR pc.category_id IN (
+                    SELECT id FROM categories WHERE parent_id IN ($category_ids_str)
+                ))
+            AND pc.status = '1'
+            AND p_a.attribute_id = '$attribute_set_id'
+            AND p_a.attribute_value_id IN (
+                SELECT id FROM attributes WHERE slug = '$attribute_slug'
+            )";
+    
+        // Add brand filter
+        if (!empty($brands)) {
+            $brands_list = implode(',', array_map('intval', $brands));
+            $sql .= " AND pc.brand IN ($brands_list)";
+        }
+    
+        $sql .= " GROUP BY p_a.product_id";
+    
+        if (!empty($havingClause)) {
+            $sql .= $havingClause;
+        }
+    
+        $sql .= ") AS filtered_products";
+    
+        return $this->db->query($sql)->getRow();
+    }
+    
+    
+
+
     // function getAttributeNameProductCountsParentAttributes($attribute_category_id, $attribute_set_id, $attribute_slug, $brands = [], $attributes = [])
     // {
     //     // print_r($attributes); exit;
@@ -172,68 +276,231 @@ class AttributeSetCategory extends Model
     // }
 
     function getAttributeNameProductCountsParentAttributes($attribute_category_id, $attribute_set_id, $attribute_slug, $brands = [], $attributes = [])
-{
-    $filter_attribute_set_ids = array_column($attributes, 'attribute_set_id');
+    {
+        $filter_attribute_set_ids = array_column($attributes, 'attribute_set_id');
 
-    // Start SQL
-    $sql = "SELECT COUNT(*) AS countRes FROM ( 
-        SELECT pc.id 
-        FROM product_attributes AS p_a 
-        JOIN products AS pc ON p_a.product_id = pc.id 
-        WHERE (pc.category_id = '$attribute_category_id' 
-        OR pc.category_id IN (SELECT id FROM categories WHERE parent_id = '$attribute_category_id')) 
-        AND pc.status = '1' ";
+        // Start SQL
+        $sql = "SELECT COUNT(*) AS countRes FROM ( 
+            SELECT pc.id 
+            FROM product_attributes AS p_a 
+            JOIN products AS pc ON p_a.product_id = pc.id 
+            WHERE (pc.category_id = '$attribute_category_id' 
+            OR pc.category_id IN (SELECT id FROM categories WHERE parent_id = '$attribute_category_id')) 
+            AND pc.status = '1' ";
 
-    // Brand filter (if provided)
-    if (!empty($brands)) {
-        $brands_list = implode(",", array_map('intval', $brands)); // ensure safe integers
-        $sql .= " AND pc.brand IN ($brands_list) ";
-    }
-
-    // Start attributes filter
-    $sql .= " AND ( (p_a.attribute_id = '$attribute_set_id' 
-              AND p_a.attribute_value_id IN (SELECT id FROM attributes WHERE slug = '$attribute_slug'))";
-
-    $innerCond = '';
-    $attributeCount = 1; // Start from 1 for the main attribute
-
-    foreach ($attributes as $attribute) {
-        $attr_set_id = $attribute['attribute_set_id'];
-
-        // Don't count main attribute again if already selected
-        if ($attr_set_id == $attribute_set_id) {
-            continue;
+        // Brand filter (if provided)
+        if (!empty($brands)) {
+            $brands_list = implode(",", array_map('intval', $brands)); // ensure safe integers
+            $sql .= " AND pc.brand IN ($brands_list) ";
         }
 
-        $selectedAttrNames = isset($attribute['filter_value']) ? explode(' ', trim($attribute['filter_value'])) : [];
+        // Start attributes filter
+        $sql .= " AND ( (p_a.attribute_id = '$attribute_set_id' 
+                AND p_a.attribute_value_id IN (SELECT id FROM attributes WHERE slug = '$attribute_slug'))";
 
-        if (empty($selectedAttrNames)) continue;
+        $innerCond = '';
+        $attributeCount = 1; // Start from 1 for the main attribute
 
-        $attr_names = implode("','", array_map('addslashes', $selectedAttrNames));
+        foreach ($attributes as $attribute) {
+            $attr_set_id = $attribute['attribute_set_id'];
 
-        $sql_get = "SELECT id FROM attributes WHERE slug IN ('$attr_names') AND attribute_set_id = '$attr_set_id'";
-        $results = $this->db->query($sql_get)->getResultArray();
-        $attr_ids = array_column($results, 'id');
+            // Don't count main attribute again if already selected
+            if ($attr_set_id == $attribute_set_id) {
+                continue;
+            }
 
-        if (!empty($attr_ids)) {
-            $attributeCount++;
-            $attr_ids_str = implode("','", $attr_ids);
-            $innerCond .= " OR (p_a.attribute_id = '$attr_set_id' AND p_a.attribute_value_id IN ('$attr_ids_str'))";
+            $selectedAttrNames = isset($attribute['filter_value']) ? explode(' ', trim($attribute['filter_value'])) : [];
+
+            if (empty($selectedAttrNames)) continue;
+
+            $attr_names = implode("','", array_map('addslashes', $selectedAttrNames));
+
+            $sql_get = "SELECT id FROM attributes WHERE slug IN ('$attr_names') AND attribute_set_id = '$attr_set_id'";
+            $results = $this->db->query($sql_get)->getResultArray();
+            $attr_ids = array_column($results, 'id');
+
+            if (!empty($attr_ids)) {
+                $attributeCount++;
+                $attr_ids_str = implode("','", $attr_ids);
+                $innerCond .= " OR (p_a.attribute_id = '$attr_set_id' AND p_a.attribute_value_id IN ('$attr_ids_str'))";
+            }
         }
+
+        // Append inner conditions and close the WHERE clause
+        if (!empty($innerCond)) {
+            $sql .= $innerCond;
+        }
+
+        $sql .= ") GROUP BY pc.id HAVING COUNT(DISTINCT p_a.attribute_id) = $attributeCount ) AS filtered_products";
+
+        // Uncomment to debug SQL
+        // echo $sql; exit;
+
+        return $this->db->query($sql)->getRow();
     }
 
-    // Append inner conditions and close the WHERE clause
-    if (!empty($innerCond)) {
-        $sql .= $innerCond;
+    function getAttributeNameProductCountsParentAttributesMultipleCategory($attribute_category_ids = [], $attribute_set_id, $attribute_slug, $brands = [], $attributes = [])
+    {
+        if (empty($attribute_category_ids)) {
+            return 0; // Or handle as needed
+        }
+    
+        // Convert category array to comma-separated list
+        $category_ids_str = implode(',', array_map('intval', $attribute_category_ids));
+    
+        // Start SQL
+        $sql = "SELECT COUNT(*) AS countRes FROM ( 
+            SELECT pc.id 
+            FROM product_attributes AS p_a 
+            JOIN products AS pc ON p_a.product_id = pc.id 
+            WHERE (pc.category_id IN ($category_ids_str) 
+            OR pc.category_id IN (SELECT id FROM categories WHERE parent_id IN ($category_ids_str))) 
+            AND pc.status = '1' ";
+    
+        // Brand filter
+        if (!empty($brands)) {
+            $brands_list = implode(',', array_map('intval', $brands));
+            $sql .= " AND pc.brand IN ($brands_list) ";
+        }
+    
+        // Start attribute filtering
+        $sql .= " AND ( (p_a.attribute_id = '$attribute_set_id' 
+                AND p_a.attribute_value_id IN (SELECT id FROM attributes WHERE slug = '$attribute_slug'))";
+    
+        $innerCond = '';
+        $attributeCount = 1;
+    
+        foreach ($attributes as $attribute) {
+            $attr_set_id = $attribute['attribute_set_id'] ?? null;
+    
+            if (!$attr_set_id || $attr_set_id == $attribute_set_id) {
+                continue;
+            }
+    
+            $selectedAttrNames = isset($attribute['filter_value']) ? explode(' ', trim($attribute['filter_value'])) : [];
+    
+            if (empty($selectedAttrNames)) continue;
+    
+            $attr_names = implode("','", array_map('addslashes', $selectedAttrNames));
+    
+            $sql_get = "SELECT id FROM attributes WHERE slug IN ('$attr_names') AND attribute_set_id = '$attr_set_id'";
+            $results = $this->db->query($sql_get)->getResultArray();
+            $attr_ids = array_column($results, 'id');
+    
+            if (!empty($attr_ids)) {
+                $attributeCount++;
+                $attr_ids_str = implode("','", $attr_ids);
+                $innerCond .= " OR (p_a.attribute_id = '$attr_set_id' AND p_a.attribute_value_id IN ('$attr_ids_str'))";
+            }
+        }
+    
+        if (!empty($innerCond)) {
+            $sql .= $innerCond;
+        }
+    
+        $sql .= ") GROUP BY pc.id HAVING COUNT(DISTINCT p_a.attribute_id) = $attributeCount ) AS filtered_products";
+    
+        return $this->db->query($sql)->getRow();
     }
 
-    $sql .= ") GROUP BY pc.id HAVING COUNT(DISTINCT p_a.attribute_id) = $attributeCount ) AS filtered_products";
-
-    // Uncomment to debug SQL
-    // echo $sql; exit;
-
-    return $this->db->query($sql)->getRow();
-}
+    function getAttributeNameProductCountsParentAttributesMultipleCategoryGlobalSearch(
+        array $attribute_category_ids = [],
+        $attribute_set_id,
+        $attribute_slug,
+        array $brands = [],
+        array $attributes = [],
+        string $keyword = ''
+    ) {
+        if (empty($attribute_category_ids)) {
+            return 0; // Or handle as needed
+        }
+    
+        $category_ids_str = implode(',', array_map('intval', $attribute_category_ids));
+    
+        // Prepare keyword logic
+        $matchScoreClause = '';
+        $havingClause = '';
+        if (!empty($keyword)) {
+            $keyword = trim(preg_replace('/\s+/', ' ', $keyword));
+            $words = explode(' ', $keyword);
+            $searchStringFull = '+' . implode(' +', $words);
+    
+            $matchScoreClause = ",
+                (
+                    (MATCH(pc.name) AGAINST('$searchStringFull' IN BOOLEAN MODE) * 50) +
+                    (MATCH(pc.short_description, pc.model, pc.vpn) AGAINST('$searchStringFull' IN BOOLEAN MODE) * 20) +
+                    " . implode(' + ', array_map(function ($word) {
+                        $plainWord = str_replace('+', '', $word);
+                        return "(CASE WHEN LOCATE('$plainWord', pc.name) > 0 THEN (1000 - LOCATE('$plainWord', pc.name)) ELSE 0 END)";
+                    }, $words)) . "
+                ) AS match_score";
+    
+            $havingClause = " HAVING match_score > 0";
+        }
+    
+        // Start SQL
+        $sql = "SELECT COUNT(*) AS countRes FROM (
+            SELECT pc.id $matchScoreClause
+            FROM product_attributes AS p_a
+            JOIN products AS pc ON p_a.product_id = pc.id
+            WHERE (pc.category_id IN ($category_ids_str)
+            OR pc.category_id IN (SELECT id FROM categories WHERE parent_id IN ($category_ids_str)))
+            AND pc.status = '1'";
+    
+        // Brand filter
+        if (!empty($brands)) {
+            $brands_list = implode(',', array_map('intval', $brands));
+            $sql .= " AND pc.brand IN ($brands_list)";
+        }
+    
+        // Attribute filtering
+        $sql .= " AND ( (p_a.attribute_id = '$attribute_set_id'
+                    AND p_a.attribute_value_id IN (SELECT id FROM attributes WHERE slug = '$attribute_slug'))";
+    
+        $innerCond = '';
+        $attributeCount = 1;
+    
+        foreach ($attributes as $attribute) {
+            $attr_set_id = $attribute['attribute_set_id'] ?? null;
+    
+            if (!$attr_set_id || $attr_set_id == $attribute_set_id) {
+                continue;
+            }
+    
+            $selectedAttrNames = isset($attribute['filter_value']) ? explode(' ', trim($attribute['filter_value'])) : [];
+    
+            if (empty($selectedAttrNames)) continue;
+    
+            $attr_names = implode("','", array_map('addslashes', $selectedAttrNames));
+    
+            $sql_get = "SELECT id FROM attributes WHERE slug IN ('$attr_names') AND attribute_set_id = '$attr_set_id'";
+            $results = $this->db->query($sql_get)->getResultArray();
+            $attr_ids = array_column($results, 'id');
+    
+            if (!empty($attr_ids)) {
+                $attributeCount++;
+                $attr_ids_str = implode("','", $attr_ids);
+                $innerCond .= " OR (p_a.attribute_id = '$attr_set_id' AND p_a.attribute_value_id IN ('$attr_ids_str'))";
+            }
+        }
+    
+        if (!empty($innerCond)) {
+            $sql .= $innerCond;
+        }
+    
+        $sql .= ") GROUP BY pc.id HAVING COUNT(DISTINCT p_a.attribute_id) = $attributeCount";
+    
+        // Add match score filtering if keyword exists
+        if (!empty($havingClause)) {
+            $sql .= " AND match_score > 0";
+        }
+    
+        $sql .= ") AS filtered_products";
+    
+        return $this->db->query($sql)->getRow();
+    }
+    
+    
 
 
     // function getProductAttributesSetValues($attribute_set_id)
@@ -286,6 +553,158 @@ class AttributeSetCategory extends Model
         $query = $builder->get();
         return $query->getResultArray();
     }
+
+    
+    // function getProductAttributeSetWithCategoryMultipleGroup($category = [], $brands = [])
+    // {
+    //     $builder = $this->db->table('attribute_set_category attr_set_cat');
+    //     $builder->select('attr_set.id, attr_set.name, attr_set.slug, p.category_id');
+    //     $builder->join('products as p', 'attr_set_cat.category_id = p.category_id');
+    //     $builder->join('attribute_set as attr_set', 'attr_set.id = attr_set_cat.attribute_set_id');
+
+    //     // if(2 dimension){
+    //     //     foreach{
+    //     //         if (!empty($category)) {
+    //     //             $builder->whereIn('p.category_id', $category);
+    //     //         }
+    //     //         foreach{
+    //     //             if (!empty($category)) {
+    //     //                 $builder->whereIn('p.category_id', $category);
+    //     //             }
+    //     //         }
+    //     //     }
+    //     // }
+    //     if (!empty($category)) {
+    //         $builder->whereIn('p.category_id', $category);
+    //     }
+
+    //     if (!empty($brands) && $brands != "") {
+    //         $builder->whereIn('p.brand', $brands);
+    //     }
+
+    //     $builder->where('p.status', 1);
+
+    //     $builder->groupBy(['attr_set.id']);
+    //     // $builder->groupBy(['attr_set.id', 'attr_set_cat.id', 'attr_set_cat.category_id']);
+
+    //     $builder->orderBy('attr_set.name', 'ASC');
+    //     $query = $builder->get();
+    //     return $query->getResultArray();
+    // }
+
+    function getProductAttributeSetWithCategoryMultipleGroup($category = [], $brands = [])
+    {
+        $builder = $this->db->table('attribute_set_category attr_set_cat');
+        $builder->select('attr_set.id as attribute_set_id, attr_set.name, attr_set.slug, p.category_id');
+        $builder->join('products as p', 'attr_set_cat.category_id = p.category_id');
+        $builder->join('attribute_set as attr_set', 'attr_set.id = attr_set_cat.attribute_set_id');
+
+        if (!empty($category)) {
+            $builder->whereIn('p.category_id', $category);
+        }
+
+        if (!empty($brands)) {
+            $builder->whereIn('p.brand', $brands);
+        }
+
+        $builder->where('p.status', 1);
+        $builder->orderBy('attr_set.name', 'ASC');
+
+        $query = $builder->get();
+        $results = $query->getResultArray();
+
+        // Group by attribute set and merge category_ids
+        $grouped = [];
+
+        foreach ($results as $row) {
+            $id = $row['attribute_set_id'];
+
+            if (!isset($grouped[$id])) {
+                $grouped[$id] = [
+                    'id' => $id,
+                    'name' => $row['name'],
+                    'slug' => $row['slug'],
+                    'category_ids' => [],
+                ];
+            }
+
+            if (!in_array($row['category_id'], $grouped[$id]['category_ids'])) {
+                $grouped[$id]['category_ids'][] = $row['category_id'];
+            }
+        }
+
+        // Reindex for array_values() if you want a clean 0-indexed array
+        return array_values($grouped);
+    }
+
+    function getProductAttributeSetWithCategoryMultipleGroupGlobalSearch(array $category = [], array $brands = [], string $keyword = '')
+    {
+        $db = \Config\Database::connect();
+        $builder = $db->table('attribute_set_category attr_set_cat');
+        $builder->select('attr_set.id as attribute_set_id, attr_set.name, attr_set.slug, p.category_id');
+        $builder->join('products as p', 'attr_set_cat.category_id = p.category_id');
+        $builder->join('attribute_set as attr_set', 'attr_set.id = attr_set_cat.attribute_set_id');
+
+        // Filters
+        if (!empty($category)) {
+            $builder->whereIn('p.category_id', $category);
+        }
+
+        if (!empty($brands)) {
+            $builder->whereIn('p.brand', $brands);
+        }
+
+        $builder->where('p.status', 1);
+
+        // Full-text keyword filtering
+        $keyword = trim(preg_replace('/\s+/', ' ', $keyword));
+        if (!empty($keyword)) {
+            $words = explode(' ', $keyword);
+            $searchStringFull = '+' . implode(' +', $words); // +hp +probook
+
+            // Match score calculation for filtering
+            $builder->select('
+                (
+                    (MATCH(p.name) AGAINST("' . $searchStringFull . '" IN BOOLEAN MODE) * 50) +
+                    (MATCH(p.short_description, p.model, p.vpn) AGAINST("' . $searchStringFull . '" IN BOOLEAN MODE) * 20) +
+                    ' . implode(' + ', array_map(function ($word) {
+                        $plainWord = str_replace('+', '', $word);
+                        return '(CASE WHEN LOCATE("' . $plainWord . '", p.name) > 0 THEN (1000 - LOCATE("' . $plainWord . '", p.name)) ELSE 0 END)';
+                    }, $words)) . '
+                ) AS match_score
+            ');
+
+            $builder->having('match_score >', 0);
+        }
+
+        $builder->orderBy('attr_set.name', 'ASC');
+
+        $query = $builder->get();
+        $results = $query->getResultArray();
+
+        // Group by attribute set and merge category_ids
+        $grouped = [];
+        foreach ($results as $row) {
+            $id = $row['attribute_set_id'];
+
+            if (!isset($grouped[$id])) {
+                $grouped[$id] = [
+                    'id' => $id,
+                    'name' => $row['name'],
+                    'slug' => $row['slug'],
+                    'category_ids' => [],
+                ];
+            }
+
+            if (!in_array($row['category_id'], $grouped[$id]['category_ids'])) {
+                $grouped[$id]['category_ids'][] = $row['category_id'];
+            }
+        }
+
+        return array_values($grouped);
+    }
+
+
 
     function getCategoryAttributeSet($category = null)
     {

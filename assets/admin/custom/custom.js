@@ -8488,6 +8488,47 @@ $(document).on('click', '.delete-brand', function () {
     });
 });
 
+$(document).on('click', '.delete-faq', function () {
+    var faq_id = $(this).data('id');
+    Swal.fire({
+        title: 'Are You Sure!',
+        text: "You won't be able to revert this!",
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!',
+        showLoaderOnConfirm: true,
+        preConfirm: function () {
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    type: 'GET',
+                    url: base_url + 'admin/faq/delete_faq',
+                    data: {
+                        id: faq_id
+                    },
+                    dataType: 'json'
+                })
+                    .done(function (response, textStatus) {
+                        if (response.error == false) {
+                            Swal.fire('Deleted!', 'Faq deleted successfully', 'success');
+                            location.reload();
+                        } else {
+                            Swal.fire('Oops...', 'Something went wrong with ajax !', 'error');
+                        }
+
+                    })
+                    .fail(function (jqXHR, textStatus, errorThrown) {
+                        Swal.fire('Oops...', 'Something went wrong with ajax !', 'error');
+                        csrfName = response['csrfName'];
+                        csrfHash = response['csrfHash'];
+                    });
+            });
+        },
+        allowOutsideClick: false
+    });
+});
+
 $(document).on('click', '.delete-page', function () {
     var page_id = $(this).data('id');
     Swal.fire({

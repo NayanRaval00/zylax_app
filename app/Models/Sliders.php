@@ -14,5 +14,5 @@ class Sliders extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['type', 'type_id', 'link', 'image'];
+    protected $allowedFields    = ['type', 'type_id', 'link', 'image', 'image_alt'];
 }

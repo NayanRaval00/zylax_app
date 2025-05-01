@@ -129,6 +129,3 @@ nb-configuration.xml
 /results/
 /phpunit*.xml
 zylaxonline-sync/
-app/config/Google.php
-app/config/Paypal.php
-app/config/Email.php

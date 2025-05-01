@@ -33,11 +33,12 @@
                                     <tr class="second-head">
                                         <th>Email</th>
                                         <th>Phone Number</th>
-                                        <th>Country</th>
+                                        <th>Company</th>
                                         <th>State</th>
                                         <th>City</th>
                                         <th>Pincode</th>
-                                        <th>Address</th>
+                                        <th>Address 1</th>
+                                        <th>Address 2</th>
                                         <th>Prmary Address</th>
                                         <th>Action</th>
                                     </tr>
@@ -47,17 +48,18 @@
                                     <tr>
                                         <td><?= $addr['email'] ?></td>
                                         <td><?= $addr['phoneno'] ?></td>
-                                        <td><?= $addr['country_name'] ?></td> <!-- Changed from <th> to <td> -->
-                                        <td><?= $addr['state_name'] ?></td>
-                                        <td><?= $addr['city_name'] ?></td>
+                                        <td><?= $addr['company'] ?></td> <!-- Changed from <th> to <td> -->
+                                        <td><?= $addr['state'] ?></td>
+                                        <td><?= $addr['city'] ?></td>
                                         <td><?= $addr['pincode'] ?></td>
-                                        <td><?= $addr['address'] ?></td>
+                                        <td><?= $addr['address_1'] ?></td>
+                                        <td><?= $addr['address_2'] ?></td>
                                         <td class="text-center">
-                                        <?php if ($addr['status_addr'] == 0): ?>
+                                            <?php if ($addr['status_addr'] == 0): ?>
                                             <i class="bi bi-ban text-danger fs-5"></i> <!-- Disabled icon -->
-                                        <?php else: ?>
+                                            <?php else: ?>
                                             <i class="bi bi-check text-success fs-3"></i> <!-- Enabled icon -->
-                                        <?php endif; ?>
+                                            <?php endif; ?>
                                         </td>
                                         <td>
                                             <a href="#" data-bs-toggle="modal"
@@ -88,14 +90,14 @@
                                                     <form method="post" id="profile-update-form"
                                                         action="<?= site_url('profile/update-address') ?>">
                                                         <div class="row g-3">
-                                                            <div class="col-md-6">
+                                                            <div class="col-md-4">
                                                                 <label for="email" class="form-label">Mail ID</label>
                                                                 <input type="email" class="form-control" id="email"
                                                                     name="email" value="<?= $addr['email'] ?>" required>
                                                                 <input type="hidden" name="address_id" id="address_id"
                                                                     value="<?= $addr['address_id'] ?>">
                                                             </div>
-                                                            <div class="col-md-6">
+                                                            <div class="col-md-4">
                                                                 <label for="phoneno" class="form-label">Phone
                                                                     Number</label>
                                                                 <input type="tel" class="form-control" id="phoneno"
@@ -103,63 +105,47 @@
                                                                     placeholder="Enter 10-digit phone number"
                                                                     value="<?= $addr['phoneno'] ?>" required>
                                                             </div>
-                                                            <div class="col-md-6">
-                                                                <label>Country</label>
-                                                                <select class="form-control" name="country_code"
-                                                                    id="country">
-                                                                    <option value="">Select...</option>
-                                                                    <?php foreach($countries as $country) { ?>
-                                                                    <option value="<?= $country["id"]; ?>"
-                                                                        <?= ($addr['country_code'] == $country["id"]) ? 'selected' : '' ?>>
-                                                                        <?= $country["name"]; ?>
-                                                                    </option>
-                                                                    <?php } ?>
-                                                                </select>
+                                                            <div class="col-md-4">
+                                                                <label for="phoneno" class="form-label">Company</label>
+                                                                <input type="tel" class="form-control" id="company"
+                                                                    name="company" placeholder="Enter company" value="<?= $addr['company'] ?>">
                                                             </div>
                                                             <div class="col-md-6">
-                                                                <label for="state"
-                                                                    class="form-label">Region/State</label>
-                                                                <select class="form-control" name="state" id="state">
-                                                                    <option value="">Select...</option>
-                                                                    <?php foreach($states as $state) { ?>
-                                                                    <option value="<?= $state["id"]; ?>"
-                                                                        <?= ($addr['state_code'] == $state["id"]) ? 'selected' : '' ?>>
-                                                                        <?= $state["state"]; ?>
-                                                                    </option>
-                                                                    <?php } ?>
-                                                                </select>
+                                                                <label for="state" class="form-label">Address 1</label>
+                                                                <input type="text" class="form-control" name="address_1"
+                                                                    id="address_1" placeholder="Enter state name"
+                                                                    value="<?= $addr['address_1'] ?>">
                                                             </div>
                                                             <div class="col-md-6">
-                                                                <label for="city" class="form-label">City</label>
-                                                                <select class="form-control" name="city" id="city">
-                                                                    <option value="">Select...</option>
-                                                                    <?php foreach($cities as $city) { ?>
-                                                                    <option value="<?= $city["id"]; ?>"
-                                                                        <?= ($addr['city_code'] == $city["id"]) ? 'selected' : '' ?>>
-                                                                        <?= $city["name"]; ?>
-                                                                    </option>
-                                                                    <?php } ?>
-                                                                </select>
+                                                                <label for="city" class="form-label">Address 2</label>
+                                                                <input type="text" class="form-control" name="address_2"
+                                                                    id="address_2" placeholder="Enter city name"
+                                                                    value="<?= $addr['address_2'] ?>">
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <label for="state" class="form-label">Suburb</label>
+                                                                <input type="text" class="form-control" name="city"
+                                                                    id="city" placeholder="Enter state name" value="<?= $addr['city'] ?>">
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <label for="city" class="form-label">state</label>
+                                                                <input type="text" class="form-control" name="state"
+                                                                    id="state" placeholder="Enter city name" value="<?= $addr['state'] ?>">
                                                             </div>
                                                             <div class="col-md-6">
                                                                 <label for="pincode" class="form-label">Pincode</label>
                                                                 <input type="text" class="form-control" id="pincode"
-                                                                    name="pincode" pattern="[0-9]{6}"
-                                                                    placeholder="Enter 6-digit pincode"
-                                                                    value="<?= $addr['pincode'] ?>" required>
+                                                                    name="pincode" placeholder="Enter 6-digit pincode"
+                                                                    value="<?= $addr['pincode'] ?>">
                                                             </div>
                                                             <div class="col-md-12">
-                                                                <label for="address" class="form-label">Address</label>
-                                                                <textarea class="form-control" id="address"
-                                                                    name="address" rows="3"
-                                                                    placeholder="Enter full address..."
-                                                                    required><?= $addr['address'] ?></textarea>
-                                                            </div>
-                                                            <div class="col-md-6">
-                                                                <input class="form-check-input status_addr_update" type="checkbox"
+                                                                <input class="form-check-input status_addr_update"
+                                                                    type="checkbox"
                                                                     id="status_addr_update-<?= $addr['address_id'] ?>"
-                                                                    name="status_addr_update" <?= ($addr['status_addr'] == "1") ? 'checked' : ''; ?>>
-                                                                <label class="form-check-label" for="status_addr_update-<?= $addr['address_id'] ?>">
+                                                                    name="status_addr_update"
+                                                                    <?= ($addr['status_addr'] == "1") ? 'checked' : ''; ?>>
+                                                                <label class="form-check-label"
+                                                                    for="status_addr_update-<?= $addr['address_id'] ?>">
                                                                     Set as primary address
                                                                 </label>
                                                             </div>
@@ -196,59 +182,46 @@
             <div class="modal-body">
                 <form method="post" id="profile-form" action="<?= site_url('profile/insert-address') ?>">
                     <div class="row g-3">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label for="email" class="form-label">Mail ID</label>
                             <input type="email" class="form-control" id="email" name="email" required>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label for="phoneno" class="form-label">Phone Number</label>
                             <input type="tel" class="form-control" id="phoneno" name="phoneno" pattern="[0-9]{10}"
                                 placeholder="Enter 10-digit phone number" required>
                         </div>
-                        <div class="col-md-6">
-                            <label>Country</label>
-                            <select class="form-control" name="country_code" id="country">
-                                <option value="">Select...</option>
-                                <?php foreach($countries as $country) {?>
-                                <option value="<?= $country["id"];?>"
-                                    <?= ($user['country_code'] == $country["id"]) ? 'selected' : '' ?>>
-                                    <?= $country["name"];?></option>
-                                <?php } ?>
-                            </select>
+                        <div class="col-md-4">
+                            <label for="phoneno" class="form-label">Company</label>
+                            <input type="tel" class="form-control" id="company" name="company"
+                                placeholder="Enter company" required>
                         </div>
                         <div class="col-md-6">
-                            <label for="state" class="form-label">Region/State</label>
-                            <select class="form-control" name="state" id="state">
-                                <option value="">Select...</option>
-                                <?php foreach($states as $state) {?>
-                                <option value="<?= $state["id"];?>"
-                                    <?= ($user['state'] == $state["id"]) ? 'selected' : '' ?>><?= $state["state"];?>
-                                </option>
-                                <?php } ?>
-                            </select>
+                            <label for="state" class="form-label">Address 1</label>
+                            <input type="text" class="form-control" name="address_1" id="address_1"
+                                placeholder="Enter state name" required>
                         </div>
                         <div class="col-md-6">
-                            <label for="city" class="form-label">City</label>
-                            <select class="form-control" name="city" id="city">
-                                <option value="">Select...</option>
-                                <?php foreach($cities as $city) {?>
-                                <option value="<?= $city["id"];?>"
-                                    <?= ($user['city'] == $city["id"]) ? 'selected' : '' ?>><?= $city["name"];?>
-                                </option>
-                                <?php } ?>
-                            </select>
+                            <label for="city" class="form-label">Address 2</label>
+                            <input type="text" class="form-control" name="address_2" id="address_2"
+                                placeholder="Enter city name">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="state" class="form-label">Suburb</label>
+                            <input type="text" class="form-control" name="city" id="city" placeholder="Enter state name"
+                                required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="city" class="form-label">state</label>
+                            <input type="text" class="form-control" name="state" id="state"
+                                placeholder="Enter city name" required>
                         </div>
                         <div class="col-md-6">
                             <label for="pincode" class="form-label">Pincode</label>
-                            <input type="text" class="form-control" id="pincode" name="pincode" pattern="[0-9]{6}"
+                            <input type="text" class="form-control" id="pincode" name="pincode"
                                 placeholder="Enter 6-digit pincode" required>
                         </div>
                         <div class="col-md-12">
-                            <label for="address" class="form-label">Address</label>
-                            <textarea class="form-control" id="address" name="address" rows="3"
-                                placeholder="Enter full address..." required></textarea>
-                        </div>
-                        <div class="col-md-6">
                             <input class="form-check-input" type="checkbox" name="status_addr" id="status_addr">
                             <label class="form-check-label" for="status_addr">
                                 Set a primary address
@@ -331,3 +304,39 @@ EOD;
 session()->set('profileScript', $profileScript);
 ?>
 <?= $this->include('frontend/layouts/footer') ?>
+
+<script>
+// auto address fetch
+(function() {
+    var widget, initAddressFinder = function() {
+        console.log(document.getElementById('address_1'))
+        widget = new AddressFinder.Widget(
+            document.getElementById('address_2'),
+            '3AUMPCNBFJX94HKR8DWT',
+            'AU', {
+                "address_params": {
+                    "gnaf": "1",
+                }
+            }
+        );
+        widget.on('result:select', function(fullAddress, metaData) {
+            // You will need to update these ids to match those in your form
+            document.getElementById('address_1').value = metaData.address_line_1;
+            document.getElementById('city').value = metaData.locality_name;
+            document.getElementById('state').value = metaData.state_territory;
+            document.getElementById('pincode').value = metaData.postcode;
+
+        });
+    };
+
+    function downloadAddressFinder() {
+        var script = document.createElement('script');
+        script.src = 'https://api.addressfinder.io/assets/v3/widget.js';
+        script.async = true;
+        script.onload = initAddressFinder;
+        document.body.appendChild(script);
+    };
+
+    document.addEventListener('DOMContentLoaded', downloadAddressFinder);
+})();
+</script>
