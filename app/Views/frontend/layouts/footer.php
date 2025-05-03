@@ -197,7 +197,7 @@ function add_to_cart(element) {
     }
 
     $.ajax({
-        url: '/CheckoutController/add_to_cart',
+        url: '/zylax/CheckoutController/add_to_cart',
         type: 'POST',
         data: {
             guest_id: guest_id,
@@ -221,7 +221,7 @@ function add_to_cart(element) {
                     timer: 3000,
                 }).then(() => {
                     // Refresh the page after the success message
-                    window.location.href = "/add-to-cart";
+                    window.location.href = "/zylax/add-to-cart";
                 });
             } else {
                 Swal.fire("Error!", response.message, "error");

@@ -1,6 +1,7 @@
-<?php 
+<?php
 
 namespace App\Controllers;
+
 use App\Libraries\Paypal_lib;
 use App\Models\Products;
 use App\Models\shipping_address;
@@ -21,8 +22,7 @@ use App\Services\PayPalService;
 use CodeIgniter\Controller;
 use App\Libraries\EmailHelper;
 use App\Models\AddressModel;
-
-
+use App\Models\ProductsVariants;
 
 class CheckoutController extends Controller
 {
@@ -32,7 +32,7 @@ class CheckoutController extends Controller
         $cartModel = new Product_Cart();
         $shippingCategoryPriceModel = new ShippingCategoryPrice();
         $Settings = new Settings();
-    
+
         // Get cart items for user or guest
         $cartItems = [];
         if ($session->has('guest_id')) {
@@ -42,7 +42,7 @@ class CheckoutController extends Controller
             $userid = $session->get('user_id');
             $cartItems = $cartModel->where('user_id', $userid)->findAll();
         }
-    
+
         // Get shipping and GST settings
         $shipping_gst_data = $Settings->where('variable', 'web_settings')->first();
         $shippingGst = 0;
@@ -55,7 +55,7 @@ class CheckoutController extends Controller
             $productGst = isset($jsonData['product_gst']) ? (float)$jsonData['product_gst'] : 0;
             $is_gst_included = !empty($shippingGst);
         }
-    
+
         // Calculate cart total excluding GST
         $cartTotalExclGst = array_reduce($cartItems, function ($sum, $item) {
             return $sum + $item['product_price'];
@@ -64,27 +64,27 @@ class CheckoutController extends Controller
         $shippingMethods = [];
         $totalShippingCharge = 0;
         $priorityMatched = false;
-        
+
         // Priority-based shipping check
         if ($cartTotalExclGst) {
             $priorities = [1, 2]; // fallback priorities
-        
+
             foreach ($priorities as $priority) {
                 $shippingDetails = $shippingCategoryPriceModel->fetchPriorityShipping($priority);
-        
+
                 if (!$shippingDetails) {
                     continue;
                 }
-        
+
                 $min = (float) $shippingDetails['orderminprice'];
                 $max = (float) $shippingDetails['ordermaxprice'];
-        
+
                 if ($cartTotalExclGst >= $min || $cartTotalExclGst <= $max) {
                     $shippingGstAmount = ($shippingDetails['price'] * $shippingGst) / 100;
                     $shippingChargeWithGst = $shippingDetails['price'] - $shippingGstAmount;
-        
+
                     $totalShippingCharge += $shippingDetails['price'];
-        
+
                     $shippingMethods[] = [
                         'shipping_id' => $shippingDetails['shipping_id'],
                         'shipping_name' => $shippingDetails['shipping_name'],
@@ -93,37 +93,37 @@ class CheckoutController extends Controller
                         'price_excl_gst' => $shippingChargeWithGst,
                         'price_incl_gst' => $shippingDetails['price'],
                     ];
-        
+
                     $priorityMatched = true;
                     break; // stop after first match
                 }
             }
         }
-        
-            // If no priority matched, fallback to category-based
+
+        // If no priority matched, fallback to category-based
         if (!$priorityMatched) {
             $categoryIds = array_unique(array_column($cartItems, 'cat_id'));
             $processedCategories = [];
-        
+
             foreach ($categoryIds as $categoryId) {
                 if (in_array($categoryId, $processedCategories)) {
                     continue;
                 }
-        
+
                 $shippingDetailsList = $shippingCategoryPriceModel->fetchShippingCharges($categoryId);
-        
+
                 if (empty($shippingDetailsList)) {
                     continue;
                 }
-        
+
                 foreach ($shippingDetailsList as $shipping) {
                     if (!empty($shipping['price'])) {
                         $shippingCharge = $shipping['price'];
                         $shippingGstAmount = ($shippingCharge * $shippingGst) / 100;
                         $shippingChargeWithGst = $shippingCharge - $shippingGstAmount;
-        
+
                         $totalShippingCharge += $shippingCharge;
-        
+
                         $shippingMethods[] = [
                             'shipping_id' => $shipping['shipping_id'],
                             'shipping_name' => $shipping['shipping_name'],
@@ -134,19 +134,19 @@ class CheckoutController extends Controller
                         ];
                     }
                 }
-        
+
                 $processedCategories[] = $categoryId;
             }
         }
-        
-    
+
+
         // Calculate GST on products
         $productGstAmount = ($cartTotalExclGst * $productGst) / 100;
         $priceIncludingGst = $cartTotalExclGst + $productGstAmount;
-    
+
         // Calculate final total (Products + Shipping)
         $finalTotal = $priceIncludingGst;
-    
+
         // Return data to view
         return view('frontend/cart/add-cart', [
             'cart_items' => $cartItems,
@@ -158,7 +158,7 @@ class CheckoutController extends Controller
             'final_total' => number_format($finalTotal, 2),
             'is_gst_included' => $is_gst_included
         ]);
-    } 
+    }
 
     // public function checkOut(){
     //     $Settings = new Settings();
@@ -186,24 +186,24 @@ class CheckoutController extends Controller
     public function checkOut()
     {
         $session = session();
-    
+
         $Settings = new Settings();
         $UserModel = new UserModel();
         $shipping_gst = $Settings->where('variable', 'web_settings')->first();
-    
+
         $checkoutenabled = null;
         if ($shipping_gst) {
             $jsonData = json_decode($shipping_gst['value'], true);
             $checkoutenabled = $jsonData['checkout_disbaled'] ?? null;
         }
-    
+
         $userData = [];
         $checkoutData = [];
         $addressModel = '';
         if ($session->has('checkout_data')) {
             $checkoutData = $session->get('checkout_data');
         }
-    
+
         if ($session->has('user_id')) {
             $userId = $session->get('user_id');
             $userModelData = $UserModel->getUserByUserid($userId);
@@ -213,7 +213,7 @@ class CheckoutController extends Controller
             $addressModel = new AddressModel();
             $addressModel = $addressModel->where('status_addr', 1)->where('user_id', $userId)->first();
         }
-    
+
         return view('frontend/cart/checkout', [
             'user' => $userData,
             'chkenabled' => $checkoutenabled,
@@ -221,9 +221,10 @@ class CheckoutController extends Controller
             'addressModel' => $addressModel
         ]);
     }
-    
 
-    public function fetchShippingCharges(){
+
+    public function fetchShippingCharges()
+    {
         $shippingCategoryPriceModel = new ShippingCategoryPrice();
         $Settings = new Settings();
         $shipping_gst = $Settings->where('variable', 'web_settings')->first();
@@ -233,10 +234,9 @@ class CheckoutController extends Controller
             $jsonData = json_decode($shipping_gst['value'], true); // Convert JSON to an associative array
             $shippingGst = $jsonData['shipping_gst'] ?? null; // Extract 'shipping_gst' key
             $productGst = $jsonData['product_gst'] ?? null; // Extract 'shipping_gst' key
-            if(!empty($shippingGst)){
+            if (!empty($shippingGst)) {
                 $is_gst_included = true;
             }
-
         }
         $shippingCategoryPrice = $shippingCategoryPriceModel->fetchShippingCharges($this->request->getPost('category_id'));
         // Return JSON response
@@ -247,7 +247,6 @@ class CheckoutController extends Controller
             'is_gst_included' => $is_gst_included,
             'product_gst' => $productGst
         ]);
-
     }
 
     public function guest_checkout()
@@ -271,10 +270,10 @@ class CheckoutController extends Controller
         // create user and token
         // $userId = 0;
         $user_id = "";
-        if($session->get('user_id')){
+        if ($session->get('user_id')) {
             $userId = $session->get('user_id');
-        }else{
-            $user_id = 'zy-'.uniqid();
+        } else {
+            $user_id = 'zy-' . uniqid();
         }
         $cart_token = "zy_" . uniqid(mt_rand(), true);
         // Define validation rules
@@ -297,10 +296,10 @@ class CheckoutController extends Controller
             'item_qty'      => 'required',
             'item_price'    => 'required',
             'item_shipid'   => 'permit_empty',
-            'item_shipprice'=> 'permit_empty',
+            'item_shipprice' => 'permit_empty',
             'payment'       => 'required',
         ];
-            // Validate input data
+        // Validate input data
         if (!$this->validate($rules)) {
             return redirect()->back()->withInput()->with('validation', $this->validator);
         }
@@ -314,7 +313,7 @@ class CheckoutController extends Controller
         } else {
             $lastId = 0;
         }
-        
+
         $genrateOrderID = 'ZYLAX' . rand(10, 100) . $lastId;
 
         // Save Billing Address
@@ -366,7 +365,7 @@ class CheckoutController extends Controller
             $total_price += (float) $item_price[$index];
         }
 
-         $ttl_amount = $total_price + $this->request->getPost('item_shipprice') + (float)$this->request->getPost('total_product_gst');
+        $ttl_amount = $total_price + $this->request->getPost('item_shipprice') + (float)$this->request->getPost('total_product_gst');
 
         // PRINT_R($ttl_amount);
         // die;
@@ -390,18 +389,18 @@ class CheckoutController extends Controller
         //     $newTotal = max(0, $ttl_amount - $discountAmount);
         // }
 
-        if($this->request->getPost('payment') === 'paypal'){
+        if ($this->request->getPost('payment') === 'paypal') {
 
             // print_r($_POST);
             // die;
-            if(!empty($billingId) || !empty($shippingId)){
+            if (!empty($billingId) || !empty($shippingId)) {
                 $guestemail = $this->request->getPost('email');
                 // Check if the user already exists by email
                 $existingUser = $UserModel->where('email', $guestemail)->first();
 
-                if(!$existingUser){
+                if (!$existingUser) {
                     $UserData = array(
-                        'ip'=> $this->request->getIPAddress(),
+                        'ip' => $this->request->getIPAddress(),
                         'username' => $this->request->getPost('email'),
                         'email' => $this->request->getPost('email'),
                         'fname' => $this->request->getPost('firstname'),
@@ -409,13 +408,13 @@ class CheckoutController extends Controller
                         'mobile' => $this->request->getPost('phoneno'),
                         'user_type' => 'guest'
                     );
-    
+
                     $UserModel->insert($UserData);
                     $guestuserId = $transaction->insertID();
-                }else{
+                } else {
                     $guestuserId = $existingUser['id'];
                 }
-                
+
                 $finalUserId = isset($userId) ? $userId : $guestuserId;
 
                 $transactionData = array(
@@ -438,7 +437,7 @@ class CheckoutController extends Controller
                 $tran_id = $transaction->insertID();
 
                 // Create Order
-                if($tran_id){
+                if ($tran_id) {
                     $orderData = [
                         'user_id' => $finalUserId,
                         'guest_id' => $user_id, // Guest user
@@ -471,7 +470,7 @@ class CheckoutController extends Controller
                     // Ensure all arrays have the same number of elements
                     $addonIndex = 0;
                     $item_count = count($item_ids);
-                    
+
                     for ($i = 0; $i < $item_count; $i++) {
                         $addonArray = [];
                         $cal_gst = ($item_prices[$i] * $productGst) / 100;
@@ -484,7 +483,7 @@ class CheckoutController extends Controller
                                 ];
                             }
                         }
-                    
+
                         $orderItemData = [
                             'order_id' => $orderId,
                             'product_id' => $item_ids[$i],
@@ -495,24 +494,22 @@ class CheckoutController extends Controller
                             'image' => $item_images[$i],
                             'addon_products' => json_encode($addonArray)
                         ];
-                    
+
                         $orderItemModel->insert($orderItemData);
                     }
-                    
-                    
                 }
                 $data = [
                     'tracking_id' => $genrateOrderID,
                     'status' => 'progress'
                 ];
-        
+
                 $transactionModel = new Tracking_logs();
-        
+
                 // Update the transaction where tracking_order_id matches
                 $transactionModel->insert($data);
 
                 $session->set('transection_id', $tran_id);
-        
+
                 // Retrieve items from POST request
                 $item_names = $this->request->getPost('item_name') ?? [];
                 $item_prices = $this->request->getPost('item_price') ?? [];
@@ -558,16 +555,15 @@ class CheckoutController extends Controller
                 if (isset($order['links'][1]['href'])) {
                     return redirect()->to($order['links'][1]['href']);
                 }
-
             }
-        }else if($this->request->getPost('payment') === 'bank_deposit'){
+        } else if ($this->request->getPost('payment') === 'bank_deposit') {
             $guestemail = $this->request->getPost('email');
             // Check if the user already exists by email
             $existingUser = $UserModel->where('email', $guestemail)->first();
 
-            if(!$existingUser){
+            if (!$existingUser) {
                 $UserData = array(
-                    'ip'=> $this->request->getIPAddress(),
+                    'ip' => $this->request->getIPAddress(),
                     'username' => $this->request->getPost('email'),
                     'email' => $this->request->getPost('email'),
                     'fname' => $this->request->getPost('firstname'),
@@ -578,13 +574,13 @@ class CheckoutController extends Controller
 
                 $UserModel->insert($UserData);
                 $guestuserId = $transaction->insertID();
-            }else{
+            } else {
                 $guestuserId = $existingUser['id'];
             }
 
             $finalUserId = isset($userId) ? $userId : $guestuserId;
 
-            if(!empty($billingId) || !empty($shippingId)){
+            if (!empty($billingId) || !empty($shippingId)) {
                 $transactionData = array(
                     'user_id' =>  $finalUserId,
                     'guest_id' => $user_id,
@@ -605,7 +601,7 @@ class CheckoutController extends Controller
                 $tran_id = $transaction->insertID();
 
                 // Create Order
-                if($tran_id){
+                if ($tran_id) {
                     // print_r($guestuserId);
                     // die;
                     $orderData = [
@@ -640,7 +636,7 @@ class CheckoutController extends Controller
                     // Ensure all arrays have the same number of elements
                     $addonIndex = 0;
                     $item_count = count($item_ids);
-                    
+
                     for ($i = 0; $i < $item_count; $i++) {
                         $addonArray = [];
                         $cal_gst = ($item_prices[$i] * $productGst) / 100;
@@ -653,7 +649,7 @@ class CheckoutController extends Controller
                                 ];
                             }
                         }
-                    
+
                         $orderItemData = [
                             'order_id' => $orderId,
                             'product_id' => $item_ids[$i],
@@ -664,19 +660,17 @@ class CheckoutController extends Controller
                             'image' => $item_images[$i],
                             'addon_products' => json_encode($addonArray)
                         ];
-                    
+
                         $orderItemModel->insert($orderItemData);
                     }
-                    
-                    
                 }
                 $data = [
                     'tracking_id' => $genrateOrderID,
                     'status' => 'progress'
                 ];
-        
+
                 $transactionModel = new Tracking_logs();
-        
+
                 // Update the transaction where tracking_order_id matches
                 $transactionModel->insert($data);
 
@@ -707,14 +701,14 @@ class CheckoutController extends Controller
                 $emailHelper->sendOrderConfirmationEmail($email, $genrateOrderID);
                 return redirect()->to('success')->with('data', $data);
             }
-        }else if($this->request->getPost('payment') === 'nab'){
+        } else if ($this->request->getPost('payment') === 'nab') {
             $guestemail = $this->request->getPost('email');
             // Check if the user already exists by email
             $existingUser = $UserModel->where('email', $guestemail)->first();
 
-            if(!$existingUser){
+            if (!$existingUser) {
                 $UserData = array(
-                    'ip'=> $this->request->getIPAddress(),
+                    'ip' => $this->request->getIPAddress(),
                     'username' => $this->request->getPost('email'),
                     'email' => $this->request->getPost('email'),
                     'fname' => $this->request->getPost('firstname'),
@@ -725,12 +719,12 @@ class CheckoutController extends Controller
 
                 $UserModel->insert($UserData);
                 $userId = $transaction->insertID();
-            }else{
+            } else {
                 $guestuserId = $existingUser['id'];
             }
 
             $finalUserId = isset($userId) ? $userId : $guestuserId;
-            
+
             $transactionData = array(
                 'user_id' => $finalUserId,
                 'guest_id' => $user_id,
@@ -749,8 +743,8 @@ class CheckoutController extends Controller
             );
             $transaction->insert($transactionData);
             $tran_id = $transaction->insertID();
-             // Create Order
-            if($tran_id){
+            // Create Order
+            if ($tran_id) {
                 $orderData = [
                     'user_id' => $finalUserId,
                     'guest_id' => $user_id, // Guest user
@@ -783,7 +777,7 @@ class CheckoutController extends Controller
                 // Ensure all arrays have the same number of elements
                 $addonIndex = 0;
                 $item_count = count($item_ids);
-                
+
                 for ($i = 0; $i < $item_count; $i++) {
                     $addonArray = [];
                     $cal_gst = ($item_prices[$i] * $productGst) / 100;
@@ -796,7 +790,7 @@ class CheckoutController extends Controller
                             ];
                         }
                     }
-                
+
                     $orderItemData = [
                         'order_id' => $orderId,
                         'product_id' => $item_ids[$i],
@@ -807,19 +801,17 @@ class CheckoutController extends Controller
                         'image' => $item_images[$i],
                         'addon_products' => json_encode($addonArray)
                     ];
-                
+
                     $orderItemModel->insert($orderItemData);
                 }
-                
-                
             }
             $data = [
                 'tracking_id' => $genrateOrderID,
                 'status' => 'progress'
             ];
-    
+
             $transactionModel = new Tracking_logs();
-    
+
             // Update the transaction where tracking_order_id matches
             $transactionModel->insert($data);
 
@@ -850,48 +842,49 @@ class CheckoutController extends Controller
                 'order_id' => $genrateOrderID,
             ];
             return view('frontend/cart/nabPayment', $data);
-        }      
+        }
     }
 
-    public function success() {
+    public function success()
+    {
         $paypalService = new PayPalService();
         $Transaction = new Transaction();
         $emailHelper = new emailHelper();
-    
+
         $paypalOrderID = $this->request->getGet('token');
-    
-        if($paypalOrderID){
+
+        if ($paypalOrderID) {
 
             // Capture the payment
             $payment = $paypalService->capturePayment($paypalOrderID);
-        
+
             if (!isset($payment['status']) || $payment['status'] !== "COMPLETED") {
                 return view('frontend/cart/failure');
             }
-        
+
             // Get order details
             $orderDetails = $paypalService->getOrderDetails($paypalOrderID);
-        
+
             if (empty($orderDetails) || !isset($orderDetails['purchase_units'][0]['reference_id'])) {
                 return view('frontend/cart/failure');
             }
 
-        
+
             $referenceID = $orderDetails['purchase_units'][0]['reference_id'];
             $paymentResponseJson = json_encode($orderDetails);
 
             // Update only 'payment_response' in the database
             $emails = $Transaction->select('email')
-                        ->where('tracking_order_id', $referenceID)
-                        ->first();
+                ->where('tracking_order_id', $referenceID)
+                ->first();
 
             $email = $emails ? $emails['email'] : null;
 
             if ($emails > 0) {
                 // echo "hii";
                 $updated = $Transaction->where('tracking_order_id', $referenceID)
-                        ->set('payment_response', $paymentResponseJson)
-                        ->update();
+                    ->set('payment_response', $paymentResponseJson)
+                    ->update();
                 // Check if update was successful
                 if ($updated) {
                     $this->clearCartAndSession();
@@ -899,15 +892,15 @@ class CheckoutController extends Controller
                     return view('frontend/cart/success', ['referenceID' => $referenceID]);
                 }
             }
-        }else{
+        } else {
             $data = session()->getFlashdata('data');
             $this->clearCartAndSession();
             return view('frontend/cart/success', ['data' => $data]);
         }
-    
+
         return view('frontend/cart/failure');
     }
-    
+
 
     public function cancel()
     {
@@ -922,19 +915,19 @@ class CheckoutController extends Controller
 
         $request = service('request');
         $varData = json_encode(['get' => $request->getGet(), 'post' => $request->getPost()]);
-        
+
         $Tbl_nab_returndata->insert(['returned_data' => $varData]);
-        
+
         $orderId = $request->getGet('orderId');
-        
+
         if (!empty($orderId)) {
             $objData = $transaction->where('order_id', $orderId)->get()->getRow();
-            
+
             echo '<script>localStorage.clear();</script>';
 
             // if (!empty($objData)) {
             //     $db->table('transaction')->where('id', $objData->id)->update(['status' => 'Completed']);
-                
+
             //     if ($objData->guest_id != 0) {
             //         $objBillingData = $db->table('billing_address')
             //             ->where('guest_id', $objData->guest_id)
@@ -951,10 +944,10 @@ class CheckoutController extends Controller
             //             ->getRowArray();
             //     }
 
-                
+
             //     // $emailService = \Config\Services::email();
             //     // $subject = "Zylax Order";
-                
+
             //     // $dataMail = [
             //     //     'transection' => [
             //     //         'payment_source' => "NAB",
@@ -969,19 +962,19 @@ class CheckoutController extends Controller
             //     //     'shippingAddress' => $objBillingData,
             //     //     'objProductData' => $db->table('orders')->where('transection_id', $objData->id)->get()->getResultArray()
             //     // ];
-                
+
             //     // $mesg = view('mailTemplate/orders_as_service', $dataMail);
-                
+
             //     // $emailService->setTo($objData->email)
             //     //     ->setSubject($subject)
             //     //     ->setMessage($mesg)
             //     //     ->send();
-                
+
             //     // $emailService->setTo(ADMIN_MAIL)
             //     //     ->setSubject('New Order ' . date('Y-m-d'))
             //     //     ->setMessage($mesg)
             //     //     ->send();
-                
+
             //     // $cartService = service('cart');
             //     // $cartService->destroy();
             // }
@@ -1042,19 +1035,20 @@ class CheckoutController extends Controller
         $dompdf->stream("invoice_{$tracking_id}.pdf", array("Attachment" => 1));
     }
 
-    public function validate_coupon() {
+    public function validate_coupon()
+    {
         $promo_codes = new PromoCodes();
         $couponData = $promo_codes->validatePromoCode($this->request->getPost('coupon_id'));
-    
+
         if (!$couponData) {
             return $this->response->setJSON([
                 'status' => 'error',
                 'message' => 'Invalid or expired coupon code.'
             ]);
         }
-    
+
         $orderTotal = floatval($this->request->getPost('total'));
-    
+
         // Ensure orderTotal is valid
         if ($orderTotal <= 0) {
             return $this->response->setJSON([
@@ -1062,7 +1056,7 @@ class CheckoutController extends Controller
                 'message' => 'Invalid order total amount.'
             ]);
         }
-    
+
         // Check if coupon is active
         if ($couponData['status'] != 1) {
             return $this->response->setJSON([
@@ -1070,7 +1064,7 @@ class CheckoutController extends Controller
                 'message' => 'This coupon is not active.'
             ]);
         }
-    
+
         // Check start and end date
         $currentDate = date('Y-m-d');
         if ($currentDate < $couponData['start_date'] || $currentDate > $couponData['end_date']) {
@@ -1079,7 +1073,7 @@ class CheckoutController extends Controller
                 'message' => 'This coupon is not valid at this time.'
             ]);
         }
-    
+
         // Check if the order total meets the minimum required amount
         if ($orderTotal < floatval($couponData['minimum_order_amount'])) {
             return $this->response->setJSON([
@@ -1087,7 +1081,7 @@ class CheckoutController extends Controller
                 'message' => 'Minimum order amount required: ' . $couponData['minimum_order_amount']
             ]);
         }
-    
+
         // Check repeat usage limit
         if ($couponData['repeat_usage'] == 0) {
             return $this->response->setJSON([
@@ -1095,7 +1089,7 @@ class CheckoutController extends Controller
                 'message' => 'This coupon can only be used once per user.'
             ]);
         }
-    
+
         // Calculate discount
         $discountAmount = 0;
         $discountpercentage = '';
@@ -1103,21 +1097,20 @@ class CheckoutController extends Controller
         if ($couponData['discount_type'] === 'percentage') {
             // Calculate percentage discount
             $discountAmount = ($orderTotal * floatval($couponData['discount'])) / 100;
-        
+
             $newTotal = $discountAmount;
-            $discountpercentage = $couponData['discount'].'%';
+            $discountpercentage = $couponData['discount'] . '%';
             // Ensure discount does not exceed the maximum allowed discount amount
             if ($couponData['max_discount_amount'] > 0 && $discountAmount > floatval($couponData['max_discount_amount'])) {
                 // $discountAmount = floatval($couponData['max_discount_amount']);
                 // $discountAmount = '';
                 $discountAmount = ($orderTotal * floatval($couponData['max_discount_amount'])) / 100;
-                $discountpercentage = $couponData['max_discount_amount'].'%';
-
+                $discountpercentage = $couponData['max_discount_amount'] . '%';
             }
-        } else { 
+        } else {
             // Fixed amount discount
             $discountAmount = floatval($couponData['discount']);
-        
+
             // Ensure discount does not exceed order total
             if ($discountAmount > $orderTotal) {
                 $discountAmount = $orderTotal;
@@ -1144,52 +1137,52 @@ class CheckoutController extends Controller
     {
         $cartModel = new Product_Cart();
         $request = service('request');
-    
+
         // Get the guest session ID (for guest users)
         $sessionId = $request->getPost('guest_id');
-        
+
         // If guest_id does not exist, generate a unique ID and store it in the session
         if (!empty($sessionId)) {
             session()->set('guest_id', $sessionId);  // Store guest_id in the session
         }
-    
+
         $productId = $request->getPost('product_id');
         $productName = $request->getPost('product_name');
         $productPrice = $request->getPost('product_price');
         $catId = $request->getPost('cat_id');
         $quantity = $request->getPost('quantity');
         $configuration = $request->getPost('configuration');
-        
+
         // Handle product image
         $imageFile = $request->getPost('ppimage');
 
         if (empty($productId) || empty($productName) || empty($productPrice) || empty($catId) || empty($quantity)) {
             return $this->response->setJSON(['status' => 'error', 'message' => 'Missing product details']);
         }
-    
+
         // Check if the user is logged in
         $userId = '';
         if (session()->has('user_id')) {
             $userId = session('user_id');
         }
-    
+
         // Clean configuration (for add-ons)
         $configArray = json_decode($configuration, true);
         $configArray = $this->cleanConfigurationOptions($configArray);
         ksort($configArray);
         $configurationEncoded = json_encode($configArray);
-    
+
         $configurationHash = md5($configurationEncoded);
-    
+
         // If the user is logged in, we want to update the cart for the logged-in user
         if ($userId) {
             // Check if item already exists for logged-in user
             $existing = $cartModel->checkExistingCartItem($userId, null, $productId, $configurationHash);
-    
+
             if ($existing) {
                 $newQuantity = $existing['quantity'] + $quantity;
                 $newPrice = $productPrice * $newQuantity;
-    
+
                 // Update the quantity and price
                 $cartModel->update($existing['id'], [
                     'quantity' => $newQuantity,
@@ -1211,17 +1204,17 @@ class CheckoutController extends Controller
                     'product_image' => !empty($imageFile) ? $imageFile : null
                 ]);
             }
-    
+
             return $this->response->setJSON(['status' => 'success']);
         }
-    
+
         // If the user is not logged in, we handle it as a guest
         $existing = $cartModel->checkExistingCartItem(null, $sessionId, $productId, $configurationHash);
-    
+
         if ($existing) {
             $newQuantity = $existing['quantity'] + $quantity;
             $newPrice = $productPrice * $newQuantity;
-    
+
             // Update the quantity for the guest cart
             $cartModel->update($existing['id'], [
                 'quantity' => $newQuantity,
@@ -1240,13 +1233,13 @@ class CheckoutController extends Controller
                 'quantity' => $quantity,
                 'configuration' => $configurationEncoded,
                 'configuration_hash' => $configurationHash,
-               'product_image' => !empty($imageFile) ? $imageFile : null
+                'product_image' => !empty($imageFile) ? $imageFile : null
             ]);
         }
-    
+
         return $this->response->setJSON(['status' => 'success']);
     }
-    
+
 
     private function cleanConfigurationOptions($configArray)
     {
@@ -1263,9 +1256,10 @@ class CheckoutController extends Controller
     }
 
     // Controller (e.g., CartController.php)
-    public function deleteCart() {
+    public function deleteCart()
+    {
         $session = session();
-        
+
         // Ensure the request is POST
         if (!empty($_POST)) {
             // Get the product ID from the AJAX request
@@ -1273,7 +1267,7 @@ class CheckoutController extends Controller
 
             // Get the user's session information (user or guest)
             $guestid = $userid = '';
-            
+
             if ($session->has('guest_id')) {
                 $guestid = $session->get('guest_id');
             } else {
@@ -1298,7 +1292,7 @@ class CheckoutController extends Controller
             // Get the updated cart data to return
             // (You can create a function to get the total price and item count here)
             // $cart_values = $this->getCartData($userid, $guestid);
-            
+
             // $totalPrice = 0;
             // foreach ($cart_values as $item) {
             //     $totalPrice += $item['product_price'] * $item['quantity'];
@@ -1315,39 +1309,39 @@ class CheckoutController extends Controller
     public function save_checkout()
     {
         $session = session();
-    
+
         if (!empty($_POST)) {
             $checkoutDataJson = json_encode($_POST);
-    
+
             $guestid = '';
             $userid = '';
-    
+
             if ($session->has('guest_id')) {
                 $guestid = $session->get('guest_id');
             } else {
                 $userid = $session->get('user_id');
             }
-    
+
             if (empty($userid) && empty($guestid)) {
                 return $this->response->setJSON(['success' => false, 'message' => 'Session not found']);
             }
-    
+
             $db = \Config\Database::connect();
             $builder = $db->table('product_cart');
-    
+
             if (!empty($userid)) {
                 $builder->where('user_id', $userid);
             } else {
                 $builder->where('guest_userid', $guestid);
             }
-    
+
             // Save cart JSON in database
             $builder->set('cart_json', $checkoutDataJson);
             $builder->update();
-    
+
             // ✅ Prepare Addons data
             $addonData = [];
-    
+
             if (isset($_POST['addonSet']) && isset($_POST['addonName']) && isset($_POST['addonprice'])) {
                 foreach ($_POST['addonSet'] as $index => $addonSets) {
                     foreach ($addonSets as $key => $addonSet) {
@@ -1359,7 +1353,7 @@ class CheckoutController extends Controller
                     }
                 }
             }
-    
+
             // ✅ Save in session
             $session->set('checkout_data', [
                 'products' => $_POST['products'] ?? [],
@@ -1378,12 +1372,12 @@ class CheckoutController extends Controller
                 'total_prd_amt' => $_POST['total_prd_amt'] ?? '',
 
             ]);
-    
+
             return redirect()->to(base_url('checkout'));
         }
-    
+
         return $this->response->setJSON(['success' => false]);
-    }      
+    }
 
     private function clearCartAndSession()
     {
@@ -1405,53 +1399,83 @@ class CheckoutController extends Controller
 
     public function update_cart_button()
     {
+        $productCartModel = new Product_Cart();
+
         $session = session();
-    
+
         if (!isset($_POST['cart'])) {
             return $this->response->setJSON(['success' => false, 'message' => 'Cart data missing']);
         }
-    
+
         $cartData = $_POST['cart'];
         $guestid = '';
         $userid = '';
-    
+
         if ($session->has('guest_id')) {
             $guestid = $session->get('guest_id');
         } else {
             $userid = $session->get('user_id');
         }
-    
+
         if (empty($userid) && empty($guestid)) {
             return $this->response->setJSON(['success' => false, 'message' => 'Session not found']);
         }
-    
+
         $db = \Config\Database::connect();
-    
+
         foreach ($cartData as $item) {
+            $addOnItemPrice = 0;
+
+            $getProductCartValue = $productCartModel->where('id', $item['product_id'])->first();
+
+            $addOnItems = json_encode($getProductCartValue['configuration']);
+
+            $configuration = is_array($getProductCartValue['configuration'])
+                ? $getProductCartValue['configuration']
+                : json_decode($getProductCartValue['configuration'], true);
+
+            foreach ($configuration as $key => $value) {
+                if (isset($value['added_price'])) {
+                    $addOnItemPrice += (float) $value['added_price'];
+                }
+            }
+
+            // $price = 2687.00 + $addOnItemPrice;
+
+            // echo "Base Price: " . 2687.00 . "<br>";
+            // echo "Add-on Price: " . $addOnItemPrice . "<br>";
+            // echo "Total Price: " . $price . "<br>";
+
+            // die();
+
+            $getProductCart = $productCartModel->where('id', $item['product_id'])->first();
+            $productsVariantsModel = new ProductsVariants();
+            $productsVariants = $productsVariantsModel->where('product_id', $getProductCart['product_id'])->first();
+
+            $price = $productsVariants['price'] + $addOnItemPrice;
+            $subTotal = $item['quantity'] *  $price;
+
             $builder = $db->table('product_cart'); // Create fresh builder inside loop to avoid query stacking
-    
+
             $where = !empty($userid) ? ['user_id' => $userid] : ['guest_userid' => $guestid];
             $where['id'] = $item['product_id'];
-    
+
             $update = [
                 'quantity' => $item['quantity'],
-                'product_price' => $item['subtotal'],
+                'product_price' => $subTotal,
             ];
-    
+
             $builder->set($update);
             $builder->where($where);
-    
+
             // Print compiled SQL
             // echo $builder->getCompiledUpdate() . "<br>";
-    
+
             // Optional: Execute the update
             $builder->update();
         }
-    
+
         // If you only want to print queries, comment the response line
         return $this->response->setJSON(['success' => true, 'message' => 'Update queries printed']);
     }
-    
-
 }
-?>

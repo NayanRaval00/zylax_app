@@ -624,7 +624,7 @@ $('.remove-fromcart').on('click', function() {
   if (confirm('Are you sure you want to remove this item from the cart?')) {
       // Send AJAX request to delete the item from the cart
       $.ajax({
-        url: '/CheckoutController/deleteCart', // Replace with the correct route to your controller
+        url: '/zylax/CheckoutController/deleteCart', // Replace with the correct route to your controller
           type: 'POST',
           data: { 
               product_id: productId 
