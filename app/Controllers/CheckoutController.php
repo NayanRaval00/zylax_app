@@ -35,12 +35,15 @@ class CheckoutController extends Controller
 
         // Get cart items for user or guest
         $cartItems = [];
-        if ($session->has('guest_id')) {
+        if ($session->has('guest_id') && $session->get('guest_id')) {
             $guestid = $session->get('guest_id');
             $cartItems = $cartModel->where('guest_userid', $guestid)->findAll();
-        } else {
+        } elseif ($session->has('user_id') && $session->get('user_id')) {
             $userid = $session->get('user_id');
             $cartItems = $cartModel->where('user_id', $userid)->findAll();
+        } else {
+            // fallback — e.g. show empty cart
+            $cartItems = [];
         }
 
         // Get shipping and GST settings

@@ -500,7 +500,7 @@
 
         // Update subtotal: (base + addons) * qty
         
-        var totalSubtotal = ((unitBasePrice + addonTotal) * newQty).toFixed(2);
+        var totalSubtotal = (unitBasePrice * newQty).toFixed(2);
 
         // Update the hidden prd_total and visible text
         var $subtotalCell = $row.find(".product-subtotal");

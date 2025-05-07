@@ -100,7 +100,7 @@ $(document).ready(function() {
         });
     }
 
-    handleFormSubmit("#loginForm", "/auth/login", '/auth/my-account');
+    handleFormSubmit("#loginForm", "/zylax/auth/login", '/zylax/auth/my-account');
     handleFormSubmit("#signUpForm", "/auth/register", '/auth/my-account');
     handleFormSubmit("#forgotPasswordForm", "/auth/forgot-password", null);
 

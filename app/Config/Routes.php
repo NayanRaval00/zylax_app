@@ -15,6 +15,8 @@ $routes->get('/admin/login', 'Admin\Auth::login');
 $routes->post('/admin/loginProcess', 'Admin\Auth::loginProcess');
 $routes->get('/admin/logout', 'Admin\Auth::logout');
 
+
+
 // $routes->get('/admin/dashboard', 'Admin\Dashboard::index', ['filter' => 'auth']);
 // $routes->get('/admin/setting', 'Admin\Setting::index', ['filter' => 'auth']);
 
@@ -29,6 +31,7 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'au
     // $routes->get('promo-code', 'Promocode::index');
 });
 
+$routes->post('wishlist/toggle', 'WishlistController::toggle');
 
 //Frontend Routes
 $routes->post('auth/register', 'Auth::register');

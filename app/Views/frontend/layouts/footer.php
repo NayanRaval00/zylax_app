@@ -116,150 +116,170 @@
     </div>
 </footer>
 <?php if (!session()->has('user_id')) { ?>
-<?php echo view('modals/login_modal'); ?>
+    <?php echo view('modals/login_modal'); ?>
 <?php } ?>
 <!-- Jquery JS -->
-<script src="<?= base_url("assets/frontend/js/jquery.min.js");?>"></script>
+<script src="<?= base_url("assets/frontend/js/jquery.min.js"); ?>"></script>
 <!-- Bootstrap 5.3 JS -->
-<script src="<?= base_url("assets/frontend/js/bootstrap.bundle.min.js");?>"></script>
+<script src="<?= base_url("assets/frontend/js/bootstrap.bundle.min.js"); ?>"></script>
 <!-- Swiper JS -->
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <!-- Custom JS -->
-<script src="<?= base_url("assets/frontend/js/custom.js");?>"></script>
-<script src="<?= base_url("assets/frontend/js/cart.js");?>"></script>
+<script src="<?= base_url("assets/frontend/js/custom.js"); ?>"></script>
+<script src="<?= base_url("assets/frontend/js/cart.js"); ?>"></script>
 <!-- Backend js -->
-<script src="<?= base_url("assets/frontend/js/backend.js");?>"></script>
+<script src="<?= base_url("assets/frontend/js/backend.js"); ?>"></script>
 <script src="https://www.google.com/recaptcha/api.js?render=6LfyYusqAAAAABkY-_4PGAwAheQzXvEX1fxqbiQq"></script>
 
 <?php
-      $profileScript = session()->get('profileScript');
-      if ($profileScript) {
-         echo $profileScript;
-         session()->remove('profileScript'); // Optional: Remove after use
-      }
-      ?>
-<?php if($profileScript){ ?>
-<script>
-document.getElementById("logout-btn").addEventListener("click", function() {
-    localStorage.clear();
-});
-</script>
+$profileScript = session()->get('profileScript');
+if ($profileScript) {
+    echo $profileScript;
+    session()->remove('profileScript'); // Optional: Remove after use
+}
+?>
+<?php if ($profileScript) { ?>
+    <script>
+        document.getElementById("logout-btn").addEventListener("click", function() {
+            localStorage.clear();
+        });
+    </script>
 <?php } ?>
 
 <script>
-function add_to_cart(element) {
-    if (!element) {
-        console.error("add_to_cart() called without element!");
-        return;
-    }
-
-    let userID = '<?php echo session()->has('user_id') ?>';
-    let productId = element.getAttribute("pid");
-    let productName = element.getAttribute("ppn");
-    let productPrice = element.getAttribute("ppp");
-    let cat_id = element.getAttribute("cat_id");
-    let ppimage = element.getAttribute("ppimage");
-
-    let configuration = [];
-
-    // Function to clean text
-    function cleanText(text) {
-        return text.replace(/\s+/g, ' ').trim();
-    }
-
-    document.querySelectorAll('.customize-me .accordion-item').forEach(item => {
-        let setName = item.querySelector('.accordion-button')?.textContent?.trim();
-        let selectedRadio = item.querySelector('input[type="radio"]:checked');
-        if (selectedRadio) {
-            let label = selectedRadio.nextElementSibling?.textContent?.trim();
-            let price = selectedRadio.value;
-            configuration.push({
-                [cleanText(setName)]: {
-                    option: cleanText(label),
-                    added_price: price
-                }
-            });
+    function add_to_cart(element) {
+        if (!element) {
+            console.error("add_to_cart() called without element!");
+            return;
         }
-    });
 
-    let count = $("#prd_cnt_" + productId).val();
-    let quantity = parseInt(count) || 1;
+        let userID = '<?php echo session()->has('user_id') ?>';
+        let productId = element.getAttribute("pid");
+        let productName = element.getAttribute("ppn");
+        let productPrice = element.getAttribute("ppp");
+        let cat_id = element.getAttribute("cat_id");
+        let ppimage = element.getAttribute("ppimage");
 
-    function generateGuestSessionId() {
-        let id = 'guest_' + Math.random().toString(36).substr(2, 9);
-        localStorage.setItem('guestSessionId', id);
-        return id;
-    }
+        let configuration = [];
 
-    let guest_id = '';
-    if (!userID) {
-        guest_id = localStorage.getItem('guestSessionId') || generateGuestSessionId();
-    }
+        // Function to clean text
+        function cleanText(text) {
+            return text.replace(/\s+/g, ' ').trim();
+        }
 
-    $.ajax({
-        url: '/zylax/CheckoutController/add_to_cart',
-        type: 'POST',
-        data: {
-            guest_id: guest_id,
-            product_id: productId,
-            product_name: productName,
-            product_price: productPrice,
-            cat_id: cat_id,
-            quantity: quantity,
-            ppimage: ppimage,
-            configuration: JSON.stringify(Object.assign({}, ...configuration)) // convert to single object
-        },
-        dataType: 'json',
-        success: function(response) {
-            if (response.status === 'success') {
-                Swal.fire({
-                    title: "Added to Cart!",
-                    text: productName + " has been added to your cart.",
-                    icon: "success",
-                    toast: true,
-                    position: "top-end",
-                    timer: 3000,
-                }).then(() => {
-                    // Refresh the page after the success message
-                    window.location.href = "/zylax/add-to-cart";
+        document.querySelectorAll('.customize-me .accordion-item').forEach(item => {
+            let setName = item.querySelector('.accordion-button')?.textContent?.trim();
+            let selectedRadio = item.querySelector('input[type="radio"]:checked');
+            if (selectedRadio) {
+                let label = selectedRadio.nextElementSibling?.textContent?.trim();
+                let price = selectedRadio.value;
+                configuration.push({
+                    [cleanText(setName)]: {
+                        option: cleanText(label),
+                        added_price: price
+                    }
                 });
-            } else {
-                Swal.fire("Error!", response.message, "error");
             }
-        },
-        error: function(xhr, status, error) {
-            console.error("AJAX Error:", error);
+        });
+
+        let count = $("#prd_cnt_" + productId).val();
+        let quantity = parseInt(count) || 1;
+
+        function generateGuestSessionId() {
+            let id = 'guest_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('guestSessionId', id);
+            return id;
+        }
+
+        const guestId = localStorage.getItem('guestSessionId');
+        if (!userID) {
+            if (guestId == null) {
+                guestId = generateGuestSessionId();
+            }
+        }
+
+        $.ajax({
+            url: '/zylax/CheckoutController/add_to_cart',
+            type: 'POST',
+            data: {
+                guest_id: guestId,
+                product_id: productId,
+                product_name: productName,
+                product_price: productPrice,
+                cat_id: cat_id,
+                quantity: quantity,
+                ppimage: ppimage,
+                configuration: JSON.stringify(Object.assign({}, ...configuration)) // convert to single object
+            },
+            dataType: 'json',
+            success: function(response) {
+                if (response.status === 'success') {
+                    Swal.fire({
+                        title: "Added to Cart!",
+                        text: productName + " has been added to your cart.",
+                        icon: "success",
+                        toast: true,
+                        position: "top-end",
+                        timer: 3000,
+                    }).then(() => {
+                        // Refresh the page after the success message
+                        window.location.href = "/zylax/add-to-cart";
+                    });
+                } else {
+                    Swal.fire("Error!", response.message, "error");
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error("AJAX Error:", error);
+            }
+        });
+    }
+
+    var cartContainer = document.getElementById("cartContainer");
+    var cartDropdown = document.getElementById("cartDropdown");
+
+    // Toggle dropdown on click
+    cartContainer.addEventListener("click", function(event) {
+        event.stopPropagation(); // Prevent click from closing immediately
+        cartDropdown.classList.toggle("active");
+        $(".cart-dropdown").css("display", "block");
+    });
+
+    // Close dropdown if clicking outside
+    document.addEventListener("click", function(event) {
+        if (!cartContainer.contains(event.target)) {
+            cartDropdown.classList.remove("active");
         }
     });
-}
 
-var cartContainer = document.getElementById("cartContainer");
-var cartDropdown = document.getElementById("cartDropdown");
+    $(document).click(function(e) {
+        if (!$(e.target).closest(".cart-container, #cartDropdown").length) {
+            $("#cartDropdown").fadeOut();
+        }
+    });
 
-// Toggle dropdown on click
-cartContainer.addEventListener("click", function (event) {
-  event.stopPropagation(); // Prevent click from closing immediately
-  cartDropdown.classList.toggle("active");
-  $(".cart-dropdown").css("display", "block");
-});
+    // Prevent dropdown from closing when clicking inside
+    $("#cartDropdown").on("click", function(e) {
+        e.stopPropagation();
+    });
 
-// Close dropdown if clicking outside
-document.addEventListener("click", function (event) {
-  if (!cartContainer.contains(event.target)) {
-    cartDropdown.classList.remove("active");
-  }
-});
-
-$(document).click(function (e) {
-    if (!$(e.target).closest(".cart-container, #cartDropdown").length) {
-      $("#cartDropdown").fadeOut();
+    function toggleWishlist(userId, productId) {
+        $.ajax({
+            url: "<?= base_url('wishlist/toggle') ?>",
+            type: "POST",
+            data: {
+                user_id: userId,
+                product_id: productId
+            },
+            success: function(response) {
+                if (response.status === 'added') {
+                    $('#wishlist-' + productId + ' i').removeClass('bi-heart').addClass('bi-heart-fill');
+                } else if (response.status === 'removed') {
+                    $('#wishlist-' + productId + ' i').removeClass('bi-heart-fill').addClass('bi-heart');
+                }
+            }
+        });
     }
-  });
-
-  // Prevent dropdown from closing when clicking inside
-  $("#cartDropdown").on("click", function (e) {
-    e.stopPropagation();
-  });
 </script>
 </body>
 

@@ -1,6 +1,6 @@
 <?= $this->include('frontend/layouts/header') ?>
 
-<?php 
+<?php
 
 // foreach($products  as $rr){
 //     echo "<pre>";
@@ -19,80 +19,89 @@
             <!-- Left Side: Main Slider + Bottom Features -->
             <div class="col-md-12 ">
                 <!-- Main Slider -->
-               <!-- <div class="row">
+                <!-- <div class="row">
                     <div class="col-md-12"> -->
-                        <div class="swiper home-slider">
-                            <div class="swiper-wrapper">
-                                <?php foreach($slider as $s){
-                                    if($s['slider_name'] == "Cover") { ?>
+                <div class="swiper home-slider">
+                    <div class="swiper-wrapper">
+                        <?php foreach ($slider as $s) {
+                            if ($s['slider_name'] == "Cover") { ?>
                                 <div class="swiper-slide">
-                                <?php if($s['link'] != 'NULL'){ ?>
-                                <a href="<?= base_url($s['link']) ?>"><img src="<?= base_url($s['image']) ?>" class="img-fluid" alt="<?= $s['image_alt'] ?>"></a>
-                                <?php }else{ ?>
-                                    <img src="<?= base_url($s['image']) ?>" class="img-fluid" alt="<?= $s['image_alt'] ?>">
-                                <?php } ?>
+                                    <?php if ($s['link'] != 'NULL') { ?>
+                                        <a href="<?= base_url($s['link']) ?>"><img src="<?= base_url($s['image']) ?>" class="img-fluid" alt="<?= $s['image_alt'] ?>"></a>
+                                    <?php } else { ?>
+                                        <img src="<?= base_url($s['image']) ?>" class="img-fluid" alt="<?= $s['image_alt'] ?>">
+                                    <?php } ?>
                                 </div>
-                                <?php } } ?>
-                            </div>
-                            <div class="swiper-pagination"></div>
-                        </div>
-                  <!--   </div>
+                        <?php }
+                        } ?>
+                    </div>
+                    <div class="swiper-pagination"></div>
+                </div>
+                <!--   </div>
               		 </div> -->
                 <!-- Bottom Two Feature Images in Two Columns -->
-               <!-- <div class="row flex-grow-1 mt-3">
+                <!-- <div class="row flex-grow-1 mt-3">
                     <div class="col-6  bottom-features">
-                        <?php foreach($slider as $s){
-                        if($s['slider_name'] == "Banner Bottom Left"){
-                            if($s['link'] != 'NULL'){
+                        <?php foreach ($slider as $s) {
+                            if ($s['slider_name'] == "Banner Bottom Left") {
+                                if ($s['link'] != 'NULL') {
                         ?>
                         <a href="<?= base_url($s['link']) ?>"><img src="<?= base_url($s['image']) ?>" class="img-fluid"
                                 alt="Feature Below 1"></a>
-                        <?php }else{ ?>
+                        <?php } else { ?>
                             <img src="<?= base_url($s['image']) ?>" class="img-fluid"
                             alt="Feature Below 1">
                     
-                    <?php } } } ?>
+                    <?php }
+                            }
+                        } ?>
                     </div>
                     <div class="col-6 bottom-features">
-                        <?php foreach($slider as $s){
-                        if($s['slider_name'] == "Banner Botttom Center"){
-                            if($s['link'] != 'NULL'){
+                        <?php foreach ($slider as $s) {
+                            if ($s['slider_name'] == "Banner Botttom Center") {
+                                if ($s['link'] != 'NULL') {
                         ?>
                         <a href="<?= base_url($s['link']) ?>"><img src="<?= base_url($s['image']) ?>" class="img-fluid"
                                 alt="Feature Below 1"></a>
-                        <?php }else{ ?>
+                        <?php } else { ?>
                             <img src="<?= base_url($s['image']) ?>" class="img-fluid"
                             alt="Feature Below 1">
-                        <?php } } } ?>
+                        <?php }
+                            }
+                        } ?>
                     </div>
                 </div>-->
             </div>
             <!-- Right Side: Feature Images (Aligned Properly) -->
-             <!--<div class="col-md-4 d-flex flex-column justify-content-between">
+            <!--<div class="col-md-4 d-flex flex-column justify-content-between">
                 <div class="row flex-grow-1">
                     <div class="col-md-12 col-6 featured-images">
-                    <?php foreach($slider as $s){
-                        if($s['slider_name'] == "Banner Bottom Right"){
-                            if($s['link'] != 'NULL'){
-                        ?>
+                    <?php foreach ($slider as $s) {
+                        if ($s['slider_name'] == "Banner Bottom Right") {
+                            if ($s['link'] != 'NULL') {
+                    ?>
                         <a href="<?= base_url($s['link']) ?>"><img src="<?= base_url($s['image']) ?>" class="img-fluid mb-3 flex-fill"
                                 alt="Feature Below 1"></a>
-                        <?php }else{ ?>
+                        <?php } else { ?>
                             <img src="<?= base_url($s['image']) ?>" class="img-fluid"
                             alt="Feature Below 1">
-                        <?php } } } ?>
+                        <?php }
+                        }
+                    } ?>
                     </div>
                     <div class="col-md-12 col-6 featured-images">
-                    <?php foreach($slider as $s){
-                        if($s['slider_name'] == "Banner Top left 1"){
-                            if($s['link'] != 'NULL'){
-                        ?>
+                    <?php foreach ($slider as $s) {
+                        if ($s['slider_name'] == "Banner Top left 1") {
+                            if ($s['link'] != 'NULL') {
+                    ?>
                         <a href="<?= base_url($s['link']) ?>"><img src="<?= base_url($s['image']) ?>" class="img-fluid flex-fill"
                                 alt="Feature Below 1"></a>
-                        <?php }else{ ?>
+                        <?php } else { ?>
                             <img src="<?= base_url($s['image']) ?>" class="img-fluid"
                             alt="Feature Below 1">
-                        <?php } } } ?>
+                        <?php }
+                        }
+                    } ?>
                     </div>
                 </div>
             </div>-->
@@ -153,28 +162,28 @@
         </div>
     </div>
 </section>
-<!-- Swiper Carousel Section --> 
+<!-- Swiper Carousel Section -->
 <section class="category-swiper-section">
     <div class="container">
         <div class="swiper category-swiper">
             <div class="swiper-wrapper">
                 <!-- Slide 1 -->
-                <?php foreach($categories as $cat){ ?>
-                <div class="swiper-slide">
-                    <?php if($cat['slug'] != 'NULL'){ ?>
-                    <a class="category-box" href="<?= $cat['slug'] ?>">
-                        <img src="<?= base_url($cat['icon']) ?>" class="feature-icon"
-                            alt="<?= $cat['name'] ?>">
-                        <h5><?= $cat['name'] ?></h5>
-                    </a>
-                    <?php }else{ ?>
-                    <div class="category-box">
-                    <img src="<?= base_url($cat['icon']) ?>" class="feature-icon"
-                                                alt="<?= $cat['name'] ?>">
-                        <h5><?= $cat['name'] ?></h5>
+                <?php foreach ($categories as $cat) { ?>
+                    <div class="swiper-slide">
+                        <?php if ($cat['slug'] != 'NULL') { ?>
+                            <a class="category-box" href="<?= $cat['slug'] ?>">
+                                <img src="<?= base_url($cat['icon']) ?>" class="feature-icon"
+                                    alt="<?= $cat['name'] ?>">
+                                <h5><?= $cat['name'] ?></h5>
+                            </a>
+                        <?php } else { ?>
+                            <div class="category-box">
+                                <img src="<?= base_url($cat['icon']) ?>" class="feature-icon"
+                                    alt="<?= $cat['name'] ?>">
+                                <h5><?= $cat['name'] ?></h5>
+                            </div>
+                        <?php } ?>
                     </div>
-                    <?php } ?>
-                </div>
                 <?php } ?>
                 <!-- Slide 2 -->
             </div>
@@ -204,14 +213,14 @@
                 </div>
                 <div class="swiper brand-slider">
                     <div class="swiper-wrapper">
-                        <?php foreach($brands as $brand){ ?>
-                        <div class="swiper-slide">
-                            <a href="<?= $brand['slug'] ?>">
-                                <?php if(isset($brand['icon'])){ ?>
-                                    <img src="<?= base_url($brand['icon']) ?>" alt="<?= $brand['name'] ?>">
-                                <?php } ?>
-                            </a>
-                        </div>
+                        <?php foreach ($brands as $brand) { ?>
+                            <div class="swiper-slide">
+                                <a href="<?= $brand['slug'] ?>">
+                                    <?php if (isset($brand['icon'])) { ?>
+                                        <img src="<?= base_url($brand['icon']) ?>" alt="<?= $brand['name'] ?>">
+                                    <?php } ?>
+                                </a>
+                            </div>
                         <?php } ?>
                     </div>
                     <div class="swiper-brand-nav">
@@ -227,8 +236,8 @@
 
 
 <!-- Deals of the day -->
-<?php if(!empty($hotdeals)){ ?>
-<!--<section class="deals-of-the-day">
+<?php if (!empty($hotdeals)) { ?>
+    <!--<section class="deals-of-the-day">
     <div class="container">
         <div class="row">
             <div class="col-7">
@@ -245,8 +254,8 @@
                             <div class="col-md-6 ">
                                 <div class=" text-center">
                                     <div class="purchase-row">
-                                        <?php 
-                                        $discount = product_off_percentage($product['pv_price'], $product['pv_rrp']); 
+                                        <?php
+                                        $discount = product_off_percentage($product['pv_price'], $product['pv_rrp']);
                                         if ($discount !== 0 && $discount !== "0%") { ?>
                                             <div class="discount-label"><?= $discount ?> OFF</div>
                                         <?php } ?>
@@ -268,11 +277,11 @@
                                 <div class="price-row mb-2">
                                     <span class="price">$<?= $product['pv_price'] ?></span>
                                     <?php
-                                        if ($discount !== 0 && $discount !== "0%") { ?>
+                                    if ($discount !== 0 && $discount !== "0%") { ?>
                                         <span class="crossed-price">$<?= $product['pv_rrp'] ?></span>
                                     <?php } ?>
                                 </div>
-                                <button class="red-btn" onclick="add_to_cart(this)" id="option-1" name="option-1" pid="<?= $product['product_id'] ?>" ppn="<?= $product['product_name'] ?>", ppp="<?= $product['pv_price'] ?>", ppimage="<?= $product['product_image']?>" , pbaseurl = "<?= base_url() ?>"  cat_id="<?php echo $product['category_id'] ?>">Add to cart</button>
+                                <button class="red-btn" onclick="add_to_cart(this)" id="option-1" name="option-1" pid="<?= $product['product_id'] ?>" ppn="<?= $product['product_name'] ?>", ppp="<?= $product['pv_price'] ?>", ppimage="<?= $product['product_image'] ?>" , pbaseurl = "<?= base_url() ?>"  cat_id="<?php echo $product['category_id'] ?>">Add to cart</button>
                             </div>
                             <div class="col-12">
                                 <div class="timer-counter">
@@ -290,7 +299,7 @@
                     <?php endforeach; ?>
                 </div>
             </div>
-            <?php if(isset($hotdeals[3]) && count($hotdeals) >= 3){ ?>
+            <?php if (isset($hotdeals[3]) && count($hotdeals) >= 3) { ?>
             <div class="col-md-4">
                 <?php if (isset($hotdeals[3])): ?>
                 <div class="product-card big-card">
@@ -299,14 +308,14 @@
                             <div class="col-md-12 ">
                                 <div class=" text-center">
                                     <div class="purchase-row">
-                                    <?php 
-                                        $discount = product_off_percentage($hotdeals[3]['pv_price'], $hotdeals[3]['pv_rrp']); 
-                                        if ($discount !== 0 && $discount !== "0%") { ?>
+                                    <?php
+                                    $discount = product_off_percentage($hotdeals[3]['pv_price'], $hotdeals[3]['pv_rrp']);
+                                    if ($discount !== 0 && $discount !== "0%") { ?>
                                             <div class="discount-label"><?= $discount ?> OFF</div>
                                         <?php } ?>
                                         <span class="wishlist "><i class="bi bi-heart"></i></span>
                                     </div>
-                                    <a href="<?= base_url($hotdeals[3]['product_slug'])?>" class="product-image">
+                                    <a href="<?= base_url($hotdeals[3]['product_slug']) ?>" class="product-image">
                                         <img src="<?= base_url($hotdeals[3]['product_image']); ?>" alt="Product">
                                     </a>
                                 </div>
@@ -321,7 +330,7 @@
                                 <div class="price-row mb-2">
                                     <span class="price">$<?= $hotdeals[3]['pv_price'] ?></span>
                                     <?php
-                                        if ($discount !== 0 && $discount !== "0%") { ?>
+                                    if ($discount !== 0 && $discount !== "0%") { ?>
                                         <span class="crossed-price">$<?= $hotdeals[3]['pv_rrp'] ?></span>
                                     <?php } ?>
                                 </div>
@@ -332,7 +341,7 @@
                                         alt="img-fluid"></p>
                                 <p class="py-2">available only: <b>38</b></p>
 
-                                <button class="red-btn shop-icon" onclick="add_to_cart(this)" id="option-1" name="option-1" pid="<?= $hotdeals[3]['product_id'] ?>" ppn="<?= $hotdeals[3]['product_name'] ?>", ppp="<?= $hotdeals[3]['pv_price'] ?>", ppimage="<?= $hotdeals[3]['product_image']?>" , pbaseurl = "<?= base_url() ?>" cat_id="<?php echo $hotdeals[3]['category_id'] ?>"><img src="assets/frontend/images/shop-icon.png" width="13"
+                                <button class="red-btn shop-icon" onclick="add_to_cart(this)" id="option-1" name="option-1" pid="<?= $hotdeals[3]['product_id'] ?>" ppn="<?= $hotdeals[3]['product_name'] ?>", ppp="<?= $hotdeals[3]['pv_price'] ?>", ppimage="<?= $hotdeals[3]['product_image'] ?>" , pbaseurl = "<?= base_url() ?>" cat_id="<?php echo $hotdeals[3]['category_id'] ?>"><img src="assets/frontend/images/shop-icon.png" width="13"
                                         class="img-fluid" alt="img-fluid"> Add to cart</button>
                             </div>
 
@@ -342,7 +351,7 @@
                 <?php endif; ?>
             </div>
             <?php } ?>
-            <?php if (!empty($hotdeals) && count($hotdeals) > 4){ ?>
+            <?php if (!empty($hotdeals) && count($hotdeals) > 4) { ?>
             <div class="col-md-4">
                 <div class="product-card">
                     <?php foreach (array_slice($hotdeals, 4, 3) as $product): ?>
@@ -351,8 +360,8 @@
                             <div class="col-md-6 ">
                                 <div class=" text-center">
                                     <div class="purchase-row">
-                                        <?php 
-                                        $discount = product_off_percentage($product['pv_price'], $product['pv_rrp']); 
+                                        <?php
+                                        $discount = product_off_percentage($product['pv_price'], $product['pv_rrp']);
                                         if ($discount !== 0 && $discount !== "0%") { ?>
                                             <div class="discount-label"><?= $discount ?> OFF</div>
                                         <?php } ?>
@@ -373,11 +382,11 @@
                                 <div class="price-row mb-2">
                                     <span class="price">$<?= $product['pv_price'] ?></span>
                                     <?php
-                                        if ($discount !== 0 && $discount !== "0%") { ?>
+                                    if ($discount !== 0 && $discount !== "0%") { ?>
                                         <span class="crossed-price">$<?= $product['pv_rrp'] ?></span>
                                     <?php } ?>
                                 </div>
-                                <button class="red-btn shop-icon" onclick="add_to_cart(this)" id="option-1" name="option-1" pid="<?= $product['product_id'] ?>" ppn="<?= $product['product_name'] ?>", ppp="<?= $product['pv_price'] ?>", ppimage="<?= $product['product_image']?>" , pbaseurl = "<?= base_url() ?>" cat_id="<?php echo $product['category_id'] ?>"> Add to cart</button>
+                                <button class="red-btn shop-icon" onclick="add_to_cart(this)" id="option-1" name="option-1" pid="<?= $product['product_id'] ?>" ppn="<?= $product['product_name'] ?>", ppp="<?= $product['pv_price'] ?>", ppimage="<?= $product['product_image'] ?>" , pbaseurl = "<?= base_url() ?>" cat_id="<?php echo $product['category_id'] ?>"> Add to cart</button>
                             </div>
                             <div class="col-12">
                                 <div class="timer-counter">
@@ -406,22 +415,22 @@
 <section class="best-seller">
     <div class="container">
         <div class="row">
-            <?php 
-                  if(isset($bestsellerMain[0])){ 
-               ?>
-            <div class="col-12 col-lg-5">
-                <h5>Amazon Award-Winning Monitor</h5>
-                <h3><?= $bestsellerMain[0]['product_name']?> <span><?= $bestsellerMain[0]['product_name']?> </span></h3>
-                <span class="starting-price">Starting at Price</span><b class="price">$<?= $bestsellerMain[0]['pv_price'] ?></b>
-                <div class="product-box">
-                <a href="<?= base_url($bestsellerMain[0]['product_slug'])?>" class="product-image">
-                    <img src="<?= base_url($bestsellerMain[0]['product_image']); ?>" class="img-fluid" alt="<?= $bestsellerMain[0]['product_name']?>">
-                  </a>
+            <?php
+            if (isset($bestsellerMain[0])) {
+            ?>
+                <div class="col-12 col-lg-5">
+                    <h5>Amazon Award-Winning Monitor</h5>
+                    <h3><?= $bestsellerMain[0]['product_name'] ?> <span><?= $bestsellerMain[0]['product_name'] ?> </span></h3>
+                    <span class="starting-price">Starting at Price</span><b class="price">$<?= $bestsellerMain[0]['pv_price'] ?></b>
+                    <div class="product-box">
+                        <a href="<?= base_url($bestsellerMain[0]['product_slug']) ?>" class="product-image">
+                            <img src="<?= base_url($bestsellerMain[0]['product_image']); ?>" class="img-fluid" alt="<?= $bestsellerMain[0]['product_name'] ?>">
+                        </a>
+                    </div>
                 </div>
-            </div>
-            <?php 
-                     }
-               ?>
+            <?php
+            }
+            ?>
 
             <div class="col-12 col-lg-7 float-end mt-5">
                 <div class="row">
@@ -439,19 +448,19 @@
                 <div class="swiper best-seller-slider product-listing">
                     <div class="swiper-wrapper">
                         <?php foreach ($bestseller as $prds1) { ?>
-                        <div class="swiper-slide">
-                            <div class="product-card text-center">
-                                <div class="purchase-row">
-                                    <div class="toprated-label">Top Rated</div>
-                                   <!-- <span class="wishlist"><i class="bi bi-heart"></i></span>-->
-                                </div>
-                                <a href="<?= base_url($prds1['product_slug']) ?>" class="product-image">
-                                    <img src="<?= base_url($prds1['product_image']); ?>" alt="<?= $prds1['product_name']?>">
-                                </a>
-                                <div class="product-title">
-                                    <p><a href="<?= base_url('product/'.$prds1['product_slug']); ?>"><?= $prds1['product_name']?></a></p>
-                                </div>
-                                <!-- <div class="rating py-2 mb-2">
+                            <div class="swiper-slide">
+                                <div class="product-card text-center">
+                                    <div class="purchase-row">
+                                        <div class="toprated-label">Top Rated</div>
+                                        <!-- <span class="wishlist"><i class="bi bi-heart"></i></span>-->
+                                    </div>
+                                    <a href="<?= base_url($prds1['product_slug']) ?>" class="product-image">
+                                        <img src="<?= base_url($prds1['product_image']); ?>" alt="<?= $prds1['product_name'] ?>">
+                                    </a>
+                                    <div class="product-title">
+                                        <p><a href="<?= base_url('product/' . $prds1['product_slug']); ?>"><?= $prds1['product_name'] ?></a></p>
+                                    </div>
+                                    <!-- <div class="rating py-2 mb-2">
                                     <b>
                                         <i class="bi bi-star-fill"></i>
                                         <i class="bi bi-star-fill"></i>
@@ -460,11 +469,11 @@
                                         <i class="bi bi-star"></i> (2)
                                     </b>
                                 </div>-->
-                                <div class="price-row">
-                                    <span class="price">$<?= $prds1['pv_price'] ?></span>
+                                    <div class="price-row">
+                                        <span class="price">$<?= $prds1['pv_price'] ?></span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
                         <?php } ?>
                     </div>
                 </div>
@@ -487,54 +496,68 @@
     </div>
     <div class="container py-4 product-listing">
         <div class="row g-3">
-            <?php foreach($arrivals as $product){ ?>
-            <div class="col-lg-custom col-md-3 col-sm-6">
-                <div class="product-card text-center p-3">
-                    <a href="<?= base_url($product['product_slug']) ?>" class="product-title"><?= $product['product_name'] ?></a>
-                   <!-- <div class="rating py-2 mb-2">
+            <?php foreach ($arrivals as $product) {
+
+            ?>
+                <div class="col-lg-custom col-md-3 col-sm-6">
+                    <div class="product-card text-center p-3">
+                        <a href="<?= base_url($product['product_slug']) ?>" class="product-title"><?= $product['product_name'] ?></a>
+                        <!-- <div class="rating py-2 mb-2">
                         <center><i class="bi bi-star-fill"></i> <i class="bi bi-star-fill"></i> <i
                                 class="bi bi-star-half"></i> <i class="bi bi-star"></i> <i class="bi bi-star"></i> (2)
                         </center>
                     </div>-->
-                    <div class="product-image">
-                        <a href="<?= base_url($product['product_slug']) ?>" class="product-image">
-                            <img src="<?= base_url($product['product_image']); ?>" alt="<?= $product['product_name'] ?>">
-                        </a>
-                    </div>
-                    <div class="price-row">
-                        <?php 
-                        $discount = product_off_percentage($product['pv_price'], $product['pv_rrp']); 
-                        ?>
-                        <div>
-                            <span class="price">$<?= $product['pv_price'] ?></span>
-                            <?php if($discount !== "0%"){ ?>
-                                <span class="crossed-price">$<?= $product['pv_rrp'] ?></span>
-                            <?php } ?>
+                        <div class="product-image">
+                            <a href="<?= base_url($product['product_slug']) ?>" class="product-image">
+                                <img src="<?= base_url($product['product_image']); ?>" alt="<?= $product['product_name'] ?>">
+                            </a>
                         </div>
-                        <?php 
-                        if ($discount !== 0 && $discount !== "0%") { ?>
-                            <div class="discount-label"><?= $discount ?> OFF</div>
+                        <div class="price-row">
+                            <?php
+                            $discount = product_off_percentage($product['pv_price'], $product['pv_rrp']);
+                            ?>
+                            <div>
+                                <span class="price">$<?= $product['pv_price'] ?></span>
+                                <?php if ($discount !== "0%") { ?>
+                                    <span class="crossed-price">$<?= $product['pv_rrp'] ?></span>
+                                <?php } ?>
+                            </div>
+                            <?php
+                            if ($discount !== 0 && $discount !== "0%") { ?>
+                                <div class="discount-label"><?= $discount ?> OFF</div>
+                            <?php } ?>
+
+                        </div>
+                        <div class="purchase-row">
+                            <span></span>
+                            <span
+                                <?php if (session()->has('user_id')): ?>
+                                onclick="toggleWishlist(<?= esc(session()->get('user_id')) ?>, <?= esc($product['product_id']) ?>)"
+                                <?php else: ?>
+                                onclick="alert('Please log in to use the wishlist feature.')"
+                                <?php endif; ?>
+                                class="wishlist"
+                                id="wishlist-<?= esc($product['product_id']) ?>">
+                                <i class="bi <?= !empty($product['in_wishlist']) ? 'bi-heart-fill' : 'bi-heart'; ?>"></i>
+                            </span>
+                        </div>
+
+
+
+                        <?php if (isset($product['pv_status']) && $product['pv_status'] == 0) { ?>
+                            <div class="out-of-stock">Out of Stock</div>
+                        <?php } else { ?>
+                            <button class="add-to-cart" name="add_cart" pid="<?= $product['product_id'] ?>" ppn="<?= $product['product_name'] ?>" ppp="<?= $product['pv_price'] ?>" ppimage="<?= $product['product_image'] ?>" pbaseurl="<?= base_url() ?>" cat_id="<?= $product['category_id'] ?>"
+                                onclick="add_to_cart(this)">Add to cart </button>
                         <?php } ?>
 
                     </div>
-                   <!-- <div class="purchase-row">
-                        <span>1,286 <span>Purchases</span></span>
-                        <span class="wishlist"><i class="bi bi-heart-fill"></i></span>
-                    </div>-->
-                    <?php if(isset($product['pv_status']) && $product['pv_status'] == 0){ ?>
-                        <div class="out-of-stock">Out of Stock</div>
-                    <?php }else{ ?>
-                        <button class="add-to-cart" name="add_cart" pid="<?= $product['product_id'] ?>" ppn="<?= $product['product_name'] ?>"  ppp="<?= $product['pv_price'] ?>"  ppimage="<?= $product['product_image']?>"  pbaseurl = "<?= base_url() ?>" cat_id="<?= $product['category_id'] ?>"
-                            onclick="add_to_cart(this)">Add to cart </button>
-                    <?php } ?>
-
                 </div>
-            </div>
             <?php } ?>
         </div>
     </div>
 </section>
- <section class="testimonial-section">
+<section class="testimonial-section">
     <div class="container">
         <div class="row">
             <!-- Left Column: Heading & Description -->
@@ -683,22 +706,23 @@
     </div>
 </section>
 <!-- Feature banner  -->
-<?php foreach($slider as $s){
-    if($s['slider_name'] == "Home Ads Banner") { ?>
-<!--<section class="feature-banner pt-5">
+<?php foreach ($slider as $s) {
+    if ($s['slider_name'] == "Home Ads Banner") { ?>
+        <!--<section class="feature-banner pt-5">
     <div class="container">
         <div class="row">
             <div class="col-12">
-            <?php if($s['link'] != 'NULL'){ ?>
+            <?php if ($s['link'] != 'NULL') { ?>
             <a href="<?= base_url($s['link']) ?>"><img src="<?= base_url($s['image']) ?>" class="img-fluid blog-img" alt="feature image"></a>
-            <?php }else{ ?>
+            <?php } else { ?>
                 <img src="<?= base_url($s['image']) ?>" class="img-fluid blog-img" alt="feature image">
             <?php } ?>
             </div>
         </div>
     </div>
 </section> -->
-<?php } }?>
+<?php }
+} ?>
 <!-- Blog Section -->
 <section class="blog-list py-5">
     <div class="container">
@@ -710,27 +734,27 @@
         </div>
         <div class="row">
             <!-- Blog 1 -->
-            <?php 
-                  $bi = 0; 
-                  foreach ($blogs as $blog) { 
-                     if ($bi >= 3) break;
-                  ?>
-            <div class="col-md-4">
-                <div class="blog-card">
-                    <img src="<?= site_url().$blog['image'] ?>" class="img-fluid blog-img" alt="<?= $blog['title'] ?>">
-                    <h4 class="blog-title mt-3"><?= $blog['title'] ?></h4>
-                    <div class="d-flex justify-content-between align-items-center blog-meta">
-                        <span class="blog-date"><?= date("F j, Y", strtotime($blog['date_added'])) ?></span>
-                        <?php if($blog['slug'] != 'NULL'){ ?>
-                        <a href="<?=  site_url().$blog['slug'] ?>" class="blog-link">Visit Blog →</a>
-                        <?php } ?>
+            <?php
+            $bi = 0;
+            foreach ($blogs as $blog) {
+                if ($bi >= 3) break;
+            ?>
+                <div class="col-md-4">
+                    <div class="blog-card">
+                        <img src="<?= site_url() . $blog['image'] ?>" class="img-fluid blog-img" alt="<?= $blog['title'] ?>">
+                        <h4 class="blog-title mt-3"><?= $blog['title'] ?></h4>
+                        <div class="d-flex justify-content-between align-items-center blog-meta">
+                            <span class="blog-date"><?= date("F j, Y", strtotime($blog['date_added'])) ?></span>
+                            <?php if ($blog['slug'] != 'NULL') { ?>
+                                <a href="<?= site_url() . $blog['slug'] ?>" class="blog-link">Visit Blog →</a>
+                            <?php } ?>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <?php 
-                     $bi++; 
-                  } 
-               ?>
+            <?php
+                $bi++;
+            }
+            ?>
         </div>
     </div>
 </section>

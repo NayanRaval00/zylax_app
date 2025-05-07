@@ -12,6 +12,9 @@ use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\Files\File;
 use CodeIgniter\Images\Image;
 use App\Models\orders;
+use App\Models\Products;
+use App\Models\ProductsVariants;
+use App\Models\WishlistModel;
 
 class ProfileController extends BaseController
 {
@@ -27,25 +30,23 @@ class ProfileController extends BaseController
         $userData = $userModel->find($userId);
 
         $countryModel = new Countries();
-        $countries = $countryModel->select("name, id")->whereIn('iso3', ['USA', 'AUS'])->orderBy('name','asc')->findAll();
+        $countries = $countryModel->select("name, id")->whereIn('iso3', ['USA', 'AUS'])->orderBy('name', 'asc')->findAll();
 
         // echo "<pre>"; print_r($userData); exit;
         $states = [];
-        if($userData['country_code'] > 0)
-        {
+        if ($userData['country_code'] > 0) {
             $stateModel = new StateModel();
-            $states = $stateModel->where('status',1)->where('country',$userData['country_code'])->orderBy('state','asc')->findAll();
+            $states = $stateModel->where('status', 1)->where('country', $userData['country_code'])->orderBy('state', 'asc')->findAll();
         }
 
         $cities = [];
-        if($userData['state'] > 0)
-        {
+        if ($userData['state'] > 0) {
             $cityModel = new CityModel();
-            $cities = $cityModel->where('status',1)->where('state',$userData['state'])->orderBy('name','asc')->findAll();
+            $cities = $cityModel->where('status', 1)->where('state', $userData['state'])->orderBy('name', 'asc')->findAll();
         }
 
         // Pass data to the view
-        return view('frontend/profile', ['user' => $userData,'countries' => $countries,'states' => $states,'cities' => $cities]);
+        return view('frontend/profile', ['user' => $userData, 'countries' => $countries, 'states' => $states, 'cities' => $cities]);
     }
 
     public function orders()
@@ -69,11 +70,38 @@ class ProfileController extends BaseController
         $data['orders_details'] = $orderModel->getOrderDetails($tracking_id);
         return view('frontend/order_details', $data);
     }
-
     public function wishlists()
     {
-        return view('frontend/wishlists');
+        if (!session()->has('user_id')) {
+            return redirect()->to('login')->with('error', 'Please login to access your wishlist.');
+        }
+
+        $userId = session()->get('user_id');
+        $wishlistModel = new WishlistModel();
+        $productModel = new Products();
+        $productVariants = new ProductsVariants();
+
+        // Get wishlist product_ids
+        $wishlistItems = $wishlistModel->where('user_id', $userId)->findAll();
+        $productIds = array_column($wishlistItems, 'product_id');
+
+        $products = [];
+
+        if (!empty($productIds)) {
+            $db = \Config\Database::connect();
+
+            $builder = $db->table('products');
+            $builder->select('products.*, product_variants.price');
+            $builder->join('product_variants', 'product_variants.product_id = products.id', 'left');
+            $builder->whereIn('products.id', $productIds);
+            $builder->groupBy('products.id'); 
+            $builder->orderBy('products.id','DESC'); 
+            $products = $builder->get()->getResultArray();
+        }
+
+        return view('frontend/wishlists', ['products' => $products]);
     }
+
 
     public function changepassword()
     {
@@ -150,9 +178,9 @@ class ProfileController extends BaseController
             if ($file->move('uploads/profile/', $newFileName)) {
                 // Update user's profile image in the database
                 \Config\Services::image()
-                ->withFile($filePath)
-                ->resize(75, 75, true, 'auto')
-                ->save($filePath);
+                    ->withFile($filePath)
+                    ->resize(75, 75, true, 'auto')
+                    ->save($filePath);
 
                 $userModel->update($userId, ['image' => $filePath]);
                 $session->set('user_image', base_url($filePath));
@@ -161,8 +189,6 @@ class ProfileController extends BaseController
                     'status' => 'success',
                     'image_url' => base_url($filePath)
                 ]);
-
-
             } else {
                 return $this->response->setJSON(['status' => 'error', 'message' => 'File upload failed.']);
             }
@@ -176,7 +202,7 @@ class ProfileController extends BaseController
         $session = session();
         $userModel = new UserModel();
         $emailService = \Config\Services::email();
-        
+
         $userId = $session->get('user_id');
         $user = $userModel->find($userId);
 
@@ -230,7 +256,8 @@ class ProfileController extends BaseController
         return redirect()->back()->with('success', 'Password changed successfully!');
     }
 
-    public function manageaddress(){
+    public function manageaddress()
+    {
         $session = session();
         if (!$session->has('user_id')) {
             return redirect()->to('/login')->with('error', 'Please login first.');
@@ -251,8 +278,8 @@ class ProfileController extends BaseController
         $userAddress = $addressModel->select("
                         address.*
                     ")
-                    ->where("address.user_id", $userId)
-                    ->findAll();
+            ->where("address.user_id", $userId)
+            ->findAll();
 
         // $states = [];
         // $stateModel = new StateModel();
@@ -271,7 +298,7 @@ class ProfileController extends BaseController
         if (!$session->has('user_id')) {
             return redirect()->to('/login')->with('error', 'Please login first.');
         }
-    
+
         $userId = $session->get('user_id');
         $addressModel = new AddressModel();
 
@@ -286,13 +313,13 @@ class ProfileController extends BaseController
             'address_1'   => 'required'
 
         ]);
-    
+
         if (!$validation->withRequest($this->request)->run()) {
             return redirect()->back()->withInput()->with('errors', $validation->getErrors());
         }
 
         $insstatus = $this->request->getPost('status_addr');
-    
+
         $addressModel->insert([
             'user_id'      => $userId,
             'email'        => $this->request->getPost('email'),
@@ -307,17 +334,18 @@ class ProfileController extends BaseController
         ]);
 
         $lastInsertedID = $addressModel->insertID();
-        if($insstatus == '1'){
+        if ($insstatus == '1') {
             $upstatus = 0;
             $addressModel->whereNotIn('address_id', [$lastInsertedID])
-            ->set(['status_addr' => $upstatus])
-            ->update();
+                ->set(['status_addr' => $upstatus])
+                ->update();
         }
 
         return redirect()->to('auth/manage-address')->with('success', 'Address Insert successfully!');
     }
 
-    public function deleteAddress($id){
+    public function deleteAddress($id)
+    {
         $session = session();
         if (!$session->has('user_id')) {
             return redirect()->to('/login')->with('error', 'Please login first.');
@@ -326,15 +354,15 @@ class ProfileController extends BaseController
         $userId = $session->get('user_id');
         $addressModel = new AddressModel();
 
-        if($addressModel->delete($id)){
+        if ($addressModel->delete($id)) {
             return redirect()->to('auth/manage-address')->with('success', 'Address deleted successfully.');
-        }else{
+        } else {
             return redirect()->to('auth/manage-address')->with('errors', 'Something went wrong.');
         }
-
     }
 
-    public function updateAddress(){
+    public function updateAddress()
+    {
         $session = session();
         if (!$session->has('user_id')) {
             return redirect()->to('/login')->with('error', 'Please login first.');
@@ -375,11 +403,11 @@ class ProfileController extends BaseController
             'status_addr'  => $insstatus,
         ]);
 
-        if($insstatus == '1'){
+        if ($insstatus == '1') {
             $upstatus = 0;
             $addressModel->whereNotIn('address_id', [$addr_id])
-            ->set(['status_addr' => $upstatus])
-            ->update();
+                ->set(['status_addr' => $upstatus])
+                ->update();
         }
 
 
